@@ -21,6 +21,12 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
 
     address payable public immutable gelato;
 
+    // #region fees
+
+    uint16 public immutable managerFeeBPS;
+
+    // #endregion fees
+
     // XXXXXXXX DO NOT  MODIFY ORDERING XXXXXXXX
     mapping(address => VaultInfo) public vaults;
     // APPPEND ADDITIONAL STATE VARS BELOW:
@@ -60,8 +66,9 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
         }
     }
 
-    constructor(address gelato_) {
+    constructor(address gelato_, uint16 managerFeeBPS_) {
         gelato = payable(gelato_);
+        managerFeeBPS = managerFeeBPS_;
     }
 
     function initialize(address owner_) external initializer {

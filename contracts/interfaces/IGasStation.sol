@@ -76,4 +76,6 @@ interface IGasStation is IManagerProxy {
     // ======= PUBLIC FUNCTIONS =====
 
     function fundVaultBalance(address vault_) external payable;
+
+    function managerFeeBPS() external view returns (uint16);
 }

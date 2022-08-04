@@ -33,7 +33,24 @@ struct Rebalance {
     SwapPayload swap;
 }
 
+struct InitializePayload {
+    uint24[] feeTiers;
+    address token0;
+    address token1;
+    address owner;
+    uint256 init0;
+    uint256 init1;
+    address manager;
+    int24 maxTwapDeviation;
+    uint24 twapDuration;
+    uint24 maxSlippage;
+}
+
 interface IVaultV2 {
+    function mint(uint256 mintAmount_, address receiver_)
+        external
+        returns (uint256 amount0, uint256 amount1);
+
     function rebalance(Rebalance calldata rebalanceParams_) external;
 
     function addRangeAndRebalance(

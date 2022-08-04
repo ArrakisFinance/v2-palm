@@ -34,7 +34,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         },
       },
     },
-    args: [addresses.Gelato],
+    args: [addresses.Gelato, 100],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
