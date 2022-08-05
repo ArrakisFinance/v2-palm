@@ -10,7 +10,6 @@ struct SetupPayload {
     address[] operators;
     uint256 init0;
     uint256 init1;
-    address manager;
     int24 maxTwapDeviation;
     uint24 twapDuration;
     uint24 maxSlippage;

@@ -17,7 +17,7 @@ contract Terms is TermsStorage {
     using SafeERC20 for IERC20;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IVaultV2Factory v2factory_) TermsStorage(v2factory) {}
+    constructor(IVaultV2Factory v2factory_) TermsStorage(v2factory_) {}
 
     /// @notice do all neccesary step to initialize market making.
     // solhint-disable-next-line function-max-lines
@@ -26,7 +26,6 @@ contract Terms is TermsStorage {
         override
         returns (address vault)
     {
-        require(setup_.manager == manager, "Terms: wrong manager.");
         require(
             setup_.projectTokenAllocation > 0,
             "Terms: no project token allocation."
@@ -37,12 +36,12 @@ contract Terms is TermsStorage {
         address me = address(this);
 
         require(
-            projectTokenERC20.allowance(msg.sender, termTreasury) >=
+            projectTokenERC20.allowance(msg.sender, me) >=
                 setup_.projectTokenAllocation,
             "Terms: project token allowance insufficient."
         );
         require(
-            baseTokenERC20.allowance(msg.sender, termTreasury) >=
+            baseTokenERC20.allowance(msg.sender, me) >=
                 setup_.baseTokenAllocation,
             "Terms: base token allowance insufficient."
         );
@@ -61,25 +60,42 @@ contract Terms is TermsStorage {
                 owner: me,
                 init0: setup_.init0,
                 init1: setup_.init1,
-                manager: setup_.manager,
+                manager: manager,
                 maxTwapDeviation: setup_.maxTwapDeviation,
                 twapDuration: setup_.twapDuration,
                 maxSlippage: setup_.maxSlippage
             })
         );
 
+        IVaultV2 vaultV2 = IVaultV2(vault);
+
+        vaultV2.toggleRestrictMint();
+
         _addVault(setup_.owner, vault);
         // Mint vaultV2 token.
-        IVaultV2(vault).mint(mintAmount_, me);
+
         // Call the manager to make it manage the new vault.
         IGasStation(manager).addVault(vault);
 
         // Transfer to termTreasury the project token emolment.
         projectTokenERC20.safeTransferFrom(
             msg.sender,
-            termTreasury,
-            (setup_.projectTokenAllocation * emolument) / 10000
+            me,
+            setup_.projectTokenAllocation
         );
-        emit SetupVault(setup_.owner, vault);
+
+        uint256 emolumentAmt = (setup_.projectTokenAllocation * emolument) /
+            10000;
+
+        projectTokenERC20.safeTransfer(
+            vault,
+            setup_.projectTokenAllocation - emolumentAmt
+        );
+        vaultV2.mint(mintAmount_, me);
+        // TODO need to add a check how much Arrakis token has been mint.
+
+        projectTokenERC20.safeTransfer(termTreasury, emolumentAmt);
+
+        emit SetupVault(setup_.owner, vault, emolumentAmt);
     }
 }

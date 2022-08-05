@@ -29,7 +29,7 @@ abstract contract TermsStorage is
     event AddVault(address creator, address vault);
     event RemoveVault(address creator, address vault);
 
-    event SetupVault(address creator, address vault);
+    event SetupVault(address creator, address vault, uint256 emolument);
 
     // #endregion events.
 

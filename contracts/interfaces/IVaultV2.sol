@@ -62,6 +62,8 @@ interface IVaultV2 {
 
     function addOperators(address[] calldata operators_) external;
 
+    function toggleRestrictMint() external;
+
     function rangeExist(Range calldata range_)
         external
         view

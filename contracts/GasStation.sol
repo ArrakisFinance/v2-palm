@@ -42,7 +42,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     modifier onlyManagedVaults(address vault) {
         require(
             vaults[vault].initialized == true,
-            "ManagerProxyV1: Vault not found"
+            "GasStation: Vault not found"
         );
         _;
     }
@@ -50,7 +50,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     modifier onlyVaultOwner(address vault) {
         require(
             IVaultV2(vault).owner() == msg.sender,
-            "ManagerProxyV1: only vault owner"
+            "GasStation: only vault owner"
         );
         _;
     }
@@ -59,9 +59,9 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
         if (msg.sender == gelato) {
             _;
             (bool success, ) = gelato.call{value: amount}("");
-            require(success, "ManagerProxyV1: ETH transfer failed");
+            require(success, "GasStation: ETH transfer failed");
         } else {
-            require(msg.sender == _owner, "ManagerProxyV1: onlyGelatoOrOwner");
+            require(msg.sender == _owner, "GasStation: onlyGelatoOrOwner");
             _;
         }
     }
@@ -121,7 +121,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     function addVault(address vault_) external override onlyVaultOwner(vault_) {
         require(
             vaults[vault_].initialized == false,
-            "ManagerProxyV1: Vault already added"
+            "GasStation: Vault already added"
         );
         vaults[vault_] = VaultInfo({
             balance: 0,
@@ -163,7 +163,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
                 vault_,
                 operators_[i]
             );
-            require(!isAssociated, "ManagerProxyV1: operator");
+            require(!isAssociated, "GasStation: operator");
             operatorsByVault[vault_].push(operators_[i]);
         }
 
@@ -184,7 +184,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     ) external override onlyVaultOwner(vault_) {
         require(
             vaults[vault_].balance >= amount_,
-            "ManagerProxyV1: amount exceeds available balance"
+            "GasStation: amount exceeds available balance"
         );
         vaults[vault_].balance -= amount_;
         Address.sendValue(payable(to_), amount_);
@@ -195,7 +195,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
         override
         onlyVaultOwner(vault_)
     {
-        require(vaults[vault_].balance > 0, "ManagerProxyV1: balance 0");
+        require(vaults[vault_].balance > 0, "GasStation: balance 0");
 
         emit WithdrawVaultBalance(vault_, vaults[vault_].balance, to_, 0);
         Address.sendValue(payable(to_), vaults[vault_].balance = 0);
@@ -229,7 +229,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
         VaultInfo memory vaultInfo = vaults[vault_];
         require(
             vaultInfo.balance > feeAmount_,
-            "ManagerProxyV1: Not enough balance to pay fee"
+            "GasStation: Not enough balance to pay fee"
         );
         balance = vaultInfo.balance - feeAmount_;
 
@@ -242,11 +242,11 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     function _removeVault(address vault_) internal {
         require(
             vaults[vault_].initialized == true,
-            "ManagerProxyV1: Vault not found"
+            "GasStation: Vault not found"
         );
         require(
             vaults[vault_].balance == 0,
-            "ManagerProxyV1: Vault still has balance"
+            "GasStation: Vault still has balance"
         );
         delete vaults[vault_];
         emit RemoveVault(vault_);
@@ -255,7 +255,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
     function _setVaultData(address vault_, bytes memory data_) internal {
         require(
             keccak256(vaultDatas[vault_]) != keccak256(data_),
-            "ManagerProxyV1: data"
+            "GasStation: data"
         );
 
         vaultDatas[vault_] = data_;
@@ -272,7 +272,7 @@ contract GasStation is IGasStation, OwnableUninitialized, PausableUpgradeable {
                 vault_,
                 operators_[i]
             );
-            require(isAssociated, "ManagerProxyV1: no operator");
+            require(isAssociated, "GasStation: no operator");
 
             delete operatorsByVault[vault_][index];
         }
