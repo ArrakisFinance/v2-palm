@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IVaultV2Factory} from "./interfaces/IVaultV2Factory.sol";
+import {IArrakisV2Factory} from "./interfaces/IArrakisV2Factory.sol";
 import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IVaultV2} from "./interfaces/IVaultV2.sol";
+import {IArrakisV2, BurnLiquidity} from "./interfaces/IArrakisV2.sol";
 import {IGasStation} from "./interfaces/IGasStation.sol";
 import {TermsStorage} from "./abstracts/TermsStorage.sol";
 import {SetupPayload} from "./structs/STerms.sol";
-import {InitializePayload} from "./interfaces/IVaultV2.sol";
+import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract Terms is TermsStorage {
     using SafeERC20 for IERC20;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IVaultV2Factory v2factory_) TermsStorage(v2factory_) {}
+    constructor(IArrakisV2Factory v2factory_) TermsStorage(v2factory_) {}
 
     /// @notice do all neccesary step to initialize market making.
     // solhint-disable-next-line function-max-lines
@@ -67,7 +67,7 @@ contract Terms is TermsStorage {
             })
         );
 
-        IVaultV2 vaultV2 = IVaultV2(vault);
+        IArrakisV2 vaultV2 = IArrakisV2(vault);
 
         vaultV2.toggleRestrictMint();
 
@@ -75,7 +75,12 @@ contract Terms is TermsStorage {
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
-        IGasStation(manager).addVault(vault);
+        IGasStation(manager).addVault(
+            vault,
+            setup_.operators_,
+            setup_.datas_,
+            setup_.strat_
+        );
 
         // Transfer to termTreasury the project token emolment.
         projectTokenERC20.safeTransferFrom(
@@ -83,14 +88,20 @@ contract Terms is TermsStorage {
             me,
             setup_.projectTokenAllocation
         );
+        baseTokenERC20.safeTransferFrom(
+            msg.sender,
+            me,
+            setup_.baseTokenAllocation
+        );
 
         uint256 emolumentAmt = (setup_.projectTokenAllocation * emolument) /
             10000;
 
-        projectTokenERC20.safeTransfer(
+        projectTokenERC20.approve(
             vault,
             setup_.projectTokenAllocation - emolumentAmt
         );
+        baseTokenERC20.approve(vault, setup_.baseTokenAllocation);
         vaultV2.mint(mintAmount_, me);
         // TODO need to add a check how much Arrakis token has been mint.
 
@@ -98,4 +109,120 @@ contract Terms is TermsStorage {
 
         emit SetupVault(setup_.owner, vault, emolumentAmt);
     }
+
+    // solhint-disable-next-line function-max-lines
+    function changeSetup(
+        IArrakisV2 vault_,
+        SetupPayload memory setup_,
+        uint256 mintAmount_
+    ) external override {
+        (bool isOwner, ) = _isOwnerOfVault(msg.sender, address(vault_));
+        require(isOwner, "Terms: not owner");
+        (address token0, address token1) = setup_.baseToken >
+            setup_.projectToken
+            ? (setup_.projectToken, setup_.baseToken)
+            : (setup_.baseToken, setup_.projectToken);
+        require(token0 == address(vault_.token0()), "Terms: wrong token0.");
+        require(token1 == address(vault_.token0()), "Terms: wrong token0.");
+
+        IERC20 baseTokenERC20 = IERC20(setup_.baseToken);
+        IERC20 projectTokenERC20 = IERC20(setup_.projectToken);
+        address me = address(this);
+
+        uint256 balanceOfArrakisTkn = IERC20(address(vault_)).balanceOf(me);
+
+        BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
+            balanceOfArrakisTkn,
+            vault_
+        );
+
+        (uint256 amount0, uint256 amount1) = vault_.burn(
+            burnPayload,
+            balanceOfArrakisTkn,
+            me
+        );
+
+        // Transfer to termTreasury the project token emolment.
+        projectTokenERC20.safeTransferFrom(
+            msg.sender,
+            me,
+            setup_.projectTokenAllocation
+        );
+        baseTokenERC20.safeTransferFrom(
+            msg.sender,
+            me,
+            setup_.baseTokenAllocation
+        );
+
+        uint256 emolumentAmt = (setup_.projectTokenAllocation * emolument) /
+            10000;
+
+        setup_.projectTokenAllocation =
+            setup_.projectTokenAllocation -
+            emolumentAmt +
+            (setup_.baseToken > setup_.projectToken ? amount0 : amount1);
+
+        setup_.baseTokenAllocation =
+            setup_.baseTokenAllocation +
+            (setup_.baseToken > setup_.projectToken ? amount1 : amount0);
+
+        IERC20(setup_.projectToken).approve(
+            address(vault_),
+            setup_.projectTokenAllocation
+        );
+        IERC20(setup_.baseToken).approve(
+            address(vault_),
+            setup_.baseTokenAllocation
+        );
+        vault_.mint(mintAmount_, me);
+
+        projectTokenERC20.safeTransfer(termTreasury, emolumentAmt);
+
+        emit SetupVault(setup_.owner, address(vault_), emolumentAmt);
+    }
+
+    function closeTerm(IArrakisV2 vault_, address to_) external override {
+        (bool isOwner, uint256 index) = _isOwnerOfVault(
+            msg.sender,
+            address(vault_)
+        );
+        require(isOwner, "Terms: not owner");
+        address me = address(this);
+        address vaultAddr = address(vault_);
+
+        uint256 balanceOfArrakisTkn = IERC20(vaultAddr).balanceOf(me);
+
+        BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
+            balanceOfArrakisTkn,
+            vault_
+        );
+
+        (uint256 amount0, uint256 amount1) = vault_.burn(
+            burnPayload,
+            balanceOfArrakisTkn,
+            me
+        );
+
+        if (amount0 > 0) vault_.token0().safeTransfer(to_, amount0);
+        if (amount1 > 0) vault_.token1().safeTransfer(to_, amount1);
+
+        delete vaults[vaultAddr][index];
+
+        emit CloseTerm(msg.sender, vaultAddr, amount0, amount1, to_);
+    }
+
+    // #region internal functions.
+
+    function _isOwnerOfVault(address onwer_, address vault_)
+        internal
+        view
+        returns (bool, uint256 index)
+    {
+        for (index = 0; index < vaults[onwer_].length; index++) {
+            if (vaults[onwer_][index] == vault_) return (true, index);
+        }
+        return (false, 0);
+    }
+
+    // #endregion internal functions.
 }

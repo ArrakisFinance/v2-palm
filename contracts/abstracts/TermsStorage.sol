@@ -2,7 +2,8 @@
 pragma solidity 0.8.13;
 
 import {ITerms} from "../interfaces/ITerms.sol";
-import {IVaultV2Factory} from "../interfaces/IVaultV2Factory.sol";
+import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
+import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {OwnableUninitialized} from "./OwnableUninitialized.sol";
 import {
     ReentrancyGuardUpgradeable
@@ -14,26 +15,38 @@ abstract contract TermsStorage is
     OwnableUninitialized,
     ReentrancyGuardUpgradeable
 {
-    IVaultV2Factory public immutable v2factory;
+    IArrakisV2Factory public immutable v2factory;
     mapping(address => address[]) public vaults;
     address public termTreasury;
     address public manager;
     uint16 public emolument;
+    IArrakisV2Resolver public resolver;
 
     // #region events.
 
     event SetEmolument(uint16 oldEmolument, uint16 newEmolment);
     event SetTermTreasury(address oldTermTreasury, address newTermTreasury);
     event SetManager(address oldManager, address newManager);
+    event SetResolver(
+        IArrakisV2Resolver oldResolver,
+        IArrakisV2Resolver newResolver
+    );
 
     event AddVault(address creator, address vault);
     event RemoveVault(address creator, address vault);
 
     event SetupVault(address creator, address vault, uint256 emolument);
+    event CloseTerm(
+        address creator,
+        address vault,
+        uint256 amount0,
+        uint256 amount1,
+        address to
+    );
 
     // #endregion events.
 
-    constructor(IVaultV2Factory v2factory_) {
+    constructor(IArrakisV2Factory v2factory_) {
         v2factory = v2factory_;
     }
 
@@ -58,18 +71,19 @@ abstract contract TermsStorage is
             emolument_ < emolument,
             "Terms: new emolument >= old emolument"
         );
-        emit SetEmolument(emolument, emolument_);
-        emolument = emolument_;
+        emit SetEmolument(emolument, emolument = emolument_);
     }
 
     function setTermTreasury(address termTreasury_) external onlyOwner {
-        emit SetTermTreasury(termTreasury, termTreasury_);
-        termTreasury = termTreasury_;
+        emit SetTermTreasury(termTreasury, termTreasury = termTreasury_);
     }
 
     function setManager(address manager_) external onlyOwner {
-        emit SetManager(manager, manager_);
-        manager = manager_;
+        emit SetManager(manager, manager = manager_);
+    }
+
+    function setResolver(IArrakisV2Resolver resolver_) external onlyOwner {
+        emit SetResolver(resolver, resolver = resolver_);
     }
 
     // #endregion setter.

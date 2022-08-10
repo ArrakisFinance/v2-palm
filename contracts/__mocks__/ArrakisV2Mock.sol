@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-contract VaultV2Mock {
+contract ArrakisV2Mock {
     address public immutable owner;
 
     constructor(address owner_) {

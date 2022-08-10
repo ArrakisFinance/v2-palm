@@ -11,7 +11,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying VaultV2FactoryMock to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying ArrakisV2FactoryMock to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
@@ -19,7 +19,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  await deploy("VaultV2FactoryMock", {
+  await deploy("ArrakisV2FactoryMock", {
     from: deployer,
     log: hre.network.name !== "hardhat" ? true : false,
   });
@@ -36,4 +36,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["VaultV2FactoryMock"];
+func.tags = ["ArrakisV2FactoryMock"];

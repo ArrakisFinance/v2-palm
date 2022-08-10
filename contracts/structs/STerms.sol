@@ -15,4 +15,7 @@ struct SetupPayload {
     uint24 maxSlippage;
     uint256 projectTokenAllocation;
     uint256 baseTokenAllocation;
+    address[] operators_;
+    bytes datas_;
+    string strat_;
 }

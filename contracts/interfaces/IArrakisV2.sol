@@ -46,17 +46,31 @@ struct InitializePayload {
     uint24 maxSlippage;
 }
 
-interface IVaultV2 {
+struct BurnLiquidity {
+    uint128 liquidity;
+    Range range;
+}
+
+interface IArrakisV2 {
+    function token0() external returns (IERC20);
+
+    function token1() external returns (IERC20);
+
     function mint(uint256 mintAmount_, address receiver_)
         external
         returns (uint256 amount0, uint256 amount1);
 
-    function rebalance(Rebalance calldata rebalanceParams_) external;
-
-    function addRangeAndRebalance(
+    function rebalance(
         Range[] calldata ranges_,
-        Rebalance calldata rebalanceParams_
+        Rebalance calldata rebalanceParams_,
+        Range[] calldata rangesToRemove_
     ) external;
+
+    function burn(
+        BurnLiquidity[] calldata burns_,
+        uint256 burnAmount_,
+        address receiver_
+    ) external returns (uint256 amount0, uint256 amount1);
 
     function transferOwnership(address newOwner) external;
 
