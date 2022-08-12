@@ -26,6 +26,12 @@ interface IGasStation is IManagerProxy {
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
+    event ExpandTermDuration(
+        address indexed vault,
+        uint256 oldMmTermDuration,
+        uint256 newMmTermDuration
+    );
+
     event WithdrawVaultBalance(
         address indexed vault,
         uint256 amount,
@@ -87,6 +93,8 @@ interface IGasStation is IManagerProxy {
     // ======= PUBLIC FUNCTIONS =====
 
     function fundVaultBalance(address vault_) external payable;
+
+    function expandMMTermDuration(address vault_) external;
 
     function managerFeeBPS() external view returns (uint16);
 }

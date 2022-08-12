@@ -78,6 +78,8 @@ interface IArrakisV2 {
 
     function toggleRestrictMint() external;
 
+    function setInits(uint256 init0_, uint256 init1_) external;
+
     function rangeExist(Range calldata range_)
         external
         view

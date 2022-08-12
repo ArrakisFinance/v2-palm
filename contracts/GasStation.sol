@@ -20,9 +20,10 @@ contract GasStation is GasStationStorage {
     constructor(
         address gelato_,
         uint16 managerFeeBPS_,
+        address terms_,
         uint256 mmTermDuration_
     )
-        GasStationStorage(gelato_, managerFeeBPS_, mmTermDuration_)
+        GasStationStorage(gelato_, managerFeeBPS_, terms, mmTermDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 

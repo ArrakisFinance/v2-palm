@@ -41,9 +41,15 @@ abstract contract GasStationStorage is
 
     // #region Terms.
 
-    uint256 public immutable mmTermDuration;
+    address public immutable terms;
 
     // #endregion Terms.
+
+    // #region Terms Duration.
+
+    uint256 public immutable mmTermDuration;
+
+    // #endregion Terms Duration.
 
     // #region white list of strategies.
 
@@ -58,6 +64,19 @@ abstract contract GasStationStorage is
     // #endregion vaults related data.
 
     // #region modifiers.
+
+    modifier onlyTerms() {
+        require(msg.sender == terms, "GasStation: only Terms");
+        _;
+    }
+
+    modifier onlyTermsVaults(address vault) {
+        require(
+            IArrakisV2(vault).owner() == terms,
+            "GasStation: owner no Terms"
+        );
+        _;
+    }
 
     modifier onlyManagedVaults(address vault) {
         require(
@@ -89,10 +108,12 @@ abstract contract GasStationStorage is
     constructor(
         address gelato_,
         uint16 managerFeeBPS_,
+        address terms_,
         uint256 mmTermDuration_
     ) {
         gelato = payable(gelato_);
         managerFeeBPS = managerFeeBPS_;
+        terms = terms_;
         mmTermDuration = mmTermDuration_;
     }
 
@@ -124,7 +145,7 @@ abstract contract GasStationStorage is
         address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
-    ) external override whenNotPaused onlyOwner {
+    ) external override whenNotPaused onlyTermsVaults(vault_) {
         _addVault(vault_, operators_, datas_, strat_);
     }
 
@@ -133,7 +154,7 @@ abstract contract GasStationStorage is
         address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
-    ) external payable override whenNotPaused onlyOwner {
+    ) external payable override whenNotPaused onlyTermsVaults(vault_) {
         _addVault(vault_, operators_, datas_, strat_);
         _fundVaultBalance(vault_);
     }
@@ -215,6 +236,20 @@ abstract contract GasStationStorage is
         onlyManagedVaults(vault_)
     {
         _fundVaultBalance(vault_);
+    }
+
+    function expandMMTermDuration(address vault_)
+        external
+        override
+        whenNotPaused
+        onlyTerms
+    {
+        emit ExpandTermDuration(
+            vault_,
+            vaults[vault_].endOfMM,
+            // solhint-disable-next-line not-rely-on-time
+            vaults[vault_].endOfMM = block.timestamp + mmTermDuration
+        );
     }
 
     function whitelistStrat(string calldata strat_)

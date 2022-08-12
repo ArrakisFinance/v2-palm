@@ -3,16 +3,24 @@ pragma solidity 0.8.13;
 
 import {IArrakisV2Factory} from "./IArrakisV2Factory.sol";
 import {IArrakisV2} from "./IArrakisV2.sol";
-import {SetupPayload} from "../structs/STerms.sol";
+import {
+    SetupPayload,
+    IncreaseBalance,
+    DecreaseBalance
+} from "../structs/STerms.sol";
 
 interface ITerms {
-    function setupVault(SetupPayload calldata setup_, uint256 mintAmount_)
+    function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
         external
         returns (address vault);
 
-    function changeSetup(
-        IArrakisV2 vault_,
-        SetupPayload calldata setup_,
+    function increaseLiquidity(
+        IncreaseBalance calldata increaseBalance_,
+        uint256 mintAmount_
+    ) external;
+
+    function decreaseLiquidity(
+        DecreaseBalance calldata decreaseBalance_,
         uint256 mintAmount_
     ) external;
 
