@@ -1,3 +1,18 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+export interface Addresses {
+  ArrakisDAOMultiSig: string;
+  Gelato: string;
+  GelatoOps: string;
+  FeeDistToken: string;
+  UniswapV3SwapRouter02: string;
+  UniswapV2Router02: string;
+  Weth: string;
+  GaugeImplementation: string;
+  ArrakisV2Resolver: string;
+  ArrakisV2Factory: string;
+}
+/* eslint-enable @typescript-eslint/naming-convention */
+
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getAddressBookByNetwork = (network: string) => {
   switch (network) {
@@ -7,12 +22,12 @@ export const getAddressBookByNetwork = (network: string) => {
         Gelato: "",
         GelatoOps: "",
         FeeDistToken: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
         Weth: "",
         GaugeImplementation: "",
-        VaultV2Resolver: "",
-        VaultV2Factory: "",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
       };
 
     case "mainnet":
@@ -22,12 +37,12 @@ export const getAddressBookByNetwork = (network: string) => {
         GelatoOps: "0xB3f5503f93d5Ef84b06993a1975B9D21B962892F",
         FeeDistToken: "0xa6c49FD13E50a30C65E6C8480aADA132011D0613",
         FeeDistributor: "0x0000000000000000000000000000000000000001",
-        UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+        UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
         Weth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         GaugeImplementation: "",
-        VaultV2Resolver: "",
-        VaultV2Factory: "",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
       };
 
     case "matic":
@@ -37,12 +52,12 @@ export const getAddressBookByNetwork = (network: string) => {
         GelatoOps: "0x527a819db1eb0e34426297b03bae11F2f8B3A19E",
         FeeDistToken: "",
         FeeDistributor: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
-        VaultV2Resolver: "0xCffEf731Bd2DfCd60Bac06cE9b4CcE5d779357b4",
-        VaultV2Factory: "0x4146c4c85aB3d1fAD888E7f07560fBC8dc01F597",
+        ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
+        ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
       };
 
     case "goerli":
@@ -50,14 +65,14 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisDAOMultiSig: "0x2912A06D25CC4D177e5F322BA1c07Cd3F351d1bC",
         FeeDistToken: "",
         FeeDistributor: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
         Weth: "",
         Gelato: "0x683913B3A32ada4F8100458A3E1675425BdAa7DF",
         GelatoOps: "0xc1C6805B857Bef1f412519C4A842522431aFed39",
         GaugeImplementation: "",
-        VaultV2Resolver: "",
-        VaultV2Factory: "",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
       };
     case "hardhat":
       return {
@@ -66,12 +81,12 @@ export const getAddressBookByNetwork = (network: string) => {
         GelatoOps: "0x527a819db1eb0e34426297b03bae11F2f8B3A19E",
         FeeDistToken: "",
         FeeDistributor: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
-        VaultV2Resolver: "0xCffEf731Bd2DfCd60Bac06cE9b4CcE5d779357b4",
-        VaultV2Factory: "0x4146c4c85aB3d1fAD888E7f07560fBC8dc01F597",
+        ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
+        ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
       };
 
     default: {

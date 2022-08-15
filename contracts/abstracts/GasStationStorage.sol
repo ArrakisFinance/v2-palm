@@ -101,6 +101,11 @@ abstract contract GasStationStorage is
         _;
     }
 
+    modifier requireAddressNotZero(address addr) {
+        require(addr != address(0), "GasStation: address Zero");
+        _;
+    }
+
     // #endregion modifiers.
 
     // #region constructor.
@@ -145,7 +150,14 @@ abstract contract GasStationStorage is
         address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
-    ) external payable override whenNotPaused onlyTermsVaults(vault_) {
+    )
+        external
+        payable
+        override
+        whenNotPaused
+        requireAddressNotZero(vault_)
+        onlyTermsVaults(vault_)
+    {
         _addVault(vault_, operators_, datas_, strat_);
         if (msg.value > 0) _fundVaultBalance(vault_);
     }
@@ -222,6 +234,7 @@ abstract contract GasStationStorage is
         whenNotPaused
         onlyVaultOwner(vault_)
         onlyManagedVaults(vault_)
+        requireAddressNotZero(address(to_))
     {
         _withdrawVaultBalance(vault_, amount_, to_);
     }
@@ -241,6 +254,7 @@ abstract contract GasStationStorage is
         override
         whenNotPaused
         onlyTerms
+        requireAddressNotZero(vault_)
     {
         emit ExpandTermDuration(
             vault_,

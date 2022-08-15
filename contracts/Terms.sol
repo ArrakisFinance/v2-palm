@@ -294,6 +294,7 @@ contract Terms is TermsStorage {
     function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.addPools(feeTiers_);
@@ -302,6 +303,7 @@ contract Terms is TermsStorage {
     function removePools(IArrakisV2 vault_, address[] calldata pools_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.removePools(pools_);
@@ -310,6 +312,7 @@ contract Terms is TermsStorage {
     function setManager(IArrakisV2 vault_, IGasStation manager_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.setManager(manager_);
@@ -318,6 +321,7 @@ contract Terms is TermsStorage {
     function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.setMaxTwapDeviation(maxTwapDeviation_);
@@ -326,6 +330,7 @@ contract Terms is TermsStorage {
     function setTwapDuration(IArrakisV2 vault_, uint24 twapDuration_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.setTwapDuration(twapDuration_);
@@ -334,6 +339,7 @@ contract Terms is TermsStorage {
     function setMaxSlippage(IArrakisV2 vault_, uint24 maxSlippage_)
         external
         override
+        requireAddressNotZero(address(vault_))
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.setMaxSlippage(maxSlippage_);
@@ -346,6 +352,7 @@ contract Terms is TermsStorage {
     function setVaultData(address vault_, bytes calldata data_)
         external
         override
+        requireAddressNotZero(vault_)
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).setVaultData(vault_, data_);
@@ -354,6 +361,7 @@ contract Terms is TermsStorage {
     function setVaultStratByName(address vault_, string calldata strat_)
         external
         override
+        requireAddressNotZero(vault_)
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).setVaultStraByName(vault_, strat_);
@@ -362,6 +370,7 @@ contract Terms is TermsStorage {
     function addOperatorsToVault(address vault_, address[] calldata operators_)
         external
         override
+        requireAddressNotZero(vault_)
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).addOperatorsToVault(vault_, operators_);
@@ -370,7 +379,7 @@ contract Terms is TermsStorage {
     function removeOperatorsToVault(
         address vault_,
         address[] calldata operators_
-    ) external override {
+    ) external override requireAddressNotZero(vault_) {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).removeOperatorsToVault(vault_, operators_);
     }
@@ -379,7 +388,7 @@ contract Terms is TermsStorage {
         address vault_,
         uint256 amount_,
         address payable to_
-    ) external override {
+    ) external override requireAddressNotZero(vault_) {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).withdrawVaultBalance(vault_, amount_, to_);
     }

@@ -1,4 +1,4 @@
-import { deployments, getNamedAccounts, ethers } from "hardhat";
+import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
@@ -33,13 +33,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
           args: [
             addresses.ArrakisDAOMultiSig,
             addresses.ArrakisDAOMultiSig,
-            (await ethers.getContract("GasStation")).address,
             100,
           ],
         },
       },
     },
-    args: [(await ethers.getContract("VaultV2FactoryMock")).address],
+    args: [addresses.ArrakisV2Factory],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -56,4 +55,3 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
 };
 
 func.tags = ["Terms"];
-func.dependencies = ["GasStation", "VaultV2FactoryMock"];

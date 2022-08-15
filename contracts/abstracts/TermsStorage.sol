@@ -61,6 +61,11 @@ abstract contract TermsStorage is
         if (leftOver1 > 0) token1_.transfer(msg.sender, leftOver1);
     }
 
+    modifier requireAddressNotZero(address addr) {
+        require(addr != address(0), "Terms: address Zero");
+        _;
+    }
+
     // #endregion no left over.
 
     constructor(IArrakisV2Factory v2factory_) {
@@ -70,14 +75,11 @@ abstract contract TermsStorage is
     function initialize(
         address owner_,
         address termTreasury_,
-        address manager_,
         uint16 emolument_
     ) external {
         require(emolument < 10000, "Terms: emolument >= 100%.");
-        require(manager_ != address(0), "Terms: manager address zero.");
         _owner = owner_;
         termTreasury = termTreasury_;
-        manager = manager_;
         emolument = emolument_;
     }
 
@@ -91,15 +93,27 @@ abstract contract TermsStorage is
         emit SetEmolument(emolument, emolument = emolument_);
     }
 
-    function setTermTreasury(address termTreasury_) external onlyOwner {
+    function setTermTreasury(address termTreasury_)
+        external
+        onlyOwner
+        requireAddressNotZero(termTreasury_)
+    {
         emit SetTermTreasury(termTreasury, termTreasury = termTreasury_);
     }
 
-    function setManager(address manager_) external onlyOwner {
+    function setManager(address manager_)
+        external
+        onlyOwner
+        requireAddressNotZero(manager_)
+    {
         emit SetManager(manager, manager = manager_);
     }
 
-    function setResolver(IArrakisV2Resolver resolver_) external onlyOwner {
+    function setResolver(IArrakisV2Resolver resolver_)
+        external
+        onlyOwner
+        requireAddressNotZero(address(resolver_))
+    {
         emit SetResolver(resolver, resolver = resolver_);
     }
 
@@ -131,17 +145,6 @@ abstract contract TermsStorage is
 
         revert("Terms: vault don't exist");
     }
-
-    // function _getInits(
-    //     address token0_,
-    //     uint256 amount0_,
-    //     uint256 amount1_
-    // ) internal view returns (uint256 init0, uint256 init1) {
-    //     uint8 token0Decimals = ERC20(token0_).decimals();
-
-    //     init0 = 10**token0Decimals;
-    //     init1 = FullMath.mulDiv(amount1_, amount0_, 10**token0Decimals);
-    // }
 
     // #endregion internals setter.
 }

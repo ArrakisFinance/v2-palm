@@ -1,4 +1,4 @@
-import { deployments, getNamedAccounts } from "hardhat";
+import { deployments, getNamedAccounts, ethers } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
@@ -22,6 +22,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getAddressBookByNetwork("matic");
 
+  const oneYear = 60 * 60 * 24 * 365;
+
   await deploy("GasStation", {
     from: deployer,
     proxy: {
@@ -34,7 +36,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         },
       },
     },
-    args: [addresses.Gelato, 100],
+    args: [
+      addresses.Gelato,
+      100,
+      (await ethers.getContract("Terms")).address,
+      oneYear,
+    ],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -51,3 +58,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
 };
 
 func.tags = ["GasStation"];
+func.dependencies = ["Terms"];
