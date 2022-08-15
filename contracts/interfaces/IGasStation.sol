@@ -62,13 +62,6 @@ interface IGasStation is IManagerProxy {
         address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
-    ) external;
-
-    function addAndFundVault(
-        address vault_,
-        address[] calldata operators_,
-        bytes calldata datas_,
-        string calldata strat_
     ) external payable;
 
     function removeVault(address vault_, address payable to_) external;

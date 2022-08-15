@@ -6,7 +6,6 @@ import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {OwnableUninitialized} from "./OwnableUninitialized.sol";
 import {
     ReentrancyGuardUpgradeable
@@ -133,16 +132,16 @@ abstract contract TermsStorage is
         revert("Terms: vault don't exist");
     }
 
-    function _getInits(
-        address token0_,
-        uint256 amount0_,
-        uint256 amount1_
-    ) internal view returns (uint256 init0, uint256 init1) {
-        uint8 token0Decimals = ERC20(token0_).decimals();
+    // function _getInits(
+    //     address token0_,
+    //     uint256 amount0_,
+    //     uint256 amount1_
+    // ) internal view returns (uint256 init0, uint256 init1) {
+    //     uint8 token0Decimals = ERC20(token0_).decimals();
 
-        init0 = 10**token0Decimals;
-        init1 = FullMath.mulDiv(amount1_, amount0_, 10**token0Decimals);
-    }
+    //     init0 = 10**token0Decimals;
+    //     init1 = FullMath.mulDiv(amount1_, amount0_, 10**token0Decimals);
+    // }
 
     // #endregion internals setter.
 }

@@ -45,17 +45,17 @@ abstract contract GasStationStorage is
 
     // #endregion Terms.
 
-    // #region Terms Duration.
+    // #region Terms Market Making Duration.
 
     uint256 public immutable mmTermDuration;
 
-    // #endregion Terms Duration.
+    // #endregion Terms Market Making Duration.
 
-    // #region white list of strategies.
+    // #region whitelisted strategies.
 
     EnumerableSet.Bytes32Set internal _whitelistedStrat;
 
-    // #endregion white list of strategies.
+    // #endregion whitelisted strategies.
 
     // #region vaults related data.
 
@@ -145,18 +145,9 @@ abstract contract GasStationStorage is
         address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
-    ) external override whenNotPaused onlyTermsVaults(vault_) {
-        _addVault(vault_, operators_, datas_, strat_);
-    }
-
-    function addAndFundVault(
-        address vault_,
-        address[] calldata operators_,
-        bytes calldata datas_,
-        string calldata strat_
     ) external payable override whenNotPaused onlyTermsVaults(vault_) {
         _addVault(vault_, operators_, datas_, strat_);
-        _fundVaultBalance(vault_);
+        if (msg.value > 0) _fundVaultBalance(vault_);
     }
 
     function removeVault(address vault_, address payable to_)
@@ -164,6 +155,7 @@ abstract contract GasStationStorage is
         override
         whenNotPaused
         onlyVaultOwner(vault_)
+        onlyManagedVaults(vault_)
     {
         _removeVault(vault_, to_);
     }
@@ -224,7 +216,13 @@ abstract contract GasStationStorage is
         address vault_,
         uint256 amount_,
         address payable to_
-    ) external override whenNotPaused onlyVaultOwner(vault_) {
+    )
+        external
+        override
+        whenNotPaused
+        onlyVaultOwner(vault_)
+        onlyManagedVaults(vault_)
+    {
         _withdrawVaultBalance(vault_, amount_, to_);
     }
 
@@ -300,14 +298,8 @@ abstract contract GasStationStorage is
         emit UpdateVaultBalance(vault_, vaults[vault_].balance);
     }
 
-    function _removeVault(address vault_, address payable to_)
-        internal
-        onlyManagedVaults(vault_)
-    {
-        require(
-            vaults[vault_].endOfMM != 0,
-            "GasStation: Vault still has balance"
-        );
+    function _removeVault(address vault_, address payable to_) internal {
+        require(vaults[vault_].endOfMM != 0, "GasStation: Vault not active.");
 
         uint256 balance = vaults[vault_].balance;
         vaults[vault_].balance = 0;

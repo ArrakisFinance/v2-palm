@@ -5,6 +5,7 @@ import {
     IUniswapV3Factory
 } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IGasStation} from "./IGasStation.sol";
 
 // structs copied from v2-core/contracts/structs/SVaultV2.sol
 struct PositionLiquidity {
@@ -52,10 +53,6 @@ struct BurnLiquidity {
 }
 
 interface IArrakisV2 {
-    function token0() external returns (IERC20);
-
-    function token1() external returns (IERC20);
-
     function mint(uint256 mintAmount_, address receiver_)
         external
         returns (uint256 amount0, uint256 amount1);
@@ -79,6 +76,22 @@ interface IArrakisV2 {
     function toggleRestrictMint() external;
 
     function setInits(uint256 init0_, uint256 init1_) external;
+
+    function addPools(uint24[] calldata feeTiers_) external;
+
+    function removePools(address[] calldata pools_) external;
+
+    function setManager(IGasStation manager_) external;
+
+    function setMaxTwapDeviation(int24 maxTwapDeviation_) external;
+
+    function setTwapDuration(uint24 twapDuration_) external;
+
+    function setMaxSlippage(uint24 maxSlippage_) external;
+
+    function token0() external view returns (IERC20);
+
+    function token1() external view returns (IERC20);
 
     function rangeExist(Range calldata range_)
         external

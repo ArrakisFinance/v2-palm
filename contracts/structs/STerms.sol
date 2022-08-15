@@ -12,8 +12,6 @@ struct SetupPayload {
     bool projectTknIsTknZero;
     address owner;
     address[] operators;
-    // uint256 init0;
-    // uint256 init1;
     int24 maxTwapDeviation;
     uint24 twapDuration;
     uint24 maxSlippage;
@@ -25,22 +23,14 @@ struct SetupPayload {
 
 struct IncreaseBalance {
     IArrakisV2 vault;
-    IERC20 token0;
-    IERC20 token1;
     bool projectTknIsTknZero;
-    // uint256 init0;
-    // uint256 init1;
     uint256 amount0;
     uint256 amount1;
 }
 
 struct DecreaseBalance {
     IArrakisV2 vault;
-    IERC20 token0;
-    IERC20 token1;
     bool projectTknIsTknZero;
-    // uint256 init0;
-    // uint256 init1;
     uint256 amount0;
     uint256 amount1;
     address to;
