@@ -35,13 +35,7 @@ contract GasStation is GasStationStorage {
         Rebalance calldata rebalanceParams_,
         Range[] calldata rangesToRemove_,
         uint256 feeAmount_
-    )
-        external
-        override
-        whenNotPaused
-        onlyManagedVaults(vault_)
-        onlyVaultOperators(vault_)
-    {
+    ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
         require(
             vaults[vault_].endOfMM > block.timestamp, // solhint-disable-line not-rely-on-time
             "GasStation: vault no longer managed."

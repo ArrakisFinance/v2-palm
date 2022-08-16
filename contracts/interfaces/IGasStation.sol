@@ -3,14 +3,10 @@ pragma solidity >=0.8.0;
 
 import {Rebalance, Range} from "./IArrakisV2.sol";
 import {IManagerProxy} from "./IManagerProxy.sol";
+import {VaultInfo} from "../structs/SGasStation.sol";
 
 interface IGasStation is IManagerProxy {
-    event AddVault(
-        address indexed vault,
-        address[] operators,
-        bytes datas,
-        string strat
-    );
+    event AddVault(address indexed vault, bytes datas, string strat);
 
     event RemoveVault(address indexed vault, uint256 sendBack);
 
@@ -20,9 +16,9 @@ interface IGasStation is IManagerProxy {
 
     event WhitelistStrat(address indexed gasStation, string strat);
 
-    event AddOperatorsToVault(address indexed vault, address[] operators);
+    event AddOperators(address indexed gasStation, address[] operators);
 
-    event RemoveOperatorsToVault(address indexed vault, address[] operators);
+    event RemoveOperators(address indexed gasStation, address[] operators);
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
@@ -59,7 +55,6 @@ interface IGasStation is IManagerProxy {
 
     function addVault(
         address vault_,
-        address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
     ) external payable;
@@ -71,13 +66,9 @@ interface IGasStation is IManagerProxy {
     function setVaultStraByName(address vault_, string calldata strat_)
         external;
 
-    function addOperatorsToVault(address vault_, address[] calldata operators_)
-        external;
+    function addOperators(address[] calldata operators_) external;
 
-    function removeOperatorsToVault(
-        address vault_,
-        address[] calldata operators_
-    ) external;
+    function removeOperators(address[] calldata operators_) external;
 
     function pause() external;
 
@@ -88,6 +79,11 @@ interface IGasStation is IManagerProxy {
     function fundVaultBalance(address vault_) external payable;
 
     function expandMMTermDuration(address vault_) external;
+
+    function getVaultInfo(address vault_)
+        external
+        view
+        returns (VaultInfo memory);
 
     function managerFeeBPS() external view returns (uint16);
 }

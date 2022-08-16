@@ -63,6 +63,12 @@ abstract contract GasStationStorage is
 
     // #endregion vaults related data.
 
+    // #region operators.
+
+    address[] public operators;
+
+    // #endregion operators.
+
     // #region modifiers.
 
     modifier onlyTerms() {
@@ -95,9 +101,9 @@ abstract contract GasStationStorage is
         _;
     }
 
-    modifier onlyVaultOperators(address vault) {
-        (bool isAssociated, ) = _isOperatorAssociatedtoVault(vault, msg.sender);
-        require(isAssociated, "GasStation: no operator");
+    modifier onlyOperators() {
+        (bool isOperator, ) = _isOperator(msg.sender);
+        require(isOperator, "GasStation: no operator");
         _;
     }
 
@@ -147,7 +153,6 @@ abstract contract GasStationStorage is
 
     function addVault(
         address vault_,
-        address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
     )
@@ -158,7 +163,7 @@ abstract contract GasStationStorage is
         requireAddressNotZero(vault_)
         onlyTermsVaults(vault_)
     {
-        _addVault(vault_, operators_, datas_, strat_);
+        _addVault(vault_, datas_, strat_);
         if (msg.value > 0) _fundVaultBalance(vault_);
     }
 
@@ -192,36 +197,28 @@ abstract contract GasStationStorage is
         _setVaultStrat(vault_, keccak256(abi.encodePacked(strat_)));
     }
 
-    function addOperatorsToVault(address vault_, address[] calldata operators_)
+    function addOperators(address[] calldata operators_)
         external
         override
         whenNotPaused
-        onlyVaultOwner(vault_)
-        onlyManagedVaults(vault_)
+        onlyOwner
     {
         for (uint256 i = 0; i < operators_.length; i++) {
-            (bool isAssociated, ) = _isOperatorAssociatedtoVault(
-                vault_,
-                operators_[i]
-            );
-            require(!isAssociated, "GasStation: operator");
-            vaults[vault_].operators.push(operators_[i]);
+            (bool isOperator, ) = _isOperator(operators_[i]);
+            require(!isOperator, "GasStation: operator");
+            operators.push(operators_[i]);
         }
 
-        emit AddOperatorsToVault(vault_, operators_);
+        emit AddOperators(address(this), operators_);
     }
 
-    function removeOperatorsToVault(
-        address vault_,
-        address[] calldata operators_
-    )
+    function removeOperators(address[] calldata operators_)
         external
         override
         whenNotPaused
-        onlyVaultOwner(vault_)
-        onlyManagedVaults(vault_)
+        onlyOwner
     {
-        _removeOperatorsToVault(vault_, operators_);
+        _removeOperators(operators_);
     }
 
     function withdrawVaultBalance(
@@ -283,11 +280,20 @@ abstract contract GasStationStorage is
         return _whitelistedStrat.values();
     }
 
+    function getVaultInfo(address vault_)
+        external
+        view
+        override
+        requireAddressNotZero(vault_)
+        returns (VaultInfo memory)
+    {
+        return vaults[vault_];
+    }
+
     // #region internal functions.
 
     function _addVault(
         address vault_,
-        address[] calldata operators_,
         bytes calldata datas_,
         string calldata strat_
     ) internal {
@@ -297,14 +303,13 @@ abstract contract GasStationStorage is
             "GasStation: Not whitelisted"
         );
         require(vaults[vault_].endOfMM == 0, "GasStation: Vault already added");
-        vaults[vault_].operators = operators_;
         vaults[vault_].datas = datas_;
         vaults[vault_].strat = stratEncoded;
 
         // solhint-disable-next-line not-rely-on-time
         vaults[vault_].endOfMM = block.timestamp + mmTermDuration;
 
-        emit AddVault(vault_, operators_, datas_, strat_);
+        emit AddVault(vault_, datas_, strat_);
     }
 
     function _fundVaultBalance(address vault_) internal {
@@ -313,8 +318,6 @@ abstract contract GasStationStorage is
     }
 
     function _removeVault(address vault_, address payable to_) internal {
-        require(vaults[vault_].endOfMM != 0, "GasStation: Vault not active.");
-
         uint256 balance = vaults[vault_].balance;
         vaults[vault_].balance = 0;
 
@@ -344,21 +347,15 @@ abstract contract GasStationStorage is
         emit SetVaultStrat(vault_, strat_);
     }
 
-    function _removeOperatorsToVault(
-        address vault_,
-        address[] memory operators_
-    ) internal {
+    function _removeOperators(address[] memory operators_) internal {
         for (uint256 i = 0; i < operators_.length; i++) {
-            (bool isAssociated, uint256 index) = _isOperatorAssociatedtoVault(
-                vault_,
-                operators_[i]
-            );
-            require(isAssociated, "GasStation: no operator");
+            (bool isOperator, uint256 index) = _isOperator(operators_[i]);
+            require(isOperator, "GasStation: no operator");
 
-            delete vaults[vault_].operators[index];
+            delete operators[index];
         }
 
-        emit RemoveOperatorsToVault(vault_, operators_);
+        emit RemoveOperators(address(this), operators_);
     }
 
     function _withdrawVaultBalance(
@@ -376,13 +373,13 @@ abstract contract GasStationStorage is
         emit WithdrawVaultBalance(vault_, amount_, to_, vaults[vault_].balance);
     }
 
-    function _isOperatorAssociatedtoVault(address vault_, address operator_)
+    function _isOperator(address operator_)
         internal
         view
         returns (bool, uint256)
     {
-        for (uint256 i = 0; i < vaults[vault_].operators.length; i++) {
-            if (vaults[vault_].operators[i] == operator_) return (true, i);
+        for (uint256 index = 0; index < operators.length; index++) {
+            if (operators[index] == operator_) return (true, index);
         }
         return (false, 0);
     }

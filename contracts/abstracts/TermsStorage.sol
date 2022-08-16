@@ -25,30 +25,6 @@ abstract contract TermsStorage is
     uint16 public emolument;
     IArrakisV2Resolver public resolver;
 
-    // #region events.
-    event SetEmolument(uint16 oldEmolument, uint16 newEmolment);
-    event SetTermTreasury(address oldTermTreasury, address newTermTreasury);
-    event SetManager(address oldManager, address newManager);
-    event SetResolver(
-        IArrakisV2Resolver oldResolver,
-        IArrakisV2Resolver newResolver
-    );
-
-    event AddVault(address creator, address vault);
-    event RemoveVault(address creator, address vault);
-
-    event SetupVault(address creator, address vault, uint256 emolument);
-    event IncreaseLiquidity(address creator, address vault, uint256 emolument);
-    event DecreaseLiquidity(address creator, address vault);
-    event CloseTerm(
-        address creator,
-        address vault,
-        uint256 amount0,
-        uint256 amount1,
-        address to
-    );
-    // #endregion events.
-
     // #region no left over.
 
     modifier noLeftOver(IERC20 token0_, IERC20 token1_) {
@@ -101,14 +77,6 @@ abstract contract TermsStorage is
         emit SetTermTreasury(termTreasury, termTreasury = termTreasury_);
     }
 
-    function setManager(address manager_)
-        external
-        onlyOwner
-        requireAddressNotZero(manager_)
-    {
-        emit SetManager(manager, manager = manager_);
-    }
-
     function setResolver(IArrakisV2Resolver resolver_)
         external
         onlyOwner
@@ -144,6 +112,13 @@ abstract contract TermsStorage is
         }
 
         revert("Terms: vault don't exist");
+    }
+
+    function _setManager(address manager_)
+        internal
+        requireAddressNotZero(manager_)
+    {
+        emit SetManager(manager, manager = manager_);
     }
 
     // #endregion internals setter.

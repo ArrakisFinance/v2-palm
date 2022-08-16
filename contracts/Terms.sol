@@ -12,6 +12,7 @@ import {TermsStorage} from "./abstracts/TermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
+    ExtendingTermData,
     DecreaseBalance
 } from "./structs/STerms.sol";
 import {InitializePayload} from "./interfaces/IArrakisV2.sol";
@@ -80,12 +81,7 @@ contract Terms is TermsStorage {
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
-        IGasStation(manager).addVault(
-            vault,
-            setup_.operators,
-            setup_.datas_,
-            setup_.strat_
-        );
+        IGasStation(manager).addVault(vault, setup_.datas_, setup_.strat_);
 
         // Transfer to termTreasury the project token emolment.
         setup_.token0.safeTransferFrom(msg.sender, me, setup_.amount0);
@@ -172,20 +168,20 @@ contract Terms is TermsStorage {
 
             increaseBalance_.vault.token1().approve(
                 address(increaseBalance_.vault),
-                increaseBalance_.amount1
+                increaseBalance_.amount1 + amount1
             );
 
             (init0, init1) = _getInits(
                 address(increaseBalance_.vault.token0()),
                 increaseBalance_.amount0 - emolumentAmt + amount0,
-                increaseBalance_.amount1
+                increaseBalance_.amount1 + amount1
             );
         } else {
             emolumentAmt = _getEmolument(increaseBalance_.amount1, emolument);
 
             increaseBalance_.vault.token0().approve(
                 address(increaseBalance_.vault),
-                increaseBalance_.amount0
+                increaseBalance_.amount0 + amount0
             );
             increaseBalance_.vault.token1().safeTransfer(
                 termTreasury,
@@ -199,7 +195,7 @@ contract Terms is TermsStorage {
 
             (init0, init1) = _getInits(
                 address(increaseBalance_.vault.token0()),
-                increaseBalance_.amount0,
+                increaseBalance_.amount0 + amount0,
                 increaseBalance_.amount1 - emolumentAmt + amount1
             );
         }
@@ -208,13 +204,120 @@ contract Terms is TermsStorage {
 
         increaseBalance_.vault.mint(mintAmount_, address(this));
 
-        IGasStation(manager).expandMMTermDuration(
-            address(increaseBalance_.vault)
-        );
-
         emit IncreaseLiquidity(
             msg.sender,
             address(increaseBalance_.vault),
+            emolumentAmt
+        );
+    }
+
+    // solhint-disable-next-line function-max-lines
+    function extendingTerm(
+        ExtendingTermData calldata extensionData_,
+        uint256 mintAmount_
+    )
+        external
+        override
+        noLeftOver(extensionData_.vault.token0(), extensionData_.vault.token1())
+    {
+        _requireProjectAllocationGtZero(
+            extensionData_.projectTknIsTknZero,
+            extensionData_.amount0,
+            extensionData_.amount1
+        );
+        _requireIsOwner(vaults[msg.sender], address(extensionData_.vault));
+        require(
+            IGasStation(manager)
+                .getVaultInfo(address(extensionData_.vault))
+                .endOfMM < block.timestamp, // solhint-disable-line not-rely-on-time
+            "Terms: terms is active."
+        );
+
+        (uint256 amount0, uint256 amount1) = _burn(
+            extensionData_.vault,
+            address(this),
+            resolver
+        );
+
+        // Transfer to termTreasury the project token emolment.
+        extensionData_.vault.token0().safeTransferFrom(
+            msg.sender,
+            address(this),
+            extensionData_.amount0
+        );
+        extensionData_.vault.token1().safeTransferFrom(
+            msg.sender,
+            address(this),
+            extensionData_.amount1
+        );
+
+        uint256 emolumentAmt;
+        uint256 init0;
+        uint256 init1;
+        if (extensionData_.projectTknIsTknZero) {
+            emolumentAmt = _getEmolument(
+                extensionData_.amount0 + amount0,
+                emolument
+            );
+
+            extensionData_.vault.token0().approve(
+                address(extensionData_.vault),
+                extensionData_.amount0 - emolumentAmt + amount0
+            );
+
+            extensionData_.vault.token0().safeTransfer(
+                termTreasury,
+                emolumentAmt
+            );
+
+            extensionData_.vault.token1().approve(
+                address(extensionData_.vault),
+                extensionData_.amount1 + amount1
+            );
+
+            (init0, init1) = _getInits(
+                address(extensionData_.vault.token0()),
+                extensionData_.amount0 - emolumentAmt + amount0,
+                extensionData_.amount1 + amount1
+            );
+        } else {
+            emolumentAmt = _getEmolument(
+                extensionData_.amount1 + amount1,
+                emolument
+            );
+
+            extensionData_.vault.token0().approve(
+                address(extensionData_.vault),
+                extensionData_.amount0 + amount0
+            );
+            extensionData_.vault.token1().safeTransfer(
+                termTreasury,
+                emolumentAmt
+            );
+
+            extensionData_.vault.token1().approve(
+                address(extensionData_.vault),
+                extensionData_.amount1 - emolumentAmt + amount1
+            );
+
+            (init0, init1) = _getInits(
+                address(extensionData_.vault.token0()),
+                extensionData_.amount0 + amount0,
+                extensionData_.amount1 - emolumentAmt + amount1
+            );
+        }
+
+        extensionData_.vault.setInits(init0, init1);
+
+        extensionData_.vault.mint(mintAmount_, address(this));
+
+        IGasStation(manager).expandMMTermDuration(
+            address(extensionData_.vault)
+        );
+
+        emit ExtendingTerm(
+            msg.sender,
+            address(extensionData_.vault),
             emolumentAmt
         );
     }
@@ -269,9 +372,21 @@ contract Terms is TermsStorage {
         emit DecreaseLiquidity(msg.sender, address(decreaseBalance_.vault));
     }
 
-    function closeTerm(IArrakisV2 vault_, address to_) external override {
+    function closeTerm(
+        IArrakisV2 vault_,
+        address to_,
+        address newOwner_,
+        address newManager_
+    )
+        external
+        override
+        requireAddressNotZero(newOwner_)
+        requireAddressNotZero(to_)
+    {
         uint256 index = _requireIsOwner(vaults[msg.sender], address(vault_));
         address vaultAddr = address(vault_);
+
+        delete vaults[msg.sender][index];
 
         (uint256 amount0, uint256 amount1) = _burn(
             vault_,
@@ -282,14 +397,14 @@ contract Terms is TermsStorage {
         if (amount0 > 0) vault_.token0().safeTransfer(to_, amount0);
         if (amount1 > 0) vault_.token1().safeTransfer(to_, amount1);
 
-        delete vaults[msg.sender][index];
-
         IGasStation(manager).removeVault(address(vault_), payable(to_));
+        _setManager(newManager_);
+        vault_.transferOwnership(newOwner_);
 
         emit CloseTerm(msg.sender, vaultAddr, amount0, amount1, to_);
     }
 
-    // #region vault confid as admin.
+    // #region vault config as admin.
 
     function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_)
         external
@@ -307,15 +422,6 @@ contract Terms is TermsStorage {
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         vault_.removePools(pools_);
-    }
-
-    function setManager(IArrakisV2 vault_, IGasStation manager_)
-        external
-        override
-        requireAddressNotZero(address(vault_))
-    {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
-        vault_.setManager(manager_);
     }
 
     function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
@@ -365,23 +471,6 @@ contract Terms is TermsStorage {
     {
         _requireIsOwner(vaults[msg.sender], address(vault_));
         IGasStation(manager).setVaultStraByName(vault_, strat_);
-    }
-
-    function addOperatorsToVault(address vault_, address[] calldata operators_)
-        external
-        override
-        requireAddressNotZero(vault_)
-    {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
-        IGasStation(manager).addOperatorsToVault(vault_, operators_);
-    }
-
-    function removeOperatorsToVault(
-        address vault_,
-        address[] calldata operators_
-    ) external override requireAddressNotZero(vault_) {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
-        IGasStation(manager).removeOperatorsToVault(vault_, operators_);
     }
 
     function withdrawVaultBalance(

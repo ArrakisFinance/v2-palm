@@ -11,7 +11,6 @@ struct SetupPayload {
     IERC20 token1;
     bool projectTknIsTknZero;
     address owner;
-    address[] operators;
     int24 maxTwapDeviation;
     uint24 twapDuration;
     uint24 maxSlippage;
@@ -22,6 +21,13 @@ struct SetupPayload {
 }
 
 struct IncreaseBalance {
+    IArrakisV2 vault;
+    bool projectTknIsTknZero;
+    uint256 amount0;
+    uint256 amount1;
+}
+
+struct ExtendingTermData {
     IArrakisV2 vault;
     bool projectTknIsTknZero;
     uint256 amount0;
