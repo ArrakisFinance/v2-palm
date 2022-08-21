@@ -50,20 +50,20 @@ contract TermsFunctionsMock {
         return _burn(vault_, address(this), resolver);
     }
 
-    function getInits(
-        address token0_,
-        uint256 amount0_,
-        uint256 amount1_
-    ) external view returns (uint256 init0, uint256 init1) {
-        return _getInits(token0_, amount0_, amount1_);
-    }
-
     function requireTokenMatch(
         IArrakisV2 vault_,
         IERC20 token0_,
         IERC20 token1_
     ) external view {
         _requireTokenMatch(vault_, token0_, token1_);
+    }
+
+    function getInits(
+        uint256 mintAmount_,
+        uint256 amount0_,
+        uint256 amount1_
+    ) external pure returns (uint256 init0, uint256 init1) {
+        return _getInits(mintAmount_, amount0_, amount1_);
     }
 
     function requireIsOwner(address[] memory vaults_, address vault_)

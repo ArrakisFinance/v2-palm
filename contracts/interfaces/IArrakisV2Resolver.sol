@@ -19,4 +19,17 @@ interface IArrakisV2Resolver {
         external
         view
         returns (BurnLiquidity[] memory burns);
+
+    function getMintAmounts(
+        IArrakisV2 vaultV2_,
+        uint256 amount0Max_,
+        uint256 amount1Max_
+    )
+        external
+        view
+        returns (
+            uint256 amount0,
+            uint256 amount1,
+            uint256 mintAmount
+        );
 }

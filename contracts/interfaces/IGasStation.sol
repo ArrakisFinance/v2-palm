@@ -28,6 +28,8 @@ interface IGasStation is IManagerProxy {
         uint256 newMmTermDuration
     );
 
+    event ToggleRestrictMint(address indexed vault);
+
     event WithdrawVaultBalance(
         address indexed vault,
         uint256 amount,
@@ -80,10 +82,14 @@ interface IGasStation is IManagerProxy {
 
     function expandMMTermDuration(address vault_) external;
 
+    function toggleRestrictMint(address vault_) external;
+
     function getVaultInfo(address vault_)
         external
         view
         returns (VaultInfo memory);
 
     function managerFeeBPS() external view returns (uint16);
+
+    function getWhitelistedStrat() external view returns (bytes32[] memory);
 }

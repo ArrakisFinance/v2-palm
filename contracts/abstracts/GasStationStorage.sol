@@ -88,7 +88,8 @@ abstract contract GasStationStorage is
         require(
             // solhint-disable-next-line not-rely-on-time
             vaults[vault].endOfMM >= block.timestamp &&
-                vaults[vault].endOfMM != 0
+                vaults[vault].endOfMM != 0,
+            "GasStation: Vault not managed"
         );
         _;
     }
@@ -171,6 +172,7 @@ abstract contract GasStationStorage is
         external
         override
         whenNotPaused
+        requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
         onlyManagedVaults(vault_)
     {
@@ -181,6 +183,7 @@ abstract contract GasStationStorage is
         external
         override
         whenNotPaused
+        requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
         onlyManagedVaults(vault_)
     {
@@ -191,6 +194,7 @@ abstract contract GasStationStorage is
         external
         override
         whenNotPaused
+        requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
         onlyManagedVaults(vault_)
     {
@@ -229,6 +233,7 @@ abstract contract GasStationStorage is
         external
         override
         whenNotPaused
+        requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
         onlyManagedVaults(vault_)
         requireAddressNotZero(address(to_))
@@ -252,6 +257,7 @@ abstract contract GasStationStorage is
         whenNotPaused
         onlyTerms
         requireAddressNotZero(vault_)
+        onlyManagedVaults(vault_)
     {
         emit ExpandTermDuration(
             vault_,
@@ -261,12 +267,28 @@ abstract contract GasStationStorage is
         );
     }
 
+    function toggleRestrictMint(address vault_)
+        external
+        override
+        whenNotPaused
+        requireAddressNotZero(vault_)
+        onlyVaultOwner(vault_)
+        onlyManagedVaults(vault_)
+    {
+        IArrakisV2(vault_).toggleRestrictMint();
+        emit ToggleRestrictMint(vault_);
+    }
+
     function whitelistStrat(string calldata strat_)
         external
         whenNotPaused
         onlyOwner
     {
         bytes32 stratB32 = keccak256(abi.encodePacked(strat_));
+        require(
+            stratB32 != keccak256(abi.encodePacked("")),
+            "GasStation: empty string"
+        );
         require(
             !_whitelistedStrat.contains(stratB32),
             "GasStation: strat whitelisted."
@@ -276,7 +298,12 @@ abstract contract GasStationStorage is
         emit WhitelistStrat(address(this), strat_);
     }
 
-    function getWhitelistedStrat() external view returns (bytes32[] memory) {
+    function getWhitelistedStrat()
+        external
+        view
+        override
+        returns (bytes32[] memory)
+    {
         return _whitelistedStrat.values();
     }
 
@@ -342,6 +369,11 @@ abstract contract GasStationStorage is
     function _setVaultStrat(address vault_, bytes32 strat_) internal {
         require(vaults[vault_].strat != strat_, "GasStation: strat");
 
+        require(
+            _whitelistedStrat.contains(strat_),
+            "GasStation: strat not whitelisted."
+        );
+
         vaults[vault_].strat = strat_;
 
         emit SetVaultStrat(vault_, strat_);
@@ -376,6 +408,7 @@ abstract contract GasStationStorage is
     function _isOperator(address operator_)
         internal
         view
+        requireAddressNotZero(operator_)
         returns (bool, uint256)
     {
         for (uint256 index = 0; index < operators.length; index++) {

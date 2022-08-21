@@ -5,12 +5,22 @@ import {ITerms} from "../interfaces/ITerms.sol";
 import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
+import {IGasStation} from "../interfaces/IGasStation.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {OwnableUninitialized} from "./OwnableUninitialized.sol";
 import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {FullMath} from "../utils/FullMath.sol";
+import {
+    _getInits,
+    _requireTokenMatch,
+    _requireIsOwner,
+    _getEmolument,
+    _requireProjectAllocationGtZero,
+    _requireTknOrder,
+    _burn
+} from "../functions/FTerms.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract TermsStorage is
@@ -51,12 +61,14 @@ abstract contract TermsStorage is
     function initialize(
         address owner_,
         address termTreasury_,
-        uint16 emolument_
+        uint16 emolument_,
+        IArrakisV2Resolver resolver_
     ) external {
         require(emolument < 10000, "Terms: emolument >= 100%.");
         _owner = owner_;
         termTreasury = termTreasury_;
         emolument = emolument_;
+        resolver = resolver_;
     }
 
     // #region setter.
@@ -74,6 +86,7 @@ abstract contract TermsStorage is
         onlyOwner
         requireAddressNotZero(termTreasury_)
     {
+        require(termTreasury != termTreasury_, "Terms: already term treasury");
         emit SetTermTreasury(termTreasury, termTreasury = termTreasury_);
     }
 
@@ -82,10 +95,104 @@ abstract contract TermsStorage is
         onlyOwner
         requireAddressNotZero(address(resolver_))
     {
+        require(
+            address(resolver) != address(resolver_),
+            "Terms: already resolver"
+        );
         emit SetResolver(resolver, resolver = resolver_);
     }
 
+    function setManager(address manager_)
+        external
+        override
+        onlyOwner
+        requireAddressNotZero(manager_)
+    {
+        require(manager_ != manager, "Terms: already manager");
+        emit SetManager(manager, manager = manager_);
+    }
+
     // #endregion setter.
+
+    // #region vault config as admin.
+
+    function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        vault_.addPools(feeTiers_);
+    }
+
+    function removePools(IArrakisV2 vault_, address[] calldata pools_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        vault_.removePools(pools_);
+    }
+
+    function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        vault_.setMaxTwapDeviation(maxTwapDeviation_);
+    }
+
+    function setTwapDuration(IArrakisV2 vault_, uint24 twapDuration_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        vault_.setTwapDuration(twapDuration_);
+    }
+
+    function setMaxSlippage(IArrakisV2 vault_, uint24 maxSlippage_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        vault_.setMaxSlippage(maxSlippage_);
+    }
+
+    // #endregion vault config as admin.
+
+    // #region gasStation config as vault owner.
+
+    function setVaultData(address vault_, bytes calldata data_)
+        external
+        override
+        requireAddressNotZero(vault_)
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        IGasStation(manager).setVaultData(vault_, data_);
+    }
+
+    function setVaultStratByName(address vault_, string calldata strat_)
+        external
+        override
+        requireAddressNotZero(vault_)
+    {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        IGasStation(manager).setVaultStraByName(vault_, strat_);
+    }
+
+    function withdrawVaultBalance(
+        address vault_,
+        uint256 amount_,
+        address payable to_
+    ) external override requireAddressNotZero(vault_) {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        IGasStation(manager).withdrawVaultBalance(vault_, amount_, to_);
+    }
+
+    // #endregion gasStation config as vault owner.
 
     // #region internals setter.
 
@@ -112,13 +219,6 @@ abstract contract TermsStorage is
         }
 
         revert("Terms: vault don't exist");
-    }
-
-    function _setManager(address manager_)
-        internal
-        requireAddressNotZero(manager_)
-    {
-        emit SetManager(manager, manager = manager_);
     }
 
     // #endregion internals setter.

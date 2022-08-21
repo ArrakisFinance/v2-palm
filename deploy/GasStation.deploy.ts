@@ -18,7 +18,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   }
 
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, arrakisDaoMultisig } = await getNamedAccounts();
 
   const addresses = getAddressBookByNetwork("matic");
 
@@ -28,11 +28,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     from: deployer,
     proxy: {
       proxyContract: "EIP173Proxy",
-      owner: addresses.ArrakisDAOMultiSig,
+      owner: arrakisDaoMultisig,
       execute: {
         init: {
           methodName: "initialize",
-          args: [addresses.ArrakisDAOMultiSig],
+          args: [arrakisDaoMultisig],
         },
       },
     },
@@ -52,6 +52,7 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   const shouldSkip =
     hre.network.name === "mainnet" ||
     hre.network.name === "goerli" ||
+    hre.network.name === "matic" ||
     hre.network.name === "optimism";
 
   return shouldSkip ? true : false;

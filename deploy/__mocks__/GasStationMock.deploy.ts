@@ -1,5 +1,6 @@
-import { deployments, getNamedAccounts, ethers } from "hardhat";
+import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getAddressBookByNetwork } from "../../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../../src/utils";
 
@@ -11,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying BaseToken to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying GasStationMock to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
@@ -19,9 +20,23 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  await deploy("BaseToken", {
+  const addresses = getAddressBookByNetwork("matic");
+
+  const oneYear = 60 * 60 * 24 * 365;
+
+  await deploy("GasStationMock", {
     from: deployer,
-    args: [ethers.utils.parseUnits("1", 27)],
+    proxy: {
+      proxyContract: "EIP173Proxy",
+      owner: deployer,
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [deployer],
+        },
+      },
+    },
+    args: [addresses.Gelato, 100, deployer, oneYear],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -38,4 +53,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["BaseToken"];
+func.tags = ["GasStationMock"];

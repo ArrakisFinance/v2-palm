@@ -24,13 +24,20 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
+    arrakisDaoMultisig: {
+      default: 1,
+      optimism: "0xAa2E0c5c85ACb7717e58060AB3c96d2B184EE07C",
+      mainnet: "0xAa2E0c5c85ACb7717e58060AB3c96d2B184EE07C",
+      matic: "0xd59cc08a65130cd046b83908dff77b434e38508e",
+      goerli: "0x2912A06D25CC4D177e5F322BA1c07Cd3F351d1bC",
+    },
   },
 
   networks: {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 31195290,
+        blockNumber: 31962310,
       },
     },
 

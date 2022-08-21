@@ -6,10 +6,12 @@ export interface Addresses {
   FeeDistToken: string;
   UniswapV3SwapRouter02: string;
   UniswapV2Router02: string;
+  UniswapV3Factory: string;
   Weth: string;
   GaugeImplementation: string;
   ArrakisV2Resolver: string;
   ArrakisV2Factory: string;
+  UniswapV3Amount: string;
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -24,10 +26,12 @@ export const getAddressBookByNetwork = (network: string) => {
         FeeDistToken: "",
         UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "",
         GaugeImplementation: "",
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
+        UniswapV3Amount: "",
       };
 
     case "mainnet":
@@ -39,10 +43,12 @@ export const getAddressBookByNetwork = (network: string) => {
         FeeDistributor: "0x0000000000000000000000000000000000000001",
         UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         GaugeImplementation: "",
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
+        UniswapV3Amount: "",
       };
 
     case "matic":
@@ -54,10 +60,12 @@ export const getAddressBookByNetwork = (network: string) => {
         FeeDistributor: "",
         UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
         ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
         ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
+        UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
       };
 
     case "goerli":
@@ -67,12 +75,14 @@ export const getAddressBookByNetwork = (network: string) => {
         FeeDistributor: "",
         UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "",
         Gelato: "0x683913B3A32ada4F8100458A3E1675425BdAa7DF",
         GelatoOps: "0xc1C6805B857Bef1f412519C4A842522431aFed39",
         GaugeImplementation: "",
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
+        UniswapV3Amount: "",
       };
     case "hardhat":
       return {
@@ -83,10 +93,12 @@ export const getAddressBookByNetwork = (network: string) => {
         FeeDistributor: "",
         UniswapV3SwapRouter02: "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45",
         UniswapV2Router02: "",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
         ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
         ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
+        UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
       };
 
     default: {

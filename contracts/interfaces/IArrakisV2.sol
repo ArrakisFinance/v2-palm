@@ -101,4 +101,6 @@ interface IArrakisV2 {
     function rangesArray() external view returns (Range[] memory);
 
     function owner() external view returns (address);
+
+    function manager() external view returns (IGasStation);
 }

@@ -1,5 +1,6 @@
-import { deployments, getNamedAccounts, ethers } from "hardhat";
+import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getAddressBookByNetwork } from "../../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../../src/utils";
 
@@ -11,17 +12,34 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying BaseToken to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying TermsMock to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
 
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, arrakisDaoMultisig } = await getNamedAccounts();
 
-  await deploy("BaseToken", {
+  const addresses = getAddressBookByNetwork("matic");
+
+  await deploy("TermsMock", {
     from: deployer,
-    args: [ethers.utils.parseUnits("1", 27)],
+    proxy: {
+      proxyContract: "EIP173Proxy",
+      owner: deployer,
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [
+            arrakisDaoMultisig,
+            arrakisDaoMultisig,
+            100,
+            addresses.ArrakisV2Resolver,
+          ],
+        },
+      },
+    },
+    args: [addresses.ArrakisV2Factory],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -38,4 +56,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["BaseToken"];
+func.tags = ["TermsMock"];

@@ -12,6 +12,7 @@ function _burn(
     IArrakisV2Resolver resolver
 ) returns (uint256 amount0, uint256 amount1) {
     uint256 balanceOfArrakisTkn = IERC20(address(vault_)).balanceOf(me);
+
     BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
         balanceOfArrakisTkn,
         vault_
@@ -21,14 +22,12 @@ function _burn(
 }
 
 function _getInits(
-    address token0_,
+    uint256 mintAmount_,
     uint256 amount0_,
     uint256 amount1_
-) view returns (uint256 init0, uint256 init1) {
-    uint8 token0Decimals = ERC20(token0_).decimals();
-
-    init0 = 10**token0Decimals;
-    init1 = FullMath.mulDiv(amount1_, amount0_, 10**token0Decimals);
+) pure returns (uint256 init0, uint256 init1) {
+    init0 = FullMath.mulDiv(amount0_, 1e18, mintAmount_);
+    init1 = FullMath.mulDiv(amount1_, 1e18, mintAmount_);
 }
 
 function _requireTokenMatch(
@@ -81,6 +80,10 @@ function _requireProjectAllocationGtZero(
         projectTknIsTknZero_ ? amount0_ > 0 : amount1_ > 0,
         "Terms: no project token allocation."
     );
+}
+
+function _requireAddressNotZero(uint256 mintAmount_) pure {
+    require(mintAmount_ > 0, "Terms: mintAmount zero.");
 }
 
 function _requireTknOrder(address token0_, address token1_) pure {

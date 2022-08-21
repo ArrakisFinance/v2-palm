@@ -93,6 +93,8 @@ interface ITerms {
         address payable to_
     ) external;
 
+    function setManager(address manager_) external;
+
     // #endregion GasStation configuration functions.
 
     function v2factory() external view returns (IArrakisV2Factory);
