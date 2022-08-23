@@ -26,10 +26,7 @@ const config: HardhatUserConfig = {
     },
     arrakisDaoMultisig: {
       default: 1,
-      optimism: "0xAa2E0c5c85ACb7717e58060AB3c96d2B184EE07C",
-      mainnet: "0xAa2E0c5c85ACb7717e58060AB3c96d2B184EE07C",
-      matic: "0xd59cc08a65130cd046b83908dff77b434e38508e",
-      goerli: "0x2912A06D25CC4D177e5F322BA1c07Cd3F351d1bC",
+      matic: "0xF869f0eBDDAa33d7aa394c2c612E6e5a6A64fDA4",
     },
   },
 
