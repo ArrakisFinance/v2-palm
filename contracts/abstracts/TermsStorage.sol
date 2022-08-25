@@ -7,7 +7,9 @@ import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
 import {IGasStation} from "../interfaces/IGasStation.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {OwnableUninitialized} from "./OwnableUninitialized.sol";
+import {
+    OwnableUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -25,7 +27,7 @@ import {
 // solhint-disable-next-line max-states-count
 abstract contract TermsStorage is
     ITerms,
-    OwnableUninitialized,
+    OwnableUpgradeable,
     ReentrancyGuardUpgradeable
 {
     IArrakisV2Factory public immutable v2factory;
@@ -65,7 +67,7 @@ abstract contract TermsStorage is
         IArrakisV2Resolver resolver_
     ) external {
         require(emolument < 10000, "Terms: emolument >= 100%.");
-        _owner = owner_;
+        _transferOwnership(owner_);
         termTreasury = termTreasury_;
         emolument = emolument_;
         resolver = resolver_;

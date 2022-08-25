@@ -7,7 +7,9 @@ import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {OwnableUninitialized} from "../vendor/common/OwnableUninitialized.sol";
+import {
+    OwnableUpgradeable
+} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {
     PausableUpgradeable
@@ -20,7 +22,7 @@ import {VaultInfo} from "../structs/SGasStation.sol";
 /// @dev owner should be the Terms smart contract.
 abstract contract GasStationStorage is
     IGasStation,
-    OwnableUninitialized,
+    OwnableUpgradeable,
     PausableUpgradeable
 {
     using SafeERC20 for IERC20;
@@ -134,7 +136,7 @@ abstract contract GasStationStorage is
     // #region initialize function.
 
     function initialize(address owner_) external initializer {
-        _owner = owner_;
+        _transferOwnership(owner_);
         __Pausable_init();
     }
 

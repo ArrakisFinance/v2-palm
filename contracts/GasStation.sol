@@ -3,7 +3,6 @@ pragma solidity 0.8.13;
 
 import {IArrakisV2, Rebalance, Range} from "./interfaces/IArrakisV2.sol";
 import {IGasStation} from "./interfaces/IGasStation.sol";
-import {OwnableUninitialized} from "./vendor/common/OwnableUninitialized.sol";
 import {
     IUniswapV3Pool
 } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
