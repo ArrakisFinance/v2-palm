@@ -165,9 +165,16 @@ describe("Terms integration test!!!", async function () {
       result.mintAmount
     );
 
-    expect(await baseToken.balanceOf(vault)).to.be.eq(baseTokenAllocation);
+    let feeTaken = baseTokenAllocation
+      .mul(await terms.emolument())
+      .div(10000)
+      .toString();
 
-    const feeTaken = projectTokenAllocation
+    expect(await baseToken.balanceOf(vault)).to.be.eq(
+      baseTokenAllocation.sub(feeTaken)
+    );
+
+    feeTaken = projectTokenAllocation
       .mul(await terms.emolument())
       .div(10000)
       .toString();
@@ -219,7 +226,9 @@ describe("Terms integration test!!!", async function () {
     const afterBTB = await baseToken.balanceOf(vault);
     const afterPTB = await projectToken.balanceOf(vault);
 
-    expect(beforeBTB.add(baseTokenAllocation)).to.be.eq(afterBTB);
+    expect(
+      beforeBTB.add(baseTokenAllocation.mul(10000 - 100).div(10000))
+    ).to.be.eq(afterBTB);
     expect(
       beforePTB.add(projectTokenAllocation.mul(10000 - 100).div(10000))
     ).to.be.eq(afterPTB);
@@ -293,7 +302,6 @@ describe("Terms integration test!!!", async function () {
     await terms.decreaseLiquidity(
       {
         vault: vault,
-        projectTknIsTknZero: projectTknIsTknZero,
         amount0: projectTknIsTknZero
           ? projectTokenAllocation
           : baseTokenAllocation,

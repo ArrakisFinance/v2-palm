@@ -36,8 +36,12 @@ struct ExtendingTermData {
 
 struct DecreaseBalance {
     IArrakisV2 vault;
-    bool projectTknIsTknZero;
     uint256 amount0;
     uint256 amount1;
     address to;
+}
+
+struct Inits {
+    uint256 init0;
+    uint256 init1;
 }

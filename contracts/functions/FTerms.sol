@@ -82,6 +82,15 @@ function _requireProjectAllocationGtZero(
     );
 }
 
+// function _requireTokenAllocationGtZero(
+//     uint256 amount_
+// ) pure {
+//     require(
+//         amount_ > 0,
+//         "Terms: no token allocation."
+//     );
+// }
+
 function _requireAddressNotZero(uint256 mintAmount_) pure {
     require(mintAmount_ > 0, "Terms: mintAmount zero.");
 }

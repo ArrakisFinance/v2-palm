@@ -13,7 +13,8 @@ import {
     SetupPayload,
     IncreaseBalance,
     ExtendingTermData,
-    DecreaseBalance
+    DecreaseBalance,
+    Inits
 } from "./structs/STerms.sol";
 import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
@@ -52,21 +53,18 @@ contract Terms is TermsStorage {
 
         address me = address(this);
 
-        uint256 emolumentAmt = _getEmolument(
-            setup_.projectTknIsTknZero ? setup_.amount0 : setup_.amount1,
-            emolument
-        );
+        /// @dev emolument0/emolument1 can be eq to 0.
+        uint256 emolumentAmt0 = _getEmolument(setup_.amount0, emolument);
+        uint256 emolumentAmt1 = _getEmolument(setup_.amount1, emolument);
 
         {
-            (uint256 init0, uint256 init1) = _getInits(
+            Inits memory inits;
+            (inits.init0, inits.init1) = _getInits(
                 mintAmount_,
-                setup_.projectTknIsTknZero
-                    ? setup_.amount0 - emolumentAmt
-                    : setup_.amount0,
-                setup_.projectTknIsTknZero
-                    ? setup_.amount1
-                    : setup_.amount1 - emolumentAmt
+                setup_.amount0 - emolumentAmt0,
+                setup_.amount1 - emolumentAmt1
             );
+
             // Create vaultV2.
             vault = v2factory.deployVault(
                 InitializePayload({
@@ -74,8 +72,8 @@ contract Terms is TermsStorage {
                     token0: address(setup_.token0),
                     token1: address(setup_.token1),
                     owner: me,
-                    init0: init0,
-                    init1: init1,
+                    init0: inits.init0,
+                    init1: inits.init1,
                     manager: manager,
                     maxTwapDeviation: setup_.maxTwapDeviation,
                     twapDuration: setup_.twapDuration,
@@ -96,27 +94,16 @@ contract Terms is TermsStorage {
         setup_.token0.safeTransferFrom(msg.sender, me, setup_.amount0);
         setup_.token1.safeTransferFrom(msg.sender, me, setup_.amount1);
 
-        setup_.token0.approve(
-            vault,
-            setup_.projectTknIsTknZero
-                ? setup_.amount0 - emolumentAmt
-                : setup_.amount0
-        );
-        setup_.projectTknIsTknZero
-            ? setup_.token0.safeTransfer(termTreasury, emolumentAmt)
-            : setup_.token1.safeTransfer(termTreasury, emolumentAmt);
+        setup_.token0.approve(vault, setup_.amount0 - emolumentAmt0);
+        setup_.token1.approve(vault, setup_.amount1 - emolumentAmt1);
+        setup_.token0.safeTransfer(termTreasury, emolumentAmt0);
+        setup_.token1.safeTransfer(termTreasury, emolumentAmt1);
 
-        setup_.token1.approve(
-            vault,
-            setup_.projectTknIsTknZero
-                ? setup_.amount1
-                : setup_.amount1 - emolumentAmt
-        );
         vaultV2.mint(mintAmount_, me);
 
         IGasStation(manager).toggleRestrictMint(vault);
 
-        emit SetupVault(setup_.owner, vault, emolumentAmt);
+        emit SetupVault(setup_.owner, vault, emolumentAmt0, emolumentAmt1);
     }
 
     // solhint-disable-next-line function-max-lines
@@ -157,57 +144,47 @@ contract Terms is TermsStorage {
             increaseBalance_.amount1
         );
 
-        uint256 emolumentAmt;
-        uint256 init0;
-        uint256 init1;
-        if (increaseBalance_.projectTknIsTknZero) {
-            emolumentAmt = _getEmolument(increaseBalance_.amount0, emolument);
+        uint256 emolumentAmt0 = _getEmolument(
+            increaseBalance_.amount0,
+            emolument
+        );
+        uint256 emolumentAmt1 = _getEmolument(
+            increaseBalance_.amount1,
+            emolument
+        );
 
-            increaseBalance_.vault.token0().approve(
-                address(increaseBalance_.vault),
-                increaseBalance_.amount0 - emolumentAmt + amount0
-            );
-
+        if (emolumentAmt0 > 0)
             increaseBalance_.vault.token0().safeTransfer(
                 termTreasury,
-                emolumentAmt
+                emolumentAmt0
             );
 
-            increaseBalance_.vault.token1().approve(
-                address(increaseBalance_.vault),
-                increaseBalance_.amount1 + amount1
-            );
-
-            (init0, init1) = _getInits(
-                mintAmount_,
-                increaseBalance_.amount0 - emolumentAmt + amount0,
-                increaseBalance_.amount1 + amount1
-            );
-        } else {
-            emolumentAmt = _getEmolument(increaseBalance_.amount1, emolument);
-
-            increaseBalance_.vault.token0().approve(
-                address(increaseBalance_.vault),
-                increaseBalance_.amount0 + amount0
-            );
+        if (emolumentAmt1 > 0)
             increaseBalance_.vault.token1().safeTransfer(
                 termTreasury,
-                emolumentAmt
+                emolumentAmt1
             );
 
-            increaseBalance_.vault.token1().approve(
-                address(increaseBalance_.vault),
-                increaseBalance_.amount1 - emolumentAmt + amount1
-            );
+        increaseBalance_.vault.token0().approve(
+            address(increaseBalance_.vault),
+            increaseBalance_.amount0 - emolumentAmt0 + amount0
+        );
 
-            (init0, init1) = _getInits(
+        increaseBalance_.vault.token1().approve(
+            address(increaseBalance_.vault),
+            increaseBalance_.amount1 - emolumentAmt1 + amount1
+        );
+
+        {
+            Inits memory inits;
+            (inits.init0, inits.init1) = _getInits(
                 mintAmount_,
-                increaseBalance_.amount0 + amount0,
-                increaseBalance_.amount1 - emolumentAmt + amount1
+                increaseBalance_.amount0 - emolumentAmt0 + amount0,
+                increaseBalance_.amount1 - emolumentAmt1 + amount1
             );
-        }
 
-        increaseBalance_.vault.setInits(init0, init1);
+            increaseBalance_.vault.setInits(inits.init0, inits.init1);
+        }
 
         IGasStation(manager).toggleRestrictMint(
             address(increaseBalance_.vault)
@@ -222,7 +199,8 @@ contract Terms is TermsStorage {
         emit IncreaseLiquidity(
             msg.sender,
             address(increaseBalance_.vault),
-            emolumentAmt
+            emolumentAmt0,
+            emolumentAmt1
         );
     }
 
@@ -267,63 +245,42 @@ contract Terms is TermsStorage {
             extensionData_.amount1
         );
 
-        uint256 emolumentAmt;
-        uint256 init0;
-        uint256 init1;
-        if (extensionData_.projectTknIsTknZero) {
-            emolumentAmt = _getEmolument(
-                extensionData_.amount0 + amount0,
-                emolument
-            );
-
-            extensionData_.vault.token0().approve(
-                address(extensionData_.vault),
-                extensionData_.amount0 - emolumentAmt + amount0
-            );
-
+        uint256 emolumentAmt0 = _getEmolument(
+            extensionData_.amount0 + amount0,
+            emolument
+        );
+        uint256 emolumentAmt1 = _getEmolument(
+            extensionData_.amount1 + amount1,
+            emolument
+        );
+        extensionData_.vault.token0().approve(
+            address(extensionData_.vault),
+            extensionData_.amount0 - emolumentAmt0 + amount0
+        );
+        extensionData_.vault.token1().approve(
+            address(extensionData_.vault),
+            extensionData_.amount1 - emolumentAmt1 + amount1
+        );
+        if (emolumentAmt0 > 0)
             extensionData_.vault.token0().safeTransfer(
                 termTreasury,
-                emolumentAmt
+                emolumentAmt0
             );
-
-            extensionData_.vault.token1().approve(
-                address(extensionData_.vault),
-                extensionData_.amount1 + amount1
-            );
-
-            (init0, init1) = _getInits(
-                mintAmount_,
-                extensionData_.amount0 - emolumentAmt + amount0,
-                extensionData_.amount1 + amount1
-            );
-        } else {
-            emolumentAmt = _getEmolument(
-                extensionData_.amount1 + amount1,
-                emolument
-            );
-
-            extensionData_.vault.token0().approve(
-                address(extensionData_.vault),
-                extensionData_.amount0 + amount0
-            );
+        if (emolumentAmt1 > 0)
             extensionData_.vault.token1().safeTransfer(
                 termTreasury,
-                emolumentAmt
+                emolumentAmt1
             );
-
-            extensionData_.vault.token1().approve(
-                address(extensionData_.vault),
-                extensionData_.amount1 - emolumentAmt + amount1
-            );
-
-            (init0, init1) = _getInits(
+        {
+            Inits memory inits;
+            (inits.init0, inits.init1) = _getInits(
                 mintAmount_,
-                extensionData_.amount0 + amount0,
-                extensionData_.amount1 - emolumentAmt + amount1
+                extensionData_.amount0 - emolumentAmt0 + amount0,
+                extensionData_.amount1 - emolumentAmt1 + amount1
             );
-        }
 
-        extensionData_.vault.setInits(init0, init1);
+            extensionData_.vault.setInits(inits.init0, inits.init1);
+        }
 
         IGasStation(manager).toggleRestrictMint(address(extensionData_.vault));
 
@@ -338,7 +295,8 @@ contract Terms is TermsStorage {
         emit ExtendingTerm(
             msg.sender,
             address(extensionData_.vault),
-            emolumentAmt
+            emolumentAmt0,
+            emolumentAmt1
         );
     }
 
