@@ -18,21 +18,21 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   }
 
   const { deploy } = deployments;
-  const { deployer, arrakisDaoMultisig } = await getNamedAccounts();
+  const { deployer, arrakisDaoOwner } = await getNamedAccounts();
 
   const addresses = getAddressBookByNetwork("matic");
 
   await deploy("TermsMock", {
     from: deployer,
     proxy: {
-      proxyContract: "EIP173Proxy",
-      owner: deployer,
+      proxyContract: "OpenZeppelinTransparentProxy",
+      viaAdminContract: "TempProxyAdmin",
       execute: {
         init: {
           methodName: "initialize",
           args: [
-            arrakisDaoMultisig,
-            arrakisDaoMultisig,
+            arrakisDaoOwner,
+            arrakisDaoOwner,
             100,
             addresses.ArrakisV2Resolver,
           ],
@@ -57,3 +57,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
 };
 
 func.tags = ["TermsMock"];
+func.dependencies = ["TempProxyAdmin"];

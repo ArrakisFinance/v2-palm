@@ -24,9 +24,13 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 0,
     },
-    arrakisDaoMultisig: {
+    arrakisDaoAdmin: {
       default: 1,
       matic: "0xF869f0eBDDAa33d7aa394c2c612E6e5a6A64fDA4",
+    },
+    arrakisDaoOwner: {
+      default: 2,
+      matic: "To define",
     },
   },
 

@@ -25,7 +25,7 @@ describe("Terms integration test!!!", async function () {
   this.timeout(0);
 
   let user: Signer;
-  let arrakisDaoMultisig: Signer;
+  let arrakisDaoOwner: Signer;
   let gelatoCaller: Signer;
   let userAddr: string;
   let addresses: Addresses;
@@ -48,7 +48,7 @@ describe("Terms integration test!!!", async function () {
       process.exit(1);
     }
 
-    [user, arrakisDaoMultisig, gelatoCaller] = await ethers.getSigners();
+    [user, , arrakisDaoOwner, gelatoCaller] = await ethers.getSigners();
 
     userAddr = await user.getAddress();
 
@@ -96,11 +96,9 @@ describe("Terms integration test!!!", async function () {
 
     // #region whitelist strat.
 
-    await gasStation
-      .connect(arrakisDaoMultisig)
-      .whitelistStrat("Bootstrapping");
+    await gasStation.connect(arrakisDaoOwner).whitelistStrat("Bootstrapping");
 
-    await terms.connect(arrakisDaoMultisig).setManager(gasStation.address);
+    await terms.connect(arrakisDaoOwner).setManager(gasStation.address);
 
     // TODO check that keccak256(encode packed ) has been added.
 
@@ -243,9 +241,7 @@ describe("Terms integration test!!!", async function () {
 
     const gelatoCallerAddr = await gelatoCaller.getAddress();
 
-    await gasStation
-      .connect(arrakisDaoMultisig)
-      .addOperators([gelatoCallerAddr]);
+    await gasStation.connect(arrakisDaoOwner).addOperators([gelatoCallerAddr]);
 
     expect(await gasStation.operators(0)).to.be.eq(gelatoCallerAddr);
 

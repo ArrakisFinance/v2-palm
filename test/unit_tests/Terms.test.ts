@@ -43,7 +43,7 @@ describe("Terms unit test!!!", async function () {
       process.exit(1);
     }
 
-    [user, owner] = await ethers.getSigners();
+    [user, , owner] = await ethers.getSigners();
 
     userAddr = await user.getAddress();
     addresses = getAddressBookByNetwork(hre.network.name);

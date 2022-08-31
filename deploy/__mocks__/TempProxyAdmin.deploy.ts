@@ -1,6 +1,5 @@
 import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getAddressBookByNetwork } from "../../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../../src/utils";
 
@@ -8,11 +7,11 @@ import { sleep } from "../../src/utils";
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   if (
     hre.network.name === "mainnet" ||
-    hre.network.name === "matic" ||
+    hre.network.name === "polygon" ||
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying GasStationMock to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying TempProxyAdmin to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
@@ -20,24 +19,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
-  const addresses = getAddressBookByNetwork("matic");
-
-  const oneYear = 60 * 60 * 24 * 365;
-
-  await deploy("GasStationMock", {
+  await deploy("TempProxyAdmin", {
     from: deployer,
-    proxy: {
-      proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: "TempProxyAdmin",
-      execute: {
-        init: {
-          methodName: "initialize",
-          args: [deployer],
-        },
-      },
-    },
-    args: [addresses.Gelato, 100, deployer, oneYear],
-    log: hre.network.name !== "hardhat" ? true : false,
+    args: [],
   });
 };
 
@@ -47,11 +31,10 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   const shouldSkip =
     hre.network.name === "mainnet" ||
     hre.network.name === "goerli" ||
-    hre.network.name === "matic" ||
+    hre.network.name === "polygon" ||
     hre.network.name === "optimism";
 
   return shouldSkip ? true : false;
 };
 
-func.tags = ["GasStationMock"];
-func.dependencies = ["TempProxyAdmin"];
+func.tags = ["TempProxyAdmin"];

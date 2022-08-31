@@ -65,7 +65,7 @@ abstract contract TermsStorage is
         address termTreasury_,
         uint16 emolument_,
         IArrakisV2Resolver resolver_
-    ) external {
+    ) external initializer {
         require(emolument < 10000, "Terms: emolument >= 100%.");
         _transferOwnership(owner_);
         termTreasury = termTreasury_;

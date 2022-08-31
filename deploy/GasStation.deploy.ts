@@ -18,7 +18,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   }
 
   const { deploy } = deployments;
-  const { deployer, arrakisDaoMultisig } = await getNamedAccounts();
+  const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
+    await getNamedAccounts();
 
   const addresses = getAddressBookByNetwork("matic");
 
@@ -27,12 +28,12 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   await deploy("GasStation", {
     from: deployer,
     proxy: {
-      proxyContract: "EIP173Proxy",
-      owner: arrakisDaoMultisig,
+      proxyContract: "OpenZeppelinTransparentProxy",
+      owner: arrakisDaoAdmin,
       execute: {
         init: {
           methodName: "initialize",
-          args: [arrakisDaoMultisig],
+          args: [arrakisDaoOwner],
         },
       },
     },
