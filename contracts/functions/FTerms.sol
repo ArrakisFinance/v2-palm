@@ -4,7 +4,7 @@ pragma solidity 0.8.13;
 import {IArrakisV2, BurnLiquidity} from "../interfaces/IArrakisV2.sol";
 import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {FullMath} from "../utils/FullMath.sol";
+import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
 
 function _burn(
     IArrakisV2 vault_,

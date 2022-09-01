@@ -13,7 +13,7 @@ import {
 import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {FullMath} from "../utils/FullMath.sol";
+import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
 import {
     _getInits,
     _requireTokenMatch,
