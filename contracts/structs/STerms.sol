@@ -18,6 +18,7 @@ struct SetupPayload {
     uint256 amount1;
     bytes datas;
     string strat;
+    bool isBeacon;
 }
 
 struct IncreaseBalance {

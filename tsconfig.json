@@ -11,6 +11,6 @@
     "outDir": "dist"
   },
   "files": ["hardhat.config.ts"],
-  "include": ["deploy", "test", "typechain", "vyper"],
+  "include": ["deploy", "test", "typechain", "vyper", "scripts"],
   "exclude": ["node_modules"]
 }

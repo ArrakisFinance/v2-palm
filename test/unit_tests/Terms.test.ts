@@ -113,7 +113,9 @@ describe("Terms unit test!!!", async function () {
       maxSlippage: 100,
     };
 
-    const receipt = await (await arrakisV2Factory.deployVault(setup)).wait();
+    const receipt = await (
+      await arrakisV2Factory.deployVault(setup, false)
+    ).wait();
 
     vault = (await ethers.getContractAt(
       "IArrakisV2",

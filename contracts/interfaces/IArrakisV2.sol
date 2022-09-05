@@ -71,8 +71,6 @@ interface IArrakisV2 {
 
     function transferOwnership(address newOwner) external;
 
-    function addOperators(address[] calldata operators_) external;
-
     function toggleRestrictMint() external;
 
     function setInits(uint256 init0_, uint256 init1_) external;
@@ -97,8 +95,6 @@ interface IArrakisV2 {
         external
         view
         returns (bool ok, uint256 index);
-
-    function rangesArray() external view returns (Range[] memory);
 
     function owner() external view returns (address);
 

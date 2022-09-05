@@ -142,6 +142,7 @@ describe("Terms integration test!!!", async function () {
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
       strat: "Bootstrapping",
+      isBeacon: false,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -331,6 +332,91 @@ describe("Terms integration test!!!", async function () {
 
     expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.eq(0);
 
-    expect(await terms.vaults(userAddr, 0)).to.be.eq(ethers.constants.Zero);
+    await expect(terms.vaults(userAddr, 0)).to.be.reverted;
+  });
+
+  it("#5: reopen Terms", async () => {
+    // #region get mintAmount.
+    // base token allocation 1000.
+    // project token allocation 100000
+
+    const baseTokenAllocation = ethers.utils.parseUnits("1000", 18);
+    const projectTokenAllocation = ethers.utils.parseUnits("100000", 18);
+
+    const init0 = ethers.utils.parseUnits("1", 18);
+    const init1 = projectTknIsTknZero
+      ? baseTokenAllocation
+          .mul(ethers.utils.parseUnits("1", 18))
+          .div(projectTokenAllocation)
+      : projectTokenAllocation
+          .mul(ethers.utils.parseUnits("1", 18))
+          .div(baseTokenAllocation);
+
+    const result = await uniswapV3Amount.computeMintAmounts(
+      init0,
+      init1,
+      ethers.utils.parseUnits("1", 18),
+      projectTknIsTknZero ? projectTokenAllocation : baseTokenAllocation,
+      projectTknIsTknZero ? baseTokenAllocation : projectTokenAllocation
+    );
+    const setup = {
+      feeTiers: [500],
+      token0: projectTknIsTknZero ? projectToken.address : baseToken.address,
+      token1: projectTknIsTknZero ? baseToken.address : projectToken.address,
+      projectTknIsTknZero: projectTknIsTknZero,
+      owner: userAddr,
+      maxTwapDeviation: 100,
+      twapDuration: 1,
+      maxSlippage: 100,
+      amount0: result.amount0,
+      amount1: result.amount1,
+      datas: ethers.constants.HashZero,
+      strat: "Bootstrapping",
+      isBeacon: false,
+    };
+
+    await baseToken.approve(terms.address, baseTokenAllocation);
+    await projectToken.approve(terms.address, projectTokenAllocation);
+
+    const receipt = await (
+      await terms.openTerm(setup, result.mintAmount)
+    ).wait();
+
+    vault = receipt.events![receipt.events!.length - 1].args!.vault;
+
+    const vaultERC20 = (await ethers.getContractAt(
+      "IERC20",
+      vault,
+      user
+    )) as IERC20;
+
+    expect(await vaultERC20.balanceOf(terms.address)).to.be.eq(
+      result.mintAmount
+    );
+
+    let feeTaken = baseTokenAllocation
+      .mul(await terms.emolument())
+      .div(10000)
+      .toString();
+
+    expect(await baseToken.balanceOf(vault)).to.be.eq(
+      baseTokenAllocation.sub(feeTaken)
+    );
+
+    feeTaken = projectTokenAllocation
+      .mul(await terms.emolument())
+      .div(10000)
+      .toString();
+
+    expect(await projectToken.balanceOf(vault)).to.be.eq(
+      projectTokenAllocation.sub(feeTaken)
+    );
+
+    expect((await gasStation.getVaultInfo(vault)).strat).to.be.eq(
+      ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
+    );
+    expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+
+    // #endregion get mintAmount.
   });
 });

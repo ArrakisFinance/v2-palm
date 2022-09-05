@@ -12,6 +12,7 @@ export interface Addresses {
   ArrakisV2Resolver: string;
   ArrakisV2Factory: string;
   UniswapV3Amount: string;
+  Terms: string;
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -32,6 +33,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
+        Terms: "",
       };
 
     case "mainnet":
@@ -49,6 +51,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
+        Terms: "",
       };
 
     case "matic":
@@ -63,9 +66,10 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
-        ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
-        ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
+        ArrakisV2Resolver: "0xACeCb2C5F25C813b120f49C8818A0c5E613bec50",
+        ArrakisV2Factory: "0x6369D9fE00701E27607B9A58719f4bd02c9b3FBA",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
+        Terms: "0xbFF8860D91b0822A299466F83Fa10177B9437715",
       };
 
     case "goerli":
@@ -83,6 +87,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
+        Terms: "",
       };
     case "hardhat":
       return {
@@ -96,9 +101,10 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         Weth: "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
         GaugeImplementation: "",
-        ArrakisV2Resolver: "0x1b94C38Bf04f5D22F265B88DD0752Aa1cd8E6baE",
-        ArrakisV2Factory: "0xFBF23A8ADc3998aF469DADdD9E5BA79b196352ba",
+        ArrakisV2Resolver: "0xACeCb2C5F25C813b120f49C8818A0c5E613bec50",
+        ArrakisV2Factory: "0x6369D9fE00701E27607B9A58719f4bd02c9b3FBA",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
+        Terms: "0xbFF8860D91b0822A299466F83Fa10177B9437715",
       };
 
     default: {

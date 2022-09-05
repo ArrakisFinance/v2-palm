@@ -2,10 +2,10 @@
 pragma solidity >=0.8.0;
 
 import {Rebalance, Range} from "./IArrakisV2.sol";
-import {IManagerProxy} from "./IManagerProxy.sol";
+import {IManagerProxyV2} from "./IManagerProxyV2.sol";
 import {VaultInfo} from "../structs/SGasStation.sol";
 
-interface IGasStation is IManagerProxy {
+interface IGasStation is IManagerProxyV2 {
     event AddVault(address indexed vault, bytes datas, string strat);
 
     event RemoveVault(address indexed vault, uint256 sendBack);
@@ -88,8 +88,6 @@ interface IGasStation is IManagerProxy {
         external
         view
         returns (VaultInfo memory);
-
-    function managerFeeBPS() external view returns (uint16);
 
     function getWhitelistedStrat() external view returns (bytes32[] memory);
 }

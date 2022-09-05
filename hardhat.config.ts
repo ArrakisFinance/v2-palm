@@ -26,11 +26,11 @@ const config: HardhatUserConfig = {
     },
     arrakisDaoAdmin: {
       default: 1,
-      matic: "0xF869f0eBDDAa33d7aa394c2c612E6e5a6A64fDA4",
+      matic: "0xDEb4C33D5C3E7e32F55a9D6336FE06010E40E3AB",
     },
     arrakisDaoOwner: {
       default: 2,
-      matic: "To define",
+      matic: "0xF869f0eBDDAa33d7aa394c2c612E6e5a6A64fDA4",
     },
   },
 
@@ -38,7 +38,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 31962310,
+        blockNumber: 32718131,
       },
     },
 

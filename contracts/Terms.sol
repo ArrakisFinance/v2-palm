@@ -28,6 +28,8 @@ import {
     _burn
 } from "./functions/FTerms.sol";
 
+import "hardhat/console.sol";
+
 // solhint-disable-next-line no-empty-blocks
 contract Terms is TermsStorage {
     using SafeERC20 for IERC20;
@@ -78,7 +80,8 @@ contract Terms is TermsStorage {
                     maxTwapDeviation: setup_.maxTwapDeviation,
                     twapDuration: setup_.twapDuration,
                     maxSlippage: setup_.maxSlippage
-                })
+                }),
+                setup_.isBeacon
             );
         }
 
@@ -379,6 +382,11 @@ contract Terms is TermsStorage {
         address vaultAddr = address(vault_);
 
         delete vaults[msg.sender][index];
+
+        for (uint256 i = index; i < vaults[msg.sender].length - 1; i++) {
+            vaults[msg.sender][i] = vaults[msg.sender][i + 1];
+        }
+        vaults[msg.sender].pop();
 
         (uint256 amount0, uint256 amount1) = _burn(
             vault_,

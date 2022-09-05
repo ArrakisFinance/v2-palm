@@ -16,7 +16,9 @@
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "postinstall": "yarn husky install",
     "test": "npx hardhat test",
-    "verify": "npx hardhat etherscan-verify"
+    "verify": "npx hardhat etherscan-verify",
+    "script-openTerm": "npx hardhat --network matic run ./scripts/openTerm.ts",
+    "script-closeTerm": "npx hardhat --network matic run ./scripts/closeTerm.ts"
   },
   "repository": {
     "type": "git",
