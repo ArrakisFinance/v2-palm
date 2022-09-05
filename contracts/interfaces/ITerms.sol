@@ -56,6 +56,7 @@ interface ITerms {
 
     function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
         external
+        payable
         returns (address vault);
 
     function increaseLiquidity(

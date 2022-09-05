@@ -27,7 +27,7 @@ contract TermsMock is TermsStorage {
 
     function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
         external
-        pure
+        payable
         override
         returns (address vault)
     {

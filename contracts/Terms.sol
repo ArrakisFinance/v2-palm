@@ -41,6 +41,7 @@ contract Terms is TermsStorage {
     // solhint-disable-next-line function-max-lines
     function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
         external
+        payable
         override
         noLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
@@ -52,8 +53,6 @@ contract Terms is TermsStorage {
             setup_.amount1
         );
         _requireTknOrder(address(setup_.token0), address(setup_.token1));
-
-        address me = address(this);
 
         /// @dev emolument0/emolument1 can be eq to 0.
         uint256 emolumentAmt0 = _getEmolument(setup_.amount0, emolument);
@@ -73,7 +72,7 @@ contract Terms is TermsStorage {
                     feeTiers: setup_.feeTiers,
                     token0: address(setup_.token0),
                     token1: address(setup_.token1),
-                    owner: me,
+                    owner: address(this),
                     init0: inits.init0,
                     init1: inits.init1,
                     manager: manager,
@@ -91,18 +90,30 @@ contract Terms is TermsStorage {
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
-        IGasStation(manager).addVault(vault, setup_.datas, setup_.strat);
+        IGasStation(manager).addVault{value: msg.value}(
+            vault,
+            setup_.datas,
+            setup_.strat
+        );
 
         // Transfer to termTreasury the project token emolment.
-        setup_.token0.safeTransferFrom(msg.sender, me, setup_.amount0);
-        setup_.token1.safeTransferFrom(msg.sender, me, setup_.amount1);
+        setup_.token0.safeTransferFrom(
+            msg.sender,
+            address(this),
+            setup_.amount0
+        );
+        setup_.token1.safeTransferFrom(
+            msg.sender,
+            address(this),
+            setup_.amount1
+        );
 
         setup_.token0.approve(vault, setup_.amount0 - emolumentAmt0);
         setup_.token1.approve(vault, setup_.amount1 - emolumentAmt1);
         setup_.token0.safeTransfer(termTreasury, emolumentAmt0);
         setup_.token1.safeTransfer(termTreasury, emolumentAmt1);
 
-        vaultV2.mint(mintAmount_, me);
+        vaultV2.mint(mintAmount_, address(this));
 
         IGasStation(manager).toggleRestrictMint(vault);
 
