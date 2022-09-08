@@ -36,6 +36,22 @@ async function main() {
   await token0ERC20.approve(terms.address, amount0);
   await token1ERC20.approve(terms.address, amount1);
 
+  const stratData = {
+    projectTknIsTknZero: true,
+    allocationBps: 200,
+    weightLeftRange: 1,
+    weightRightRange: 2,
+    numberLeftRanges: 2,
+    numberRightRanges: 2,
+    sizeLeftRanges: 1,
+    sizeRightRanges: 1,
+    feeTiers: [3000],
+    strategy:
+      "0xdd2e3f45234182539bc4dd532d9fae3a4d63dbc7adf96452f541fce8539504f1",
+    version: 0.1,
+  };
+  const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
+
   await terms.openTerm(
     {
       feeTiers: [feeTier.toString()],
@@ -48,7 +64,7 @@ async function main() {
       maxSlippage,
       amount0,
       amount1,
-      datas: ethers.constants.HashZero,
+      datas: dataFormatted,
       strat,
       isBeacon: false,
     },
