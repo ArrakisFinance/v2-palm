@@ -3,14 +3,14 @@ import { Terms } from "../typechain";
 
 // #region user input values
 
-const feeTier = 500; // uniswap v3 feeTier.
-const token0 = "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"; // token0 address. token0 < token1 USDC on polygon
-const token1 = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"; // token1 address. token0 < token1 WETH on polygon
+const feeTier = 10000; // uniswap v3 feeTier.
+const token0 = ""; // token0 address.
+const token1 = ""; // token1 address.
 const projectTknIsTknZero = true; // eslint-disable-line
-const amount0 = ethers.utils.parseUnits("0.01", 8);
-const amount1 = ethers.utils.parseUnits("0.01", 18);
-const allocationBps = 1000; // percent holdings to use as liquidity (e.g. 10%)
-const owner = "0x88215a2794ddC031439C72922EC8983bDE831c78"; // your gnosis safe address
+const amount0 = ethers.utils.parseUnits("1", 18);
+const amount1 = ethers.utils.parseUnits("1", 18);
+const allocationBps = 250; // percent holdings to use as liquidity (e.g. 10%)
+const owner = ""; // your gnosis safe address
 // #endregion user input values.
 
 // #region default inputs

@@ -3,13 +3,13 @@ import { ERC20, Terms } from "../typechain";
 
 // #region user input values
 
-const feeTier = 500; // uniswap v3 feeTier.
-const token0 = "0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"; // token0 address. token0 < token1 USDC on polygon
-const token1 = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"; // token1 address. token0 < token1 WETH on polygon
+const feeTier = 10000; // uniswap v3 feeTier.
+const token0 = "0x4e1581f01046eFDd7a1a2CDB0F82cdd7F71F2E59"; // token0 address.
+const token1 = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"; // token1 address.
 const projectTknIsTknZero = true; // eslint-disable-line
-const amount0 = ethers.utils.parseUnits("0.01", 8);
-const amount1 = ethers.utils.parseUnits("0.01", 18);
-const allocationBps = 1000; // percent holdings to use as liquidity (e.g. 10%)
+const amount0 = ethers.utils.parseUnits("1", 18);
+const amount1 = ethers.utils.parseUnits("0", 18);
+const allocationBps = 250; // percent holdings to use as liquidity (e.g. 2.5%)
 // #endregion user input values.
 
 // #region default inputs
@@ -31,16 +31,16 @@ async function main() {
     signer
   )) as ERC20;
 
-  const token1ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token1,
-    signer
-  )) as ERC20;
+  //   const token1ERC20: ERC20 = (await ethers.getContractAt(
+  //     "ERC20",
+  //     token1,
+  //     signer
+  //   )) as ERC20;
 
   const terms = (await ethers.getContract("Terms", signer)) as Terms;
 
   await token0ERC20.approve(terms.address, amount0);
-  await token1ERC20.approve(terms.address, amount1);
+  //await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
     projectTknIsTknZero: projectTknIsTknZero,
