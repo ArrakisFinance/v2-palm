@@ -18,6 +18,7 @@
     "test": "npx hardhat test",
     "verify": "npx hardhat etherscan-verify",
     "script-openTerm": "npx hardhat --network matic run ./scripts/openTerm.ts",
+    "script-openTermGnosis": "npx hardhat --network matic run ./scripts/openTermGnosis.ts",
     "script-closeTerm": "npx hardhat --network matic run ./scripts/closeTerm.ts"
   },
   "repository": {

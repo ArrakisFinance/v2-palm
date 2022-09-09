@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { ERC20, Terms } from "../typechain";
+import { Terms } from "../typechain";
 
 // #region user input values
 
@@ -10,6 +10,7 @@ const projectTknIsTknZero = true; // eslint-disable-line
 const amount0 = ethers.utils.parseUnits("0.01", 8);
 const amount1 = ethers.utils.parseUnits("0.01", 18);
 const allocationBps = 1000; // percent holdings to use as liquidity (e.g. 10%)
+const owner = "0x88215a2794ddC031439C72922EC8983bDE831c78"; // your gnosis safe address
 // #endregion user input values.
 
 // #region default inputs
@@ -25,22 +26,22 @@ async function main() {
   if (hre.network.name != "matic") return;
   const [signer] = await ethers.getSigners();
 
-  const token0ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token0,
-    signer
-  )) as ERC20;
+  // const token0ERC20: ERC20 = (await ethers.getContractAt(
+  //   "ERC20",
+  //   token0,
+  //   signer
+  // )) as ERC20;
 
-  const token1ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token1,
-    signer
-  )) as ERC20;
+  // const token1ERC20: ERC20 = (await ethers.getContractAt(
+  //   "ERC20",
+  //   token1,
+  //   signer
+  // )) as ERC20;
 
   const terms = (await ethers.getContract("Terms", signer)) as Terms;
 
-  await token0ERC20.approve(terms.address, amount0);
-  await token1ERC20.approve(terms.address, amount1);
+  // await token0ERC20.approve(terms.address, amount0);
+  // await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
     projectTknIsTknZero: projectTknIsTknZero,
@@ -57,35 +58,13 @@ async function main() {
   };
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
 
-  //   const data = terms.interface.encodeFunctionData("openTerm", [
-  //       {
-  //         feeTiers: [feeTier.toString()],
-  //         token0,
-  //         token1,
-  //         projectTknIsTknZero,
-  //         owner: await signer.getAddress(),
-  //         maxTwapDeviation,
-  //         twapDuration,
-  //         maxSlippage,
-  //         amount0,
-  //         amount1,
-  //         datas: dataFormatted,
-  //         strat,
-  //         isBeacon: isBeacon,
-  //       },
-  //       ethers.utils.parseUnits("1", 18)
-  //     ]
-  //   );
-
-  //   console.log(data);
-
-  await terms.openTerm(
+  const data = terms.interface.encodeFunctionData("openTerm", [
     {
       feeTiers: [feeTier.toString()],
       token0,
       token1,
       projectTknIsTknZero,
-      owner: await signer.getAddress(),
+      owner: owner,
       maxTwapDeviation,
       twapDuration,
       maxSlippage,
@@ -95,10 +74,29 @@ async function main() {
       strat,
       isBeacon: isBeacon,
     },
-    ethers.utils.parseUnits("1", 18)
-  );
+    ethers.utils.parseUnits("1", 18),
+  ]);
 
-  console.log("SUCCESS");
+  console.log(data);
+
+  // await terms.openTerm(
+  //   {
+  //     feeTiers: [feeTier.toString()],
+  //     token0,
+  //     token1,
+  //     projectTknIsTknZero,
+  //     owner: owner,
+  //     maxTwapDeviation,
+  //     twapDuration,
+  //     maxSlippage,
+  //     amount0,
+  //     amount1,
+  //     datas: dataFormatted,
+  //     strat,
+  //     isBeacon: isBeacon,
+  //   },
+  //   ethers.utils.parseUnits("1", 18)
+  // );
 }
 
 main()
