@@ -37,7 +37,7 @@ async function main() {
   await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
-    projectTknIsTknZero: true,
+    projectTknIsTknZero: projectTknIsTknZero,
     allocationBps: 200,
     weightLeftRange: 1,
     weightRightRange: 2,
@@ -46,8 +46,7 @@ async function main() {
     sizeLeftRanges: 1,
     sizeRightRanges: 1,
     feeTiers: [3000],
-    strategy:
-      "0xdd2e3f45234182539bc4dd532d9fae3a4d63dbc7adf96452f541fce8539504f1",
+    strategy: ethers.utils.solidityKeccak256(["string"], [strat]),
     version: 0.1,
   };
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
