@@ -10,6 +10,7 @@ const projectTknIsTknZero = true; // eslint-disable-line
 const amount0 = ethers.utils.parseUnits("1", 18);
 const amount1 = ethers.utils.parseUnits("0.01", 18);
 const allocationBps = 250; // percent holdings to use as liquidity (e.g. 2.5%)
+const weightRightRange = 2;
 // #endregion user input values.
 
 // #region default inputs
@@ -46,7 +47,7 @@ async function main() {
     projectTknIsTknZero: projectTknIsTknZero,
     allocationBps: allocationBps,
     weightLeftRange: 1,
-    weightRightRange: 2,
+    weightRightRange: weightRightRange,
     numberLeftRanges: 2,
     numberRightRanges: 2,
     sizeLeftRanges: 1,
