@@ -28,8 +28,6 @@ import {
     _burn
 } from "./functions/FTerms.sol";
 
-import "hardhat/console.sol";
-
 // solhint-disable-next-line no-empty-blocks
 contract Terms is TermsStorage {
     using SafeERC20 for IERC20;
