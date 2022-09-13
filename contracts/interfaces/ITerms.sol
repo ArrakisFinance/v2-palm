@@ -25,31 +25,28 @@ interface ITerms {
     event AddVault(address creator, address vault);
     event RemoveVault(address creator, address vault);
 
-    event SetupVault(
-        address creator,
-        address vault,
-        uint256 emolument0,
-        uint256 emolument1
-    );
-    event IncreaseLiquidity(
-        address creator,
-        address vault,
-        uint256 emolument0,
-        uint256 emolument1
-    );
+    event SetupVault(address creator, address vault);
+    event IncreaseLiquidity(address creator, address vault);
     event ExtendingTerm(
         address creator,
         address vault,
         uint256 emolument0,
         uint256 emolument1
     );
-    event DecreaseLiquidity(address creator, address vault);
+    event DecreaseLiquidity(
+        address creator,
+        address vault,
+        uint256 emolument0,
+        uint256 emolument1
+    );
     event CloseTerm(
         address creator,
         address vault,
         uint256 amount0,
         uint256 amount1,
-        address to
+        address to,
+        uint256 emolument0,
+        uint256 emolument1
     );
 
     // #endregion events.
