@@ -69,7 +69,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0xACeCb2C5F25C813b120f49C8818A0c5E613bec50",
         ArrakisV2Factory: "0x6369D9fE00701E27607B9A58719f4bd02c9b3FBA",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        Terms: "0xbFF8860D91b0822A299466F83Fa10177B9437715",
+        Terms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
       };
 
     case "goerli":
@@ -104,7 +104,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0xACeCb2C5F25C813b120f49C8818A0c5E613bec50",
         ArrakisV2Factory: "0x6369D9fE00701E27607B9A58719f4bd02c9b3FBA",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        Terms: "0xbFF8860D91b0822A299466F83Fa10177B9437715",
+        Terms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
       };
 
     default: {
