@@ -39,7 +39,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     },
     args: [
       addresses.Gelato,
-      100,
+      4750,
       (await ethers.getContract("Terms")).address,
       oneYear,
     ],

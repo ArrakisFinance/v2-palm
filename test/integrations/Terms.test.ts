@@ -108,7 +108,7 @@ describe("Terms integration test!!!", async function () {
   it("#0: open Terms", async () => {
     // #region get mintAmount.
     // base token allocation 1000.
-    // project token allocation 100000
+    // project token allocation 100000.
 
     const baseTokenAllocation = ethers.utils.parseUnits("1000", 18);
     const projectTokenAllocation = ethers.utils.parseUnits("100000", 18);
@@ -164,26 +164,14 @@ describe("Terms integration test!!!", async function () {
       result.mintAmount
     );
 
-    let feeTaken = baseTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
-
-    expect(await baseToken.balanceOf(vault)).to.be.eq(
-      baseTokenAllocation.sub(feeTaken)
-    );
-
-    feeTaken = projectTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
+    expect(await baseToken.balanceOf(vault)).to.be.eq(baseTokenAllocation);
 
     expect(await projectToken.balanceOf(vault)).to.be.eq(
-      projectTokenAllocation.sub(feeTaken)
+      projectTokenAllocation
     );
 
     expect(await projectToken.balanceOf(await terms.termTreasury())).to.be.eq(
-      feeTaken
+      ethers.constants.Zero
     );
 
     expect((await gasStation.getVaultInfo(vault)).strat).to.be.eq(
@@ -200,10 +188,6 @@ describe("Terms integration test!!!", async function () {
 
     const beforeBTB = await baseToken.balanceOf(vault);
     const beforePTB = await projectToken.balanceOf(vault);
-
-    const beforeTreasoryB = await projectToken.balanceOf(
-      await terms.termTreasury()
-    );
 
     await baseToken.approve(terms.address, baseTokenAllocation);
     await projectToken.approve(terms.address, projectTokenAllocation);
@@ -225,15 +209,11 @@ describe("Terms integration test!!!", async function () {
     const afterBTB = await baseToken.balanceOf(vault);
     const afterPTB = await projectToken.balanceOf(vault);
 
-    expect(
-      beforeBTB.add(baseTokenAllocation.mul(10000 - 100).div(10000))
-    ).to.be.eq(afterBTB);
-    expect(
-      beforePTB.add(projectTokenAllocation.mul(10000 - 100).div(10000))
-    ).to.be.eq(afterPTB);
+    expect(beforeBTB.add(baseTokenAllocation)).to.be.eq(afterBTB);
+    expect(beforePTB.add(projectTokenAllocation)).to.be.eq(afterPTB);
 
     expect(await projectToken.balanceOf(await terms.termTreasury())).to.be.eq(
-      beforeTreasoryB.add(projectTokenAllocation.mul(100).div(10000))
+      ethers.constants.Zero
     );
   });
 
@@ -310,6 +290,24 @@ describe("Terms integration test!!!", async function () {
       ethers.utils.parseUnits("1000", 18)
     );
 
+    let feeTaken = baseTokenAllocation
+      .mul(await terms.emolument())
+      .div(10000)
+      .toString();
+
+    expect(await baseToken.balanceOf(await terms.termTreasury())).to.be.eq(
+      feeTaken
+    );
+
+    feeTaken = projectTokenAllocation
+      .mul(await terms.emolument())
+      .div(10000)
+      .toString();
+
+    expect(await projectToken.balanceOf(await terms.termTreasury())).to.be.eq(
+      feeTaken
+    );
+
     const afterBTB = await baseToken.balanceOf(userAddr);
     const afterPTB = await projectToken.balanceOf(userAddr);
 
@@ -319,7 +317,51 @@ describe("Terms integration test!!!", async function () {
   });
 
   it("#4: Close Term", async () => {
-    await terms.closeTerm(vault, userAddr, userAddr, userAddr);
+    const beforeTreasoryP = await projectToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const beforeTreasoryB = await baseToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const beforeUserP = await projectToken.balanceOf(userAddr);
+
+    const beforeUserB = await baseToken.balanceOf(userAddr);
+
+    const result = await (
+      await terms.closeTerm(vault, userAddr, userAddr, userAddr)
+    ).wait();
+
+    const closeTermsEvent = result.events?.find(
+      (e) => e.event == "CloseTerm"
+    )?.args;
+
+    const afterTreasoryP = await projectToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const afterTreasoryB = await baseToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const afterUserP = await projectToken.balanceOf(userAddr);
+
+    const afterUserB = await baseToken.balanceOf(userAddr);
+
+    expect(afterUserP.sub(beforeUserP)).to.be.eq(
+      closeTermsEvent?.amount0.sub(closeTermsEvent?.emolument0)
+    );
+    expect(afterUserB.sub(beforeUserB)).to.be.eq(
+      closeTermsEvent?.amount1.sub(closeTermsEvent?.emolument1)
+    );
+
+    expect(beforeTreasoryP.add(closeTermsEvent?.emolument0)).to.be.equal(
+      afterTreasoryP
+    );
+    expect(beforeTreasoryB.add(closeTermsEvent?.emolument1)).to.be.equal(
+      afterTreasoryB
+    );
 
     vaultV2 = (await ethers.getContractAt(
       "IArrakisV2",
@@ -394,22 +436,10 @@ describe("Terms integration test!!!", async function () {
       result.mintAmount
     );
 
-    let feeTaken = baseTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
-
-    expect(await baseToken.balanceOf(vault)).to.be.eq(
-      baseTokenAllocation.sub(feeTaken)
-    );
-
-    feeTaken = projectTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
+    expect(await baseToken.balanceOf(vault)).to.be.eq(baseTokenAllocation);
 
     expect(await projectToken.balanceOf(vault)).to.be.eq(
-      projectTokenAllocation.sub(feeTaken)
+      projectTokenAllocation
     );
 
     expect((await gasStation.getVaultInfo(vault)).strat).to.be.eq(
