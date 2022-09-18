@@ -17,6 +17,7 @@ import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
 import {
     _getInits,
     _requireTokenMatch,
+    _requireIsOwnerOrDelegate,
     _requireIsOwner,
     _getEmolument,
     _requireProjectAllocationGtZero,
@@ -38,6 +39,9 @@ abstract contract TermsStorage is
     IArrakisV2Resolver public resolver;
 
     // #region no left over.
+
+    // New variable for Proxy.
+    mapping(address => address) public delegateByVaults;
 
     modifier noLeftOver(IERC20 token0_, IERC20 token1_) {
         uint256 token0Balance = token0_.balanceOf(address(this));
@@ -172,7 +176,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(vault_)
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        _requireIsOwnerOrDelegate(
+            delegateByVaults[vault_],
+            vaults[msg.sender],
+            address(vault_)
+        );
         IGasStation(manager).setVaultData(vault_, data_);
     }
 
@@ -181,8 +189,17 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(vault_)
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        _requireIsOwnerOrDelegate(
+            delegateByVaults[vault_],
+            vaults[msg.sender],
+            address(vault_)
+        );
         IGasStation(manager).setVaultStraByName(vault_, strat_);
+    }
+
+    function setDelegate(address vault_, address delegate_) external override {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        _setDelegate(vault_, delegate_);
     }
 
     function withdrawVaultBalance(
@@ -221,6 +238,16 @@ abstract contract TermsStorage is
         }
 
         revert("Terms: vault don't exist");
+    }
+
+    function _setDelegate(address vault_, address delegate_) internal {
+        require(
+            delegateByVaults[vault_] != delegate_,
+            "Terms: already delegate"
+        );
+
+        delegateByVaults[vault_] = delegate_;
+        emit DelegateVault(msg.sender, vault_, delegate_);
     }
 
     // #endregion internals setter.

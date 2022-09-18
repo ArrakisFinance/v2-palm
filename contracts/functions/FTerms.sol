@@ -45,6 +45,16 @@ function _requireTokenMatch(
     );
 }
 
+function _requireIsOwnerOrDelegate(
+    address delegate_,
+    address[] memory vaults_,
+    address vault_
+) view {
+    if (delegate_ != address(0)) {
+        require(msg.sender == delegate_, "Terms: no delegate");
+    } else _requireIsOwner(vaults_, vault_);
+}
+
 function _requireIsOwner(address[] memory vaults_, address vault_)
     pure
     returns (uint256 index)

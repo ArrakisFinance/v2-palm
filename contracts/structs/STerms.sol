@@ -19,6 +19,7 @@ struct SetupPayload {
     bytes datas;
     string strat;
     bool isBeacon;
+    address delegate;
 }
 
 struct IncreaseBalance {

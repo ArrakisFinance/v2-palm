@@ -24,6 +24,7 @@ interface ITerms {
 
     event AddVault(address creator, address vault);
     event RemoveVault(address creator, address vault);
+    event DelegateVault(address creator, address vault, address delegate);
 
     event SetupVault(address creator, address vault);
     event IncreaseLiquidity(address creator, address vault);
@@ -99,6 +100,8 @@ interface ITerms {
 
     function setVaultStratByName(address vault_, string calldata strat_)
         external;
+
+    function setDelegate(address vault_, address delegate_) external;
 
     function withdrawVaultBalance(
         address vault_,

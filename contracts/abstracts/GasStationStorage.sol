@@ -176,8 +176,8 @@ abstract contract GasStationStorage is
         whenNotPaused
         requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
-        onlyManagedVaults(vault_)
     {
+        require(vaults[vault_].endOfMM != 0, "GasStation: Vault not managed");
         _removeVault(vault_, to_);
     }
 

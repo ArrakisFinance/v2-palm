@@ -95,6 +95,7 @@ async function main() {
       datas: dataFormatted,
       strat,
       isBeacon: isBeacon,
+      delegate: ethers.constants.AddressZero,
     },
     ethers.utils.parseUnits("1", 18)
   );

@@ -23,7 +23,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getAddressBookByNetwork("matic");
 
-  const oneYear = 60 * 60 * 24 * 365;
+  const oneQuarter = (60 * 60 * 24 * 365) / 4;
 
   await deploy("GasStation", {
     from: deployer,
@@ -41,7 +41,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       addresses.Gelato,
       4750,
       (await ethers.getContract("Terms")).address,
-      oneYear,
+      oneQuarter,
     ],
     log: hre.network.name !== "hardhat" ? true : false,
   });
