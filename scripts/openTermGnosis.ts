@@ -1,16 +1,17 @@
 import hre, { ethers } from "hardhat";
-import { ERC20, Terms } from "../typechain";
+import { Terms } from "../typechain";
 
 // #region user input values
 
+const owner = "0x88215a2794ddC031439C72922EC8983bDE831c78"; // your gnosis safe address
 const feeTier = 10000; // uniswap v3 feeTier.
-const token0 = "0x4e1581f01046eFDd7a1a2CDB0F82cdd7F71F2E59"; // token0 address.
+const token0 = "0x15b7c0c907e4C6b9AdaAaabC300C08991D6CEA05"; // token0 address.
 const token1 = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"; // token1 address.
 const projectTknIsTknZero = true; // eslint-disable-line
 const amount0 = ethers.utils.parseUnits("1", 18);
-const amount1 = ethers.utils.parseUnits("0.01", 18);
-const allocationBps = 250; // percent holdings to use as liquidity (e.g. 2.5%)
-const weightRightRange = 2;
+const amount1 = ethers.utils.parseUnits("0.1", 18);
+const allocationBps = 250; // percent holdings to use as liquidity (e.g. 10%)
+const weightRightRange = 1.5;
 // #endregion user input values.
 
 // #region default inputs
@@ -26,22 +27,22 @@ async function main() {
   if (hre.network.name != "matic") return;
   const [signer] = await ethers.getSigners();
 
-  const token0ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token0,
-    signer
-  )) as ERC20;
+  // const token0ERC20: ERC20 = (await ethers.getContractAt(
+  //   "ERC20",
+  //   token0,
+  //   signer
+  // )) as ERC20;
 
-  const token1ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token1,
-    signer
-  )) as ERC20;
+  // const token1ERC20: ERC20 = (await ethers.getContractAt(
+  //   "ERC20",
+  //   token1,
+  //   signer
+  // )) as ERC20;
 
   const terms = (await ethers.getContract("Terms", signer)) as Terms;
 
-  await token0ERC20.approve(terms.address, amount0);
-  await token1ERC20.approve(terms.address, amount1);
+  // await token0ERC20.approve(terms.address, amount0);
+  // await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
     projectTknIsTknZero: projectTknIsTknZero,
@@ -58,35 +59,13 @@ async function main() {
   };
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
 
-  //   const data = terms.interface.encodeFunctionData("openTerm", [
-  //       {
-  //         feeTiers: [feeTier.toString()],
-  //         token0,
-  //         token1,
-  //         projectTknIsTknZero,
-  //         owner: await signer.getAddress(),
-  //         maxTwapDeviation,
-  //         twapDuration,
-  //         maxSlippage,
-  //         amount0,
-  //         amount1,
-  //         datas: dataFormatted,
-  //         strat,
-  //         isBeacon: isBeacon,
-  //       },
-  //       ethers.utils.parseUnits("1", 18)
-  //     ]
-  //   );
-
-  //   console.log(data);
-
-  await terms.openTerm(
+  const data = terms.interface.encodeFunctionData("openTerm", [
     {
       feeTiers: [feeTier.toString()],
       token0,
       token1,
       projectTknIsTknZero,
-      owner: await signer.getAddress(),
+      owner: owner,
       maxTwapDeviation,
       twapDuration,
       maxSlippage,
@@ -95,12 +74,30 @@ async function main() {
       datas: dataFormatted,
       strat,
       isBeacon: isBeacon,
-      delegate: ethers.constants.AddressZero,
     },
-    ethers.utils.parseUnits("1", 18)
-  );
+    ethers.utils.parseUnits("1", 18),
+  ]);
 
-  console.log("SUCCESS");
+  console.log(data);
+
+  // await terms.openTerm(
+  //   {
+  //     feeTiers: [feeTier.toString()],
+  //     token0,
+  //     token1,
+  //     projectTknIsTknZero,
+  //     owner: owner,
+  //     maxTwapDeviation,
+  //     twapDuration,
+  //     maxSlippage,
+  //     amount0,
+  //     amount1,
+  //     datas: dataFormatted,
+  //     strat,
+  //     isBeacon: isBeacon,
+  //   },
+  //   ethers.utils.parseUnits("1", 18)
+  // );
 }
 
 main()
