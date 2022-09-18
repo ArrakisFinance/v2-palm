@@ -51,6 +51,7 @@ async function main() {
       datas: ethers.constants.HashZero,
       strat,
       isBeacon: false,
+      delegate: ethers.constants.AddressZero,
     },
     ethers.utils.parseUnits("1", 18)
   );

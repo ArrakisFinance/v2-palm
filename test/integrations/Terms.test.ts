@@ -25,6 +25,7 @@ describe("Terms integration test!!!", async function () {
   this.timeout(0);
 
   let user: Signer;
+  let user2: Signer;
   let arrakisDaoOwner: Signer;
   let gelatoCaller: Signer;
   let userAddr: string;
@@ -48,7 +49,7 @@ describe("Terms integration test!!!", async function () {
       process.exit(1);
     }
 
-    [user, , arrakisDaoOwner, gelatoCaller] = await ethers.getSigners();
+    [user, , arrakisDaoOwner, gelatoCaller, user2] = await ethers.getSigners();
 
     userAddr = await user.getAddress();
 
@@ -97,6 +98,9 @@ describe("Terms integration test!!!", async function () {
     // #region whitelist strat.
 
     await gasStation.connect(arrakisDaoOwner).whitelistStrat("Bootstrapping");
+    await gasStation
+      .connect(arrakisDaoOwner)
+      .whitelistStrat("After Bootstrapping");
 
     await terms.connect(arrakisDaoOwner).setManager(gasStation.address);
 
@@ -143,6 +147,7 @@ describe("Terms integration test!!!", async function () {
       datas: ethers.constants.HashZero,
       strat: "Bootstrapping",
       isBeacon: false,
+      delegate: ethers.constants.AddressZero,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -415,6 +420,7 @@ describe("Terms integration test!!!", async function () {
       datas: ethers.constants.HashZero,
       strat: "Bootstrapping",
       isBeacon: false,
+      delegate: await user2.getAddress(),
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -448,5 +454,85 @@ describe("Terms integration test!!!", async function () {
     expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.gt(0);
 
     // #endregion get mintAmount.
+  });
+
+  it("#6: extending terms", async () => {
+    // set data and strat type.
+
+    const newData = ethers.utils.defaultAbiCoder.encode(["string"], ["TEST"]);
+
+    await terms.connect(user2).setVaultData(vault, newData);
+
+    await terms
+      .connect(user2)
+      .setVaultStratByName(vault, "After Bootstrapping");
+
+    const vaultInfo = await gasStation.getVaultInfo(vault);
+
+    expect(vaultInfo.strat).to.be.eq(
+      ethers.utils.solidityKeccak256(["string"], ["After Bootstrapping"])
+    );
+    expect(vaultInfo.datas).to.be.eq(newData);
+
+    await hre.network.provider.send("evm_setNextBlockTimestamp", [
+      vaultInfo.endOfMM.toNumber() - 10,
+    ]);
+    await hre.network.provider.send("evm_mine");
+
+    const beforeBTB = await baseToken.balanceOf(vault);
+    const beforePTB = await projectToken.balanceOf(vault);
+
+    const beforeTreasoryP = await projectToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const beforeTreasoryB = await baseToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const result = await (
+      await terms.connect(user2).extendingTerm(
+        {
+          vault: vault,
+          projectTknIsTknZero: projectTknIsTknZero,
+          amount0: ethers.constants.Zero,
+          amount1: ethers.constants.Zero,
+        },
+        ethers.utils.parseUnits("1000", 18)
+      )
+    ).wait();
+
+    const extendingEvent = result.events?.find(
+      (e) => e.event == "ExtendingTerm"
+    )?.args;
+
+    const afterBTB = await baseToken.balanceOf(vault);
+    const afterPTB = await projectToken.balanceOf(vault);
+
+    expect(
+      beforeBTB.sub(
+        projectTknIsTknZero
+          ? extendingEvent?.emolument1
+          : extendingEvent?.emolument0
+      )
+    ).to.be.eq(afterBTB);
+    expect(
+      beforePTB.sub(
+        projectTknIsTknZero
+          ? extendingEvent?.emolument0
+          : extendingEvent?.emolument1
+      )
+    ).to.be.eq(afterPTB);
+
+    const afterTreasoryP = await projectToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    const afterTreasoryB = await baseToken.balanceOf(
+      await terms.termTreasury()
+    );
+
+    expect(afterTreasoryP).to.be.gte(beforeTreasoryP);
+    expect(afterTreasoryB).to.be.gte(beforeTreasoryB);
   });
 });

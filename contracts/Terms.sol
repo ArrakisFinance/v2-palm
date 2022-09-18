@@ -21,6 +21,7 @@ import {
     _requireAddressNotZero,
     _getInits,
     _requireTokenMatch,
+    _requireIsOwnerOrDelegate,
     _requireIsOwner,
     _getEmolument,
     _requireProjectAllocationGtZero,
@@ -81,6 +82,7 @@ contract Terms is TermsStorage {
         IArrakisV2 vaultV2 = IArrakisV2(vault);
 
         _addVault(setup_.owner, vault);
+        if (setup_.delegate != address(0)) _setDelegate(vault, setup_.delegate);
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
@@ -194,16 +196,15 @@ contract Terms is TermsStorage {
         noLeftOver(extensionData_.vault.token0(), extensionData_.vault.token1())
     {
         _requireAddressNotZero(mintAmount_);
-        _requireProjectAllocationGtZero(
-            extensionData_.projectTknIsTknZero,
-            extensionData_.amount0,
-            extensionData_.amount1
+        _requireIsOwnerOrDelegate(
+            delegateByVaults[address(extensionData_.vault)],
+            vaults[msg.sender],
+            address(extensionData_.vault)
         );
-        _requireIsOwner(vaults[msg.sender], address(extensionData_.vault));
         require(
             IGasStation(manager)
                 .getVaultInfo(address(extensionData_.vault))
-                .endOfMM < block.timestamp, // solhint-disable-line not-rely-on-time
+                .endOfMM < block.timestamp + 60 * 60 * 24, // solhint-disable-line not-rely-on-time
             "Terms: terms is active."
         );
 
