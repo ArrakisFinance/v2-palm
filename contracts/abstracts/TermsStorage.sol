@@ -127,8 +127,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(address(vault_))
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.addPools(feeTiers_);
+
+        emit LogAddPools(msg.sender, vaultAddr, feeTiers_);
     }
 
     function removePools(IArrakisV2 vault_, address[] calldata pools_)
@@ -136,8 +139,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(address(vault_))
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.removePools(pools_);
+
+        emit LogRemovePools(msg.sender, vaultAddr, pools_);
     }
 
     function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
@@ -145,8 +151,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(address(vault_))
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.setMaxTwapDeviation(maxTwapDeviation_);
+
+        emit LogSetMaxTwapDeviation(msg.sender, vaultAddr, maxTwapDeviation_);
     }
 
     function setTwapDuration(IArrakisV2 vault_, uint24 twapDuration_)
@@ -154,8 +163,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(address(vault_))
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.setTwapDuration(twapDuration_);
+
+        emit LogSetTwapDuration(msg.sender, vaultAddr, twapDuration_);
     }
 
     function setMaxSlippage(IArrakisV2 vault_, uint24 maxSlippage_)
@@ -163,8 +175,11 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(address(vault_))
     {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.setMaxSlippage(maxSlippage_);
+
+        emit LogSetMaxSlippage(msg.sender, vaultAddr, maxSlippage_);
     }
 
     // #endregion vault config as admin.
@@ -176,12 +191,21 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(vault_)
     {
+        address vaultAddr = address(vault_);
         _requireIsOwnerOrDelegate(
             delegateByVaults[vault_],
             vaults[msg.sender],
-            address(vault_)
+            vaultAddr
         );
         IGasStation(manager).setVaultData(vault_, data_);
+
+        emit LogSetVaultData(
+            delegateByVaults[vault_] != address(0)
+                ? delegateByVaults[vault_]
+                : msg.sender,
+            vaultAddr,
+            data_
+        );
     }
 
     function setVaultStratByName(address vault_, string calldata strat_)
@@ -189,17 +213,29 @@ abstract contract TermsStorage is
         override
         requireAddressNotZero(vault_)
     {
+        address vaultAddr = address(vault_);
         _requireIsOwnerOrDelegate(
             delegateByVaults[vault_],
             vaults[msg.sender],
-            address(vault_)
+            vaultAddr
         );
         IGasStation(manager).setVaultStraByName(vault_, strat_);
+
+        emit LogSetVaultStratByName(
+            delegateByVaults[vault_] != address(0)
+                ? delegateByVaults[vault_]
+                : msg.sender,
+            vaultAddr,
+            strat_
+        );
     }
 
     function setDelegate(address vault_, address delegate_) external override {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
         _setDelegate(vault_, delegate_);
+
+        emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
     }
 
     function withdrawVaultBalance(
@@ -207,8 +243,13 @@ abstract contract TermsStorage is
         uint256 amount_,
         address payable to_
     ) external override requireAddressNotZero(vault_) {
-        _requireIsOwner(vaults[msg.sender], address(vault_));
-        IGasStation(manager).withdrawVaultBalance(vault_, amount_, to_);
+        address vaultAddr = address(vault_);
+        IGasStation gasStation = IGasStation(manager);
+        (uint256 balance, , , , ) = gasStation.vaults(vaultAddr);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        gasStation.withdrawVaultBalance(vault_, amount_, to_);
+
+        emit LogWithdrawVaultBalance(msg.sender, vaultAddr, to_, balance);
     }
 
     // #endregion gasStation config as vault owner.
