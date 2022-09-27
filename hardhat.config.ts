@@ -26,11 +26,11 @@ const config: HardhatUserConfig = {
     },
     arrakisDaoAdmin: {
       default: 1,
-      matic: "0xDEb4C33D5C3E7e32F55a9D6336FE06010E40E3AB",
+      matic: "0xd06a7cc1a162fDfB515595A2eC1c47B75743C381",
     },
     arrakisDaoOwner: {
       default: 2,
-      matic: "0xF869f0eBDDAa33d7aa394c2c612E6e5a6A64fDA4",
+      matic: "0xDEb4C33D5C3E7e32F55a9D6336FE06010E40E3AB",
     },
   },
 

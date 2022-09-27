@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.13;
 
 import {Rebalance, Range} from "./IArrakisV2.sol";
 import {IManagerProxyV2} from "./IManagerProxyV2.sol";
@@ -90,4 +90,15 @@ interface IGasStation is IManagerProxyV2 {
         returns (VaultInfo memory);
 
     function getWhitelistedStrat() external view returns (bytes32[] memory);
+
+    function vaults(address vault_)
+        external
+        view
+        returns (
+            uint256 balance,
+            uint256 lastBalance,
+            bytes memory datas,
+            bytes32 strat,
+            uint256 endOfMM
+        );
 }

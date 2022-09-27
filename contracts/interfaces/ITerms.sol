@@ -14,6 +14,7 @@ import {
 
 interface ITerms {
     // #region events.
+
     event SetEmolument(uint16 oldEmolument, uint16 newEmolment);
     event SetTermTreasury(address oldTermTreasury, address newTermTreasury);
     event SetManager(address oldManager, address newManager);
@@ -49,6 +50,49 @@ interface ITerms {
         uint256 emolument0,
         uint256 emolument1
     );
+
+    // #region vault modification events.
+
+    event LogAddPools(address creator, address vault, uint24[] feeTiers);
+
+    event LogRemovePools(address creator, address vault, address[] pools);
+
+    event LogSetMaxTwapDeviation(
+        address creator,
+        address vault,
+        int24 maxTwapDeviation
+    );
+
+    event LogSetTwapDuration(
+        address creator,
+        address vault,
+        uint24 twapDuration
+    );
+
+    event LogSetMaxSlippage(address creator, address vault, uint24 maxSlippage);
+
+    // #endregion vault modification events.
+
+    // #region GasStation interaction events.
+
+    event LogSetVaultData(address creatorOrDelegate, address vault, bytes data);
+
+    event LogSetVaultStratByName(
+        address creatorOrDelegate,
+        address vault,
+        string strat
+    );
+
+    event LogSetDelegate(address creator, address vault, address delegate);
+
+    event LogWithdrawVaultBalance(
+        address creator,
+        address vault,
+        address to,
+        uint256 sentBack
+    );
+
+    // #endregion GasStation interaction events.
 
     // #endregion events.
 
