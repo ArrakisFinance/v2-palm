@@ -238,6 +238,11 @@ abstract contract TermsStorage is
         emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
     }
 
+    function setDelegate(address vault_, address delegate_) external override {
+        _requireIsOwner(vaults[msg.sender], address(vault_));
+        _setDelegate(vault_, delegate_);
+    }
+
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,
