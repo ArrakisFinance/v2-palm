@@ -57,20 +57,6 @@ interface ITerms {
 
     event LogRemovePools(address creator, address vault, address[] pools);
 
-    event LogSetMaxTwapDeviation(
-        address creator,
-        address vault,
-        int24 maxTwapDeviation
-    );
-
-    event LogSetTwapDuration(
-        address creator,
-        address vault,
-        uint24 twapDuration
-    );
-
-    event LogSetMaxSlippage(address creator, address vault, uint24 maxSlippage);
-
     // #endregion vault modification events.
 
     // #region GasStation interaction events.
@@ -128,13 +114,6 @@ interface ITerms {
     function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_) external;
 
     function removePools(IArrakisV2 vault_, address[] calldata pools_) external;
-
-    function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
-        external;
-
-    function setTwapDuration(IArrakisV2 vault_, uint24 twapDuration_) external;
-
-    function setMaxSlippage(IArrakisV2 vault_, uint24 maxSlippage_) external;
 
     // #endregion Vault configuration functions.
 

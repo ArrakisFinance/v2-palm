@@ -6,6 +6,7 @@ import "@nomiclabs/hardhat-ethers";
 import "@typechain/hardhat";
 import "hardhat-deploy";
 import "@nomiclabs/hardhat-etherscan";
+import "solidity-coverage";
 
 // Process Env Variables
 import * as dotenv from "dotenv";
@@ -38,7 +39,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 32820781,
+        blockNumber: 33952851,
       },
     },
 

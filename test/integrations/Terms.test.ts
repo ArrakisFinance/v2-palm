@@ -65,6 +65,27 @@ describe("Terms integration test!!!", async function () {
       addresses.UniswapV3Factory
     )) as IUniswapV3Factory;
 
+    // const addrGasStation =
+    //   "0x" +
+    //   (
+    //     await user.provider!.getStorageAt(
+    //       (
+    //         await ethers.getContract("GasStation", user)
+    //       ).address,
+    //       "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+    //     )
+    //   )
+    //     .toString()
+    //     .substring(26);
+
+    // gasStation = (await ethers.getContractAt(
+    //   "GasStation",
+    //   addrGasStation,
+    //   user
+    // )) as GasStation;
+
+    // gasStation.initialize(await arrakisDaoOwner.getAddress());
+
     arrakisV2Resolver = (await ethers.getContractAt(
       "IArrakisV2Resolver",
       addresses.ArrakisV2Resolver
@@ -139,9 +160,6 @@ describe("Terms integration test!!!", async function () {
       token1: projectTknIsTknZero ? baseToken.address : projectToken.address,
       projectTknIsTknZero: projectTknIsTknZero,
       owner: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
       amount0: result.amount0,
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
@@ -354,18 +372,18 @@ describe("Terms integration test!!!", async function () {
 
     const afterUserB = await baseToken.balanceOf(userAddr);
 
-    expect(afterUserP.sub(beforeUserP)).to.be.eq(
+    expect(afterUserB.sub(beforeUserB)).to.be.eq(
       closeTermsEvent?.amount0.sub(closeTermsEvent?.emolument0)
     );
-    expect(afterUserB.sub(beforeUserB)).to.be.eq(
+    expect(afterUserP.sub(beforeUserP)).to.be.eq(
       closeTermsEvent?.amount1.sub(closeTermsEvent?.emolument1)
     );
 
-    expect(beforeTreasoryP.add(closeTermsEvent?.emolument0)).to.be.equal(
-      afterTreasoryP
-    );
-    expect(beforeTreasoryB.add(closeTermsEvent?.emolument1)).to.be.equal(
+    expect(beforeTreasoryB.add(closeTermsEvent?.emolument0)).to.be.equal(
       afterTreasoryB
+    );
+    expect(beforeTreasoryP.add(closeTermsEvent?.emolument1)).to.be.equal(
+      afterTreasoryP
     );
 
     vaultV2 = (await ethers.getContractAt(
@@ -412,9 +430,6 @@ describe("Terms integration test!!!", async function () {
       token1: projectTknIsTknZero ? baseToken.address : projectToken.address,
       projectTknIsTknZero: projectTknIsTknZero,
       owner: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
       amount0: result.amount0,
       amount1: result.amount1,
       datas: ethers.constants.HashZero,

@@ -269,18 +269,6 @@ abstract contract GasStationStorage is
         );
     }
 
-    function toggleRestrictMint(address vault_)
-        external
-        override
-        whenNotPaused
-        requireAddressNotZero(vault_)
-        onlyVaultOwner(vault_)
-        onlyManagedVaults(vault_)
-    {
-        IArrakisV2(vault_).toggleRestrictMint();
-        emit ToggleRestrictMint(vault_);
-    }
-
     function whitelistStrat(string calldata strat_)
         external
         whenNotPaused

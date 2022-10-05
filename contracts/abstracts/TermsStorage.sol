@@ -14,6 +14,7 @@ import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {
     _getInits,
     _requireTokenMatch,
@@ -146,42 +147,6 @@ abstract contract TermsStorage is
         emit LogRemovePools(msg.sender, vaultAddr, pools_);
     }
 
-    function setMaxTwapDeviation(IArrakisV2 vault_, int24 maxTwapDeviation_)
-        external
-        override
-        requireAddressNotZero(address(vault_))
-    {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
-        vault_.setMaxTwapDeviation(maxTwapDeviation_);
-
-        emit LogSetMaxTwapDeviation(msg.sender, vaultAddr, maxTwapDeviation_);
-    }
-
-    function setTwapDuration(IArrakisV2 vault_, uint24 twapDuration_)
-        external
-        override
-        requireAddressNotZero(address(vault_))
-    {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
-        vault_.setTwapDuration(twapDuration_);
-
-        emit LogSetTwapDuration(msg.sender, vaultAddr, twapDuration_);
-    }
-
-    function setMaxSlippage(IArrakisV2 vault_, uint24 maxSlippage_)
-        external
-        override
-        requireAddressNotZero(address(vault_))
-    {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
-        vault_.setMaxSlippage(maxSlippage_);
-
-        emit LogSetMaxSlippage(msg.sender, vaultAddr, maxSlippage_);
-    }
-
     // #endregion vault config as admin.
 
     // #region gasStation config as vault owner.
@@ -265,20 +230,6 @@ abstract contract TermsStorage is
 
         vaultsOfCreator.push(vault_);
         emit AddVault(creator_, vault_);
-    }
-
-    function _removeVault(address creator_, address vault_) internal {
-        address[] storage vaultsOfCreator = vaults[creator_];
-
-        for (uint256 i = 0; i < vaultsOfCreator.length; i++) {
-            if (vaultsOfCreator[i] == vault_) {
-                delete vaultsOfCreator[i];
-                emit RemoveVault(creator_, vault_);
-                return;
-            }
-        }
-
-        revert("Terms: vault don't exist");
     }
 
     function _setDelegate(address vault_, address delegate_) internal {

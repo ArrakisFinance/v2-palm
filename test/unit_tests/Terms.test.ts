@@ -108,9 +108,6 @@ describe("Terms unit test!!!", async function () {
       init0: init0,
       init1: init1,
       manager: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
     };
 
     const receipt = await (
@@ -279,75 +276,6 @@ describe("Terms unit test!!!", async function () {
   });
 
   // #endregion removePools unit test.
-
-  // #region setMaxTwapDeviation unit test.
-
-  it("#20: setMaxTwapDeviation unit test with vault zero address", async () => {
-    await expect(
-      terms.setMaxTwapDeviation(ethers.constants.AddressZero, 2000)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#21: setMaxTwapDeviation unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setMaxTwapDeviation(vault.address, 2000)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#22: setMaxTwapDeviation unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setMaxTwapDeviation(vault.address, 2000))
-      .to.not.be.reverted;
-  });
-
-  // #endregion setMaxTwapDeviation unit test.
-
-  // #region setTwapDuration unit test.
-
-  it("#23: setTwapDuration unit test with vault zero address", async () => {
-    await expect(
-      terms.setTwapDuration(ethers.constants.AddressZero, 200)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#24: setTwapDuration unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setTwapDuration(vault.address, 200)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#25: setTwapDuration unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setTwapDuration(vault.address, 200)).to
-      .not.be.reverted;
-  });
-
-  // #endregion setTwapDuration unit test.
-
-  // #region setMaxSlippage unit test.
-
-  it("#26: setMaxSlippage unit test with vault zero address", async () => {
-    await expect(
-      terms.setMaxSlippage(ethers.constants.AddressZero, 300)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#27: setMaxSlippage unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setMaxSlippage(vault.address, 300)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#28: setMaxSlippage unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setMaxSlippage(vault.address, 300)).to.not
-      .be.reverted;
-  });
-
-  // #endregion setMaxSlippage unit test.
 
   // #region setVaultData unit test.
 

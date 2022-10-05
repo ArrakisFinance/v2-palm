@@ -70,10 +70,7 @@ contract Terms is TermsStorage {
                     owner: address(this),
                     init0: inits.init0,
                     init1: inits.init1,
-                    manager: manager,
-                    maxTwapDeviation: setup_.maxTwapDeviation,
-                    twapDuration: setup_.twapDuration,
-                    maxSlippage: setup_.maxSlippage
+                    manager: manager
                 }),
                 setup_.isBeacon
             );
@@ -82,6 +79,7 @@ contract Terms is TermsStorage {
         IArrakisV2 vaultV2 = IArrakisV2(vault);
 
         _addVault(setup_.owner, vault);
+
         if (setup_.delegate != address(0)) _setDelegate(vault, setup_.delegate);
         // Mint vaultV2 token.
 
@@ -107,9 +105,9 @@ contract Terms is TermsStorage {
         setup_.token0.approve(vault, setup_.amount0);
         setup_.token1.approve(vault, setup_.amount1);
 
-        vaultV2.mint(mintAmount_, address(this));
+        vaultV2.setRestrictedMint(address(this));
 
-        IGasStation(manager).toggleRestrictMint(vault);
+        vaultV2.mint(mintAmount_, address(this));
 
         emit SetupVault(setup_.owner, vault);
     }
@@ -173,15 +171,7 @@ contract Terms is TermsStorage {
             increaseBalance_.vault.setInits(inits.init0, inits.init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(
-            address(increaseBalance_.vault)
-        );
-
         increaseBalance_.vault.mint(mintAmount_, address(this));
-
-        IGasStation(manager).toggleRestrictMint(
-            address(increaseBalance_.vault)
-        );
 
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
@@ -257,11 +247,7 @@ contract Terms is TermsStorage {
             extensionData_.vault.setInits(inits.init0, inits.init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(address(extensionData_.vault));
-
         extensionData_.vault.mint(mintAmount_, address(this));
-
-        IGasStation(manager).toggleRestrictMint(address(extensionData_.vault));
 
         IGasStation(manager).expandMMTermDuration(
             address(extensionData_.vault)
@@ -350,15 +336,7 @@ contract Terms is TermsStorage {
             decreaseBalance_.vault.setInits(init0, init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(
-            address(decreaseBalance_.vault)
-        );
-
         decreaseBalance_.vault.mint(mintAmount_, me);
-
-        IGasStation(manager).toggleRestrictMint(
-            address(decreaseBalance_.vault)
-        );
 
         emit DecreaseLiquidity(
             msg.sender,
@@ -380,8 +358,8 @@ contract Terms is TermsStorage {
         requireAddressNotZero(newOwner_)
         requireAddressNotZero(to_)
     {
-        uint256 index = _requireIsOwner(vaults[msg.sender], address(vault_));
         address vaultAddr = address(vault_);
+        uint256 index = _requireIsOwner(vaults[msg.sender], vaultAddr);
 
         delete vaults[msg.sender][index];
 
@@ -409,8 +387,9 @@ contract Terms is TermsStorage {
         if (amount1 > 0)
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
-        IGasStation(manager).removeVault(address(vault_), payable(to_));
+        IGasStation(manager).removeVault(vaultAddr, payable(to_));
         vault_.setManager(IGasStation(newManager_));
+        vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 
         emit CloseTerm(

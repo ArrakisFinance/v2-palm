@@ -99,9 +99,6 @@ describe("GasStation unit test!!!", async function () {
       init0: init0,
       init1: init1,
       manager: gasStationMock.address,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
     };
 
     const receipt = await (
@@ -560,41 +557,6 @@ describe("GasStation unit test!!!", async function () {
   });
 
   // #endregion expand MM Term Duration unit test.
-
-  // #region toggleRestrictMint unit test.
-
-  it("#37: test toggleRestrictMint with vault eq zero address", async () => {
-    await expect(
-      gasStationMock.toggleRestrictMint(ethers.constants.AddressZero)
-    ).to.be.revertedWith("GasStation: address Zero");
-  });
-
-  it("#38: test toggleRestrictMint with no vault owner", async () => {
-    await expect(
-      gasStationMock.connect(user2).toggleRestrictMint(vault.address)
-    ).to.be.revertedWith("GasStation: only vault owner");
-  });
-
-  it("#39: test toggleRestrictMint with no managed vault", async () => {
-    await expect(
-      gasStationMock.toggleRestrictMint(vault.address)
-    ).to.be.revertedWith("GasStation: Vault not managed");
-  });
-
-  it("#40: test toggleRestrictMint", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
-
-    await gasStationMock.addVault(
-      vault.address,
-      ethers.constants.HashZero,
-      "Gaussian"
-    );
-
-    await expect(gasStationMock.toggleRestrictMint(vault.address)).to.not.be
-      .reverted;
-  });
-
-  // #endregion toggleRestrictMint unit test.
 
   // #region whitelistStrat unit test.
 

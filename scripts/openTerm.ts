@@ -7,9 +7,6 @@ const feeTier = 500; // uniswap v3 feeTier.
 const token0 = "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"; // token0 address. token0 < token1 USDC on polygon
 const token1 = "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619"; // token1 address. token0 < token1 WETH on polygon
 const projectTknIsTknZero = true; // eslint-disable-line
-const maxTwapDeviation = 100; // twap deviation max value.
-const twapDuration = 2000; // number of seconds.
-const maxSlippage = 100; // number of seconds.
 const strat = "BOOTSTRAPPING";
 const amount0 = ethers.utils.parseUnits("1", 17);
 const amount1 = ethers.utils.parseUnits("1", 15);
@@ -43,9 +40,6 @@ async function main() {
       token1,
       projectTknIsTknZero,
       owner: await signer.getAddress(),
-      maxTwapDeviation,
-      twapDuration,
-      maxSlippage,
       amount0,
       amount1,
       datas: ethers.constants.HashZero,

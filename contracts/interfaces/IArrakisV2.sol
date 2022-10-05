@@ -32,6 +32,8 @@ struct Rebalance {
     PositionLiquidity[] removes;
     PositionLiquidity[] deposits;
     SwapPayload swap;
+    uint256 minDeposit0;
+    uint256 minDeposit1;
 }
 
 struct InitializePayload {
@@ -42,9 +44,6 @@ struct InitializePayload {
     uint256 init0;
     uint256 init1;
     address manager;
-    int24 maxTwapDeviation;
-    uint24 twapDuration;
-    uint24 maxSlippage;
 }
 
 struct BurnLiquidity {
@@ -71,7 +70,7 @@ interface IArrakisV2 {
 
     function transferOwnership(address newOwner) external;
 
-    function toggleRestrictMint() external;
+    function setRestrictedMint(address minter) external;
 
     function setInits(uint256 init0_, uint256 init1_) external;
 
@@ -80,12 +79,6 @@ interface IArrakisV2 {
     function removePools(address[] calldata pools_) external;
 
     function setManager(IGasStation manager_) external;
-
-    function setMaxTwapDeviation(int24 maxTwapDeviation_) external;
-
-    function setTwapDuration(uint24 twapDuration_) external;
-
-    function setMaxSlippage(uint24 maxSlippage_) external;
 
     function token0() external view returns (IERC20);
 

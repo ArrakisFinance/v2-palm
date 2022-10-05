@@ -28,8 +28,6 @@ interface IGasStation is IManagerProxyV2 {
         uint256 newMmTermDuration
     );
 
-    event ToggleRestrictMint(address indexed vault);
-
     event WithdrawVaultBalance(
         address indexed vault,
         uint256 amount,
@@ -81,8 +79,6 @@ interface IGasStation is IManagerProxyV2 {
     function fundVaultBalance(address vault_) external payable;
 
     function expandMMTermDuration(address vault_) external;
-
-    function toggleRestrictMint(address vault_) external;
 
     function getVaultInfo(address vault_)
         external
