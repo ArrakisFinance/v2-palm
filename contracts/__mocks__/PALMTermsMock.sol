@@ -3,19 +3,19 @@ pragma solidity 0.8.13;
 
 import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
-import {TermsStorage} from "../abstracts/TermsStorage.sol";
+import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
     ExtendingTermData,
     DecreaseBalance
-} from "../structs/STerms.sol";
+} from "../structs/SPALMTerms.sol";
 
 // solhint-disable
 
-contract TermsMock is TermsStorage {
+contract PALMTermsMock is PALMTermsStorage {
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2Factory v2factory_) TermsStorage(v2factory_) {}
+    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     // #region mock functions.
 

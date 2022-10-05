@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {GasStationStorage} from "../abstracts/GasStationStorage.sol";
+import {PALMManagerStorage} from "../abstracts/PALMManagerStorage.sol";
 import {Range, Rebalance} from "../interfaces/IArrakisV2.sol";
-import {VaultInfo} from "../structs/SGasStation.sol";
+import {VaultInfo} from "../structs/SPALMManager.sol";
 
-contract GasStationMock is GasStationStorage {
+contract PALMManagerMock is PALMManagerStorage {
     constructor(
         address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 mmTermDuration_ // solhint-disable-next-line no-empty-blocks
-    ) GasStationStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_) {}
+    ) PALMManagerStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_) {}
 
     function addVaultMock(address vault_) external payable {
         vaults[vault_] = VaultInfo({

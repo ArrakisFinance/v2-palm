@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying TermsMock to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying PALMTermsMock to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
@@ -22,7 +22,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getAddressBookByNetwork("matic");
 
-  await deploy("TermsMock", {
+  await deploy("PALMTermsMock", {
     from: deployer,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -56,5 +56,5 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["TermsMock"];
+func.tags = ["PALMTermsMock"];
 func.dependencies = ["TempProxyAdmin"];

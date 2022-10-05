@@ -3,9 +3,9 @@ pragma solidity 0.8.13;
 
 import {Rebalance, Range} from "./IArrakisV2.sol";
 import {IManagerProxyV2} from "./IManagerProxyV2.sol";
-import {VaultInfo} from "../structs/SGasStation.sol";
+import {VaultInfo} from "../structs/SPALMManager.sol";
 
-interface IGasStation is IManagerProxyV2 {
+interface IPALMManager is IManagerProxyV2 {
     event AddVault(address indexed vault, bytes datas, string strat);
 
     event RemoveVault(address indexed vault, uint256 sendBack);
@@ -14,11 +14,11 @@ interface IGasStation is IManagerProxyV2 {
 
     event SetVaultStrat(address indexed vault, bytes32 strat);
 
-    event WhitelistStrat(address indexed gasStation, string strat);
+    event WhitelistStrat(address indexed manager, string strat);
 
-    event AddOperators(address indexed gasStation, address[] operators);
+    event AddOperators(address indexed manager, address[] operators);
 
-    event RemoveOperators(address indexed gasStation, address[] operators);
+    event RemoveOperators(address indexed manager, address[] operators);
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 

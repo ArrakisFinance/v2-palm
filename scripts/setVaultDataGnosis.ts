@@ -1,11 +1,11 @@
 import hre, { ethers } from "hardhat";
-import { Terms } from "../typechain";
+import { PALMTerms } from "../typechain";
 
 async function main() {
   if (hre.network.name != "matic") return;
   const [signer] = await ethers.getSigners();
 
-  const terms = (await ethers.getContract("Terms", signer)) as Terms;
+  const terms = (await ethers.getContract("PALMTerms", signer)) as PALMTerms;
 
   const vaultAddress = "0x303Afcd07494dc58689F002131b6046d0645BA50";
   const stratData = {

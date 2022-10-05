@@ -37,11 +37,11 @@ function _requireTokenMatch(
 ) view {
     require(
         address(token0_) == address(vault_.token0()),
-        "Terms: wrong token0."
+        "PALMTerms: wrong token0."
     );
     require(
         address(token1_) == address(vault_.token1()),
-        "Terms: wrong token1."
+        "PALMTerms: wrong token1."
     );
 }
 
@@ -51,7 +51,7 @@ function _requireIsOwnerOrDelegate(
     address vault_
 ) view {
     if (delegate_ != address(0)) {
-        require(msg.sender == delegate_, "Terms: no delegate");
+        require(msg.sender == delegate_, "PALMTerms: no delegate");
     } else _requireIsOwner(vaults_, vault_);
 }
 
@@ -61,7 +61,7 @@ function _requireIsOwner(address[] memory vaults_, address vault_)
 {
     bool isOwner;
     (isOwner, index) = _isOwnerOfVault(vaults_, address(vault_));
-    require(isOwner, "Terms: not owner");
+    require(isOwner, "PALMTerms: not owner");
 }
 
 function _isOwnerOfVault(address[] memory vaults_, address vault_)
@@ -88,14 +88,14 @@ function _requireProjectAllocationGtZero(
 ) pure {
     require(
         projectTknIsTknZero_ ? amount0_ > 0 : amount1_ > 0,
-        "Terms: no project token allocation."
+        "PALMTerms: no project token allocation."
     );
 }
 
 function _requireAddressNotZero(uint256 mintAmount_) pure {
-    require(mintAmount_ > 0, "Terms: mintAmount zero.");
+    require(mintAmount_ > 0, "PALMTerms: mintAmount zero.");
 }
 
 function _requireTknOrder(address token0_, address token1_) pure {
-    require(token0_ < token1_, "Terms: tokens order inverted.");
+    require(token0_ < token1_, "PALMTerms: tokens order inverted.");
 }

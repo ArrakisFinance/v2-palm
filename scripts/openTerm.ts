@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { ERC20, Terms } from "../typechain";
+import { ERC20, PALMTerms } from "../typechain";
 
 // #region user input values
 
@@ -36,7 +36,7 @@ async function main() {
     signer
   )) as ERC20;
 
-  const terms = (await ethers.getContract("Terms", signer)) as Terms;
+  const terms = (await ethers.getContract("PALMTerms", signer)) as PALMTerms;
 
   await token0ERC20.approve(terms.address, amount0);
   await token1ERC20.approve(terms.address, amount1);
