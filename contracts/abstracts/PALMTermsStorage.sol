@@ -204,7 +204,6 @@ abstract contract PALMTermsStorage is
         _setDelegate(vault_, delegate_);
 
         emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
-
     }
 
     function withdrawVaultBalance(
@@ -240,16 +239,6 @@ abstract contract PALMTermsStorage is
         require(
             delegateByVaults[vault_] != delegate_,
             "PALMTerms: already delegate"
-        );
-
-        delegateByVaults[vault_] = delegate_;
-        emit DelegateVault(msg.sender, vault_, delegate_);
-    }
-
-    function _setDelegate(address vault_, address delegate_) internal {
-        require(
-            delegateByVaults[vault_] != delegate_,
-            "Terms: already delegate"
         );
 
         delegateByVaults[vault_] = delegate_;
