@@ -7,15 +7,15 @@ import {
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IArrakisV2} from "./interfaces/IArrakisV2.sol";
-import {IGasStation} from "./interfaces/IGasStation.sol";
-import {TermsStorage} from "./abstracts/TermsStorage.sol";
+import {IPALMManager} from "./interfaces/IPALMManager.sol";
+import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
     ExtendingTermData,
     DecreaseBalance,
     Inits
-} from "./structs/STerms.sol";
+} from "./structs/SPALMTerms.sol";
 import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
     _requireAddressNotZero,
@@ -27,14 +27,14 @@ import {
     _requireProjectAllocationGtZero,
     _requireTknOrder,
     _burn
-} from "./functions/FTerms.sol";
+} from "./functions/FPALMTerms.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract Terms is TermsStorage {
+contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2Factory v2factory_) TermsStorage(v2factory_) {}
+    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     /// @notice do all neccesary step to initialize market making.
     // solhint-disable-next-line function-max-lines
@@ -84,7 +84,7 @@ contract Terms is TermsStorage {
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
-        IGasStation(manager).addVault{value: msg.value}(
+        IPALMManager(manager).addVault{value: msg.value}(
             vault,
             setup_.datas,
             setup_.strat
@@ -192,10 +192,10 @@ contract Terms is TermsStorage {
             address(extensionData_.vault)
         );
         require(
-            IGasStation(manager)
+            IPALMManager(manager)
                 .getVaultInfo(address(extensionData_.vault))
                 .endOfMM < block.timestamp + 60 * 60 * 24, // solhint-disable-line not-rely-on-time
-            "Terms: terms is active."
+            "PALMTerms: terms is active."
         );
 
         (uint256 amount0, uint256 amount1) = _burn(
@@ -249,7 +249,7 @@ contract Terms is TermsStorage {
 
         extensionData_.vault.mint(mintAmount_, address(this));
 
-        IGasStation(manager).expandMMTermDuration(
+        IPALMManager(manager).expandMMTermDuration(
             address(extensionData_.vault)
         );
 
@@ -285,11 +285,11 @@ contract Terms is TermsStorage {
         );
         require(
             decreaseBalance_.amount0 < amount0,
-            "Terms: send back amount0 > amount0"
+            "PALMTerms: send back amount0 > amount0"
         );
         require(
             decreaseBalance_.amount1 < amount1,
-            "Terms: send back amount1 > amount1"
+            "PALMTerms: send back amount1 > amount1"
         );
 
         uint256 emolumentAmt0 = _getEmolument(
@@ -387,8 +387,8 @@ contract Terms is TermsStorage {
         if (amount1 > 0)
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
-        IGasStation(manager).removeVault(vaultAddr, payable(to_));
-        vault_.setManager(IGasStation(newManager_));
+        IPALMManager(manager).removeVault(vaultAddr, payable(to_));
+        vault_.setManager(IPALMManager(newManager_));
         vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 

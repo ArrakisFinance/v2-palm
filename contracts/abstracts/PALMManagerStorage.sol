@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IGasStation} from "../interfaces/IGasStation.sol";
+import {IPALMManager} from "../interfaces/IPALMManager.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
 import {
     IERC20,
@@ -17,11 +17,11 @@ import {
 import {
     EnumerableSet
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {VaultInfo} from "../structs/SGasStation.sol";
+import {VaultInfo} from "../structs/SPALMManager.sol";
 
-/// @dev owner should be the Terms smart contract.
-abstract contract GasStationStorage is
-    IGasStation,
+/// @dev owner should be the PALMTerms smart contract.
+abstract contract PALMManagerStorage is
+    IPALMManager,
     OwnableUpgradeable,
     PausableUpgradeable
 {
@@ -41,17 +41,17 @@ abstract contract GasStationStorage is
 
     // #endregion manager fees.
 
-    // #region Terms.
+    // #region PALMTerms.
 
     address public immutable terms;
 
-    // #endregion Terms.
+    // #endregion PALMTerms.
 
-    // #region Terms Market Making Duration.
+    // #region PALMTerms Market Making Duration.
 
     uint256 public immutable mmTermDuration;
 
-    // #endregion Terms Market Making Duration.
+    // #endregion PALMTerms Market Making Duration.
 
     // #region whitelisted strategies.
 
@@ -73,15 +73,15 @@ abstract contract GasStationStorage is
 
     // #region modifiers.
 
-    modifier onlyTerms() {
-        require(msg.sender == terms, "GasStation: only Terms");
+    modifier onlyPALMTerms() {
+        require(msg.sender == terms, "PALMManager: only PALMTerms");
         _;
     }
 
-    modifier onlyTermsVaults(address vault) {
+    modifier onlyPALMTermsVaults(address vault) {
         require(
             IArrakisV2(vault).owner() == terms,
-            "GasStation: owner no Terms"
+            "PALMManager: owner no PALMTerms"
         );
         _;
     }
@@ -91,7 +91,7 @@ abstract contract GasStationStorage is
             // solhint-disable-next-line not-rely-on-time
             vaults[vault].endOfMM >= block.timestamp &&
                 vaults[vault].endOfMM != 0,
-            "GasStation: Vault not managed"
+            "PALMManager: Vault not managed"
         );
         _;
     }
@@ -99,19 +99,19 @@ abstract contract GasStationStorage is
     modifier onlyVaultOwner(address vault) {
         require(
             IArrakisV2(vault).owner() == msg.sender,
-            "GasStation: only vault owner"
+            "PALMManager: only vault owner"
         );
         _;
     }
 
     modifier onlyOperators() {
         (bool isOperator, ) = _isOperator(msg.sender);
-        require(isOperator, "GasStation: no operator");
+        require(isOperator, "PALMManager: no operator");
         _;
     }
 
     modifier requireAddressNotZero(address addr) {
-        require(addr != address(0), "GasStation: address Zero");
+        require(addr != address(0), "PALMManager: address Zero");
         _;
     }
 
@@ -164,7 +164,7 @@ abstract contract GasStationStorage is
         override
         whenNotPaused
         requireAddressNotZero(vault_)
-        onlyTermsVaults(vault_)
+        onlyPALMTermsVaults(vault_)
     {
         _addVault(vault_, datas_, strat_);
         if (msg.value > 0) _fundVaultBalance(vault_);
@@ -177,7 +177,7 @@ abstract contract GasStationStorage is
         requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
     {
-        require(vaults[vault_].endOfMM != 0, "GasStation: Vault not managed");
+        require(vaults[vault_].endOfMM != 0, "PALMManager: Vault not managed");
         _removeVault(vault_, to_);
     }
 
@@ -211,7 +211,7 @@ abstract contract GasStationStorage is
     {
         for (uint256 i = 0; i < operators_.length; i++) {
             (bool isOperator, ) = _isOperator(operators_[i]);
-            require(!isOperator, "GasStation: operator");
+            require(!isOperator, "PALMManager: operator");
             operators.push(operators_[i]);
         }
 
@@ -257,7 +257,7 @@ abstract contract GasStationStorage is
         external
         override
         whenNotPaused
-        onlyTerms
+        onlyPALMTerms
         requireAddressNotZero(vault_)
         onlyManagedVaults(vault_)
     {
@@ -277,11 +277,11 @@ abstract contract GasStationStorage is
         bytes32 stratB32 = keccak256(abi.encodePacked(strat_));
         require(
             stratB32 != keccak256(abi.encodePacked("")),
-            "GasStation: empty string"
+            "PALMManager: empty string"
         );
         require(
             !_whitelistedStrat.contains(stratB32),
-            "GasStation: strat whitelisted."
+            "PALMManager: strat whitelisted."
         );
         _whitelistedStrat.add(stratB32);
 
@@ -317,9 +317,12 @@ abstract contract GasStationStorage is
         bytes32 stratEncoded = keccak256(abi.encodePacked(strat_));
         require(
             _whitelistedStrat.contains(stratEncoded),
-            "GasStation: Not whitelisted"
+            "PALMManager: Not whitelisted"
         );
-        require(vaults[vault_].endOfMM == 0, "GasStation: Vault already added");
+        require(
+            vaults[vault_].endOfMM == 0,
+            "PALMManager: Vault already added"
+        );
         vaults[vault_].datas = datas_;
         vaults[vault_].strat = stratEncoded;
 
@@ -348,7 +351,7 @@ abstract contract GasStationStorage is
     function _setVaultData(address vault_, bytes memory data_) internal {
         require(
             keccak256(vaults[vault_].datas) != keccak256(data_),
-            "GasStation: data"
+            "PALMManager: data"
         );
 
         vaults[vault_].datas = data_;
@@ -357,11 +360,11 @@ abstract contract GasStationStorage is
     }
 
     function _setVaultStrat(address vault_, bytes32 strat_) internal {
-        require(vaults[vault_].strat != strat_, "GasStation: strat");
+        require(vaults[vault_].strat != strat_, "PALMManager: strat");
 
         require(
             _whitelistedStrat.contains(strat_),
-            "GasStation: strat not whitelisted."
+            "PALMManager: strat not whitelisted."
         );
 
         vaults[vault_].strat = strat_;
@@ -372,7 +375,7 @@ abstract contract GasStationStorage is
     function _removeOperators(address[] memory operators_) internal {
         for (uint256 i = 0; i < operators_.length; i++) {
             (bool isOperator, uint256 index) = _isOperator(operators_[i]);
-            require(isOperator, "GasStation: no operator");
+            require(isOperator, "PALMManager: no operator");
 
             delete operators[index];
         }
@@ -387,7 +390,7 @@ abstract contract GasStationStorage is
     ) internal {
         require(
             vaults[vault_].balance >= amount_,
-            "GasStation: amount exceeds available balance"
+            "PALMManager: amount exceeds available balance"
         );
         vaults[vault_].balance -= amount_;
         to_.sendValue(amount_);

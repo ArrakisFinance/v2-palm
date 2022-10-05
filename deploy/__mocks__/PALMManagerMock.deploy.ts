@@ -1,8 +1,8 @@
-import { deployments, getNamedAccounts, ethers } from "hardhat";
+import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getAddressBookByNetwork } from "../src/config";
+import { getAddressBookByNetwork } from "../../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
-import { sleep } from "../src/utils";
+import { sleep } from "../../src/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -12,37 +12,31 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying GasStation to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying PALMManagerMock to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
 
   const { deploy } = deployments;
-  const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
-    await getNamedAccounts();
+  const { deployer } = await getNamedAccounts();
 
   const addresses = getAddressBookByNetwork("matic");
 
-  const oneQuarter = (60 * 60 * 24 * 365) / 4;
+  const oneYear = 60 * 60 * 24 * 365;
 
-  await deploy("GasStation", {
+  await deploy("PALMManagerMock", {
     from: deployer,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
-      owner: arrakisDaoAdmin,
+      viaAdminContract: "TempProxyAdmin",
       execute: {
         init: {
           methodName: "initialize",
-          args: [arrakisDaoOwner],
+          args: [deployer],
         },
       },
     },
-    args: [
-      addresses.Gelato,
-      4750,
-      (await ethers.getContract("Terms")).address,
-      oneQuarter,
-    ],
+    args: [addresses.Gelato, 100, deployer, oneYear],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -59,5 +53,5 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["GasStation"];
-func.dependencies = ["Terms"];
+func.tags = ["PALMManagerMock"];
+func.dependencies = ["TempProxyAdmin"];

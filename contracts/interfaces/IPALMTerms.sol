@@ -4,15 +4,15 @@ pragma solidity 0.8.13;
 import {IArrakisV2Factory} from "./IArrakisV2Factory.sol";
 import {IArrakisV2Resolver} from "./IArrakisV2Resolver.sol";
 import {IArrakisV2} from "./IArrakisV2.sol";
-import {IGasStation} from "./IGasStation.sol";
+import {IPALMManager} from "./IPALMManager.sol";
 import {
     SetupPayload,
     IncreaseBalance,
     ExtendingTermData,
     DecreaseBalance
-} from "../structs/STerms.sol";
+} from "../structs/SPALMTerms.sol";
 
-interface ITerms {
+interface IPALMTerms {
     // #region events.
 
     event SetEmolument(uint16 oldEmolument, uint16 newEmolment);
@@ -59,7 +59,7 @@ interface ITerms {
 
     // #endregion vault modification events.
 
-    // #region GasStation interaction events.
+    // #region PALMManager interaction events.
 
     event LogSetVaultData(address creatorOrDelegate, address vault, bytes data);
 
@@ -78,7 +78,7 @@ interface ITerms {
         uint256 sentBack
     );
 
-    // #endregion GasStation interaction events.
+    // #endregion PALMManager interaction events.
 
     // #endregion events.
 
@@ -117,7 +117,7 @@ interface ITerms {
 
     // #endregion Vault configuration functions.
 
-    // #region GasStation configuration functions.
+    // #region PALMManager configuration functions.
 
     function setVaultData(address vault_, bytes calldata data_) external;
 
@@ -134,7 +134,7 @@ interface ITerms {
 
     function setManager(address manager_) external;
 
-    // #endregion GasStation configuration functions.
+    // #endregion PALMManager configuration functions.
 
     function v2factory() external view returns (IArrakisV2Factory);
 

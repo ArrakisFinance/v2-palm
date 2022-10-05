@@ -5,7 +5,7 @@ import {
     IUniswapV3Factory
 } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IGasStation} from "./IGasStation.sol";
+import {IPALMManager} from "./IPALMManager.sol";
 
 // structs copied from v2-core/contracts/structs/SVaultV2.sol
 struct PositionLiquidity {
@@ -78,7 +78,7 @@ interface IArrakisV2 {
 
     function removePools(address[] calldata pools_) external;
 
-    function setManager(IGasStation manager_) external;
+    function setManager(IPALMManager manager_) external;
 
     function token0() external view returns (IERC20);
 
@@ -91,5 +91,5 @@ interface IArrakisV2 {
 
     function owner() external view returns (address);
 
-    function manager() external view returns (IGasStation);
+    function manager() external view returns (IPALMManager);
 }

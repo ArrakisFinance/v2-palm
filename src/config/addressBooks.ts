@@ -12,7 +12,7 @@ export interface Addresses {
   ArrakisV2Resolver: string;
   ArrakisV2Factory: string;
   UniswapV3Amount: string;
-  Terms: string;
+  PALMTerms: string;
 }
 /* eslint-enable @typescript-eslint/naming-convention */
 
@@ -33,7 +33,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        Terms: "",
+        PALMTerms: "",
       };
 
     case "mainnet":
@@ -51,7 +51,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        Terms: "",
+        PALMTerms: "",
       };
 
     case "matic":
@@ -69,7 +69,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0x8092d0C29296d906896e5F45d2f6989eEBb58AC8",
         ArrakisV2Factory: "0xf5973723eb067F90276d9f9bE80F7C9De67d22af",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        Terms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
+        PALMTerms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
       };
 
     case "goerli":
@@ -87,7 +87,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        Terms: "",
+        PALMTerms: "",
       };
     case "hardhat":
       return {
@@ -104,7 +104,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0x8092d0C29296d906896e5F45d2f6989eEBb58AC8",
         ArrakisV2Factory: "0xf5973723eb067F90276d9f9bE80F7C9De67d22af",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        Terms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
+        PALMTerms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
       };
 
     default: {

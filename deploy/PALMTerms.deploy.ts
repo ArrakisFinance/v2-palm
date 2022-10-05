@@ -1,8 +1,8 @@
 import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getAddressBookByNetwork } from "../../src/config";
+import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
-import { sleep } from "../../src/utils";
+import { sleep } from "../src/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -12,31 +12,35 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying GasStationMock to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying PALMTerms to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
 
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
+    await getNamedAccounts();
 
   const addresses = getAddressBookByNetwork("matic");
 
-  const oneYear = 60 * 60 * 24 * 365;
-
-  await deploy("GasStationMock", {
+  await deploy("PALMTerms", {
     from: deployer,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
-      viaAdminContract: "TempProxyAdmin",
+      owner: arrakisDaoAdmin,
       execute: {
         init: {
           methodName: "initialize",
-          args: [deployer],
+          args: [
+            arrakisDaoOwner,
+            arrakisDaoOwner,
+            100,
+            addresses.ArrakisV2Resolver,
+          ],
         },
       },
     },
-    args: [addresses.Gelato, 100, deployer, oneYear],
+    args: [addresses.ArrakisV2Factory],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -53,5 +57,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["GasStationMock"];
-func.dependencies = ["TempProxyAdmin"];
+func.tags = ["PALMTerms"];

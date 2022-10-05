@@ -1,4 +1,4 @@
-import { deployments, getNamedAccounts } from "hardhat";
+import { deployments, getNamedAccounts, ethers } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
@@ -12,7 +12,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying Terms to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying PALMManager to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
@@ -23,7 +23,9 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
 
   const addresses = getAddressBookByNetwork("matic");
 
-  await deploy("Terms", {
+  const oneQuarter = (60 * 60 * 24 * 365) / 4;
+
+  await deploy("PALMManager", {
     from: deployer,
     proxy: {
       proxyContract: "OpenZeppelinTransparentProxy",
@@ -31,16 +33,16 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [
-            arrakisDaoOwner,
-            arrakisDaoOwner,
-            100,
-            addresses.ArrakisV2Resolver,
-          ],
+          args: [arrakisDaoOwner],
         },
       },
     },
-    args: [addresses.ArrakisV2Factory],
+    args: [
+      addresses.Gelato,
+      4750,
+      (await ethers.getContract("PALMTerms")).address,
+      oneQuarter,
+    ],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -57,4 +59,5 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["Terms"];
+func.tags = ["PALMManager"];
+func.dependencies = ["PALMTerms"];

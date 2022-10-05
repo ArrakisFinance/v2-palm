@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { Terms } from "../typechain";
+import { PALMTerms } from "../typechain";
 
 // #region input values.
 const vault = "0x34645df7b69c9944c3406d96bba31f1d023d6732";
@@ -13,7 +13,7 @@ async function main() {
   if (hre.network.name != "matic") return;
   const [signer] = await ethers.getSigners();
 
-  const terms = (await ethers.getContract("Terms", signer)) as Terms;
+  const terms = (await ethers.getContract("PALMTerms", signer)) as PALMTerms;
 
   await signer.sendTransaction({
     to: terms.address,
