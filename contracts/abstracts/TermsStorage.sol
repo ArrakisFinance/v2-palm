@@ -201,6 +201,7 @@ abstract contract TermsStorage is
         _setDelegate(vault_, delegate_);
 
         emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
+
     }
 
     function withdrawVaultBalance(
@@ -230,6 +231,16 @@ abstract contract TermsStorage is
 
         vaultsOfCreator.push(vault_);
         emit AddVault(creator_, vault_);
+    }
+
+    function _setDelegate(address vault_, address delegate_) internal {
+        require(
+            delegateByVaults[vault_] != delegate_,
+            "Terms: already delegate"
+        );
+
+        delegateByVaults[vault_] = delegate_;
+        emit DelegateVault(msg.sender, vault_, delegate_);
     }
 
     function _setDelegate(address vault_, address delegate_) internal {
