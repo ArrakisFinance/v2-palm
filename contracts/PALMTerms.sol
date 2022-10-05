@@ -7,15 +7,15 @@ import {
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IArrakisV2} from "./interfaces/IArrakisV2.sol";
-import {IGasStation} from "./interfaces/IGasStation.sol";
-import {TermsStorage} from "./abstracts/TermsStorage.sol";
+import {IPALMManager} from "./interfaces/IPALMManager.sol";
+import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
     ExtendingTermData,
     DecreaseBalance,
     Inits
-} from "./structs/STerms.sol";
+} from "./structs/SPALMTerms.sol";
 import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
     _requireAddressNotZero,
@@ -27,14 +27,14 @@ import {
     _requireProjectAllocationGtZero,
     _requireTknOrder,
     _burn
-} from "./functions/FTerms.sol";
+} from "./functions/FPALMTerms.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract Terms is TermsStorage {
+contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2Factory v2factory_) TermsStorage(v2factory_) {}
+    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     /// @notice do all neccesary step to initialize market making.
     // solhint-disable-next-line function-max-lines
@@ -70,10 +70,7 @@ contract Terms is TermsStorage {
                     owner: address(this),
                     init0: inits.init0,
                     init1: inits.init1,
-                    manager: manager,
-                    maxTwapDeviation: setup_.maxTwapDeviation,
-                    twapDuration: setup_.twapDuration,
-                    maxSlippage: setup_.maxSlippage
+                    manager: manager
                 }),
                 setup_.isBeacon
             );
@@ -82,11 +79,12 @@ contract Terms is TermsStorage {
         IArrakisV2 vaultV2 = IArrakisV2(vault);
 
         _addVault(setup_.owner, vault);
+
         if (setup_.delegate != address(0)) _setDelegate(vault, setup_.delegate);
         // Mint vaultV2 token.
 
         // Call the manager to make it manage the new vault.
-        IGasStation(manager).addVault{value: msg.value}(
+        IPALMManager(manager).addVault{value: msg.value}(
             vault,
             setup_.datas,
             setup_.strat
@@ -107,9 +105,9 @@ contract Terms is TermsStorage {
         setup_.token0.approve(vault, setup_.amount0);
         setup_.token1.approve(vault, setup_.amount1);
 
-        vaultV2.mint(mintAmount_, address(this));
+        vaultV2.setRestrictedMint(address(this));
 
-        IGasStation(manager).toggleRestrictMint(vault);
+        vaultV2.mint(mintAmount_, address(this));
 
         emit SetupVault(setup_.owner, vault);
     }
@@ -173,15 +171,7 @@ contract Terms is TermsStorage {
             increaseBalance_.vault.setInits(inits.init0, inits.init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(
-            address(increaseBalance_.vault)
-        );
-
         increaseBalance_.vault.mint(mintAmount_, address(this));
-
-        IGasStation(manager).toggleRestrictMint(
-            address(increaseBalance_.vault)
-        );
 
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
@@ -202,10 +192,10 @@ contract Terms is TermsStorage {
             address(extensionData_.vault)
         );
         require(
-            IGasStation(manager)
+            IPALMManager(manager)
                 .getVaultInfo(address(extensionData_.vault))
                 .endOfMM < block.timestamp + 60 * 60 * 24, // solhint-disable-line not-rely-on-time
-            "Terms: terms is active."
+            "PALMTerms: terms is active."
         );
 
         (uint256 amount0, uint256 amount1) = _burn(
@@ -257,13 +247,9 @@ contract Terms is TermsStorage {
             extensionData_.vault.setInits(inits.init0, inits.init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(address(extensionData_.vault));
-
         extensionData_.vault.mint(mintAmount_, address(this));
 
-        IGasStation(manager).toggleRestrictMint(address(extensionData_.vault));
-
-        IGasStation(manager).expandMMTermDuration(
+        IPALMManager(manager).expandMMTermDuration(
             address(extensionData_.vault)
         );
 
@@ -299,11 +285,11 @@ contract Terms is TermsStorage {
         );
         require(
             decreaseBalance_.amount0 < amount0,
-            "Terms: send back amount0 > amount0"
+            "PALMTerms: send back amount0 > amount0"
         );
         require(
             decreaseBalance_.amount1 < amount1,
-            "Terms: send back amount1 > amount1"
+            "PALMTerms: send back amount1 > amount1"
         );
 
         uint256 emolumentAmt0 = _getEmolument(
@@ -350,15 +336,7 @@ contract Terms is TermsStorage {
             decreaseBalance_.vault.setInits(init0, init1);
         }
 
-        IGasStation(manager).toggleRestrictMint(
-            address(decreaseBalance_.vault)
-        );
-
         decreaseBalance_.vault.mint(mintAmount_, me);
-
-        IGasStation(manager).toggleRestrictMint(
-            address(decreaseBalance_.vault)
-        );
 
         emit DecreaseLiquidity(
             msg.sender,
@@ -380,8 +358,8 @@ contract Terms is TermsStorage {
         requireAddressNotZero(newOwner_)
         requireAddressNotZero(to_)
     {
-        uint256 index = _requireIsOwner(vaults[msg.sender], address(vault_));
         address vaultAddr = address(vault_);
+        uint256 index = _requireIsOwner(vaults[msg.sender], vaultAddr);
 
         delete vaults[msg.sender][index];
 
@@ -409,8 +387,9 @@ contract Terms is TermsStorage {
         if (amount1 > 0)
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
-        IGasStation(manager).removeVault(address(vault_), payable(to_));
-        vault_.setManager(IGasStation(newManager_));
+        IPALMManager(manager).removeVault(vaultAddr, payable(to_));
+        vault_.setManager(IPALMManager(newManager_));
+        vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 
         emit CloseTerm(

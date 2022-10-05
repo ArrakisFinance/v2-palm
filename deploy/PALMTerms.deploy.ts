@@ -1,7 +1,8 @@
 import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
-import { sleep } from "../../src/utils";
+import { sleep } from "../src/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
@@ -11,16 +12,35 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "optimism"
   ) {
     console.log(
-      `Deploying ArrakisV2FactoryMock to ${hre.network.name}. Hit ctrl + c to abort`
+      `Deploying PALMTerms to ${hre.network.name}. Hit ctrl + c to abort`
     );
     await sleep(10000);
   }
 
   const { deploy } = deployments;
-  const { deployer } = await getNamedAccounts();
+  const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
+    await getNamedAccounts();
 
-  await deploy("ArrakisV2FactoryMock", {
+  const addresses = getAddressBookByNetwork("matic");
+
+  await deploy("PALMTerms", {
     from: deployer,
+    proxy: {
+      proxyContract: "OpenZeppelinTransparentProxy",
+      owner: arrakisDaoAdmin,
+      execute: {
+        init: {
+          methodName: "initialize",
+          args: [
+            arrakisDaoOwner,
+            arrakisDaoOwner,
+            100,
+            addresses.ArrakisV2Resolver,
+          ],
+        },
+      },
+    },
+    args: [addresses.ArrakisV2Factory],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
@@ -37,4 +57,4 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
   return shouldSkip ? true : false;
 };
 
-func.tags = ["ArrakisV2FactoryMock"];
+func.tags = ["PALMTerms"];

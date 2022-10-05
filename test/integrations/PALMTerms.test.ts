@@ -8,20 +8,20 @@ import { Signer } from "ethers";
 import { Contract } from "ethers";
 import {
   BaseToken,
-  GasStation,
+  PALMManager,
   IArrakisV2,
   IArrakisV2Resolver,
   IERC20,
   IUniswapV3Factory,
   IUniswapV3Pool,
   ProjectToken,
-  Terms,
+  PALMTerms,
 } from "../../typechain";
 import { BigNumber } from "ethers";
 
 const { ethers, deployments } = hre;
 
-describe("Terms integration test!!!", async function () {
+describe("PALMTerms integration test!!!", async function () {
   this.timeout(0);
 
   let user: Signer;
@@ -30,8 +30,8 @@ describe("Terms integration test!!!", async function () {
   let gelatoCaller: Signer;
   let userAddr: string;
   let addresses: Addresses;
-  let terms: Terms;
-  let gasStation: GasStation;
+  let terms: PALMTerms;
+  let manager: PALMManager;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
   let v3Factory: IUniswapV3Factory;
@@ -56,14 +56,35 @@ describe("Terms integration test!!!", async function () {
     addresses = getAddressBookByNetwork(hre.network.name);
     await deployments.fixture();
 
-    terms = (await ethers.getContract("Terms", user)) as Terms;
-    gasStation = (await ethers.getContract("GasStation", user)) as GasStation;
+    terms = (await ethers.getContract("PALMTerms", user)) as PALMTerms;
+    manager = (await ethers.getContract("PALMManager", user)) as PALMManager;
     baseToken = (await ethers.getContract("BaseToken")) as BaseToken;
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
     v3Factory = (await ethers.getContractAt(
       "IUniswapV3Factory",
       addresses.UniswapV3Factory
     )) as IUniswapV3Factory;
+
+    // const addrPALMManager =
+    //   "0x" +
+    //   (
+    //     await user.provider!.getStorageAt(
+    //       (
+    //         await ethers.getContract("PALMManager", user)
+    //       ).address,
+    //       "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+    //     )
+    //   )
+    //     .toString()
+    //     .substring(26);
+
+    // manager = (await ethers.getContractAt(
+    //   "PALMManager",
+    //   addrPALMManager,
+    //   user
+    // )) as PALMManager;
+
+    // manager.initialize(await arrakisDaoOwner.getAddress());
 
     arrakisV2Resolver = (await ethers.getContractAt(
       "IArrakisV2Resolver",
@@ -97,19 +118,19 @@ describe("Terms integration test!!!", async function () {
 
     // #region whitelist strat.
 
-    await gasStation.connect(arrakisDaoOwner).whitelistStrat("Bootstrapping");
-    await gasStation
+    await manager.connect(arrakisDaoOwner).whitelistStrat("Bootstrapping");
+    await manager
       .connect(arrakisDaoOwner)
       .whitelistStrat("After Bootstrapping");
 
-    await terms.connect(arrakisDaoOwner).setManager(gasStation.address);
+    await terms.connect(arrakisDaoOwner).setManager(manager.address);
 
     // TODO check that keccak256(encode packed ) has been added.
 
     // #endregion whitelist strat.
   });
 
-  it("#0: open Terms", async () => {
+  it("#0: open PALMTerms", async () => {
     // #region get mintAmount.
     // base token allocation 1000.
     // project token allocation 100000.
@@ -139,9 +160,6 @@ describe("Terms integration test!!!", async function () {
       token1: projectTknIsTknZero ? baseToken.address : projectToken.address,
       projectTknIsTknZero: projectTknIsTknZero,
       owner: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
       amount0: result.amount0,
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
@@ -179,10 +197,10 @@ describe("Terms integration test!!!", async function () {
       ethers.constants.Zero
     );
 
-    expect((await gasStation.getVaultInfo(vault)).strat).to.be.eq(
+    expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
@@ -227,9 +245,9 @@ describe("Terms integration test!!!", async function () {
 
     const gelatoCallerAddr = await gelatoCaller.getAddress();
 
-    await gasStation.connect(arrakisDaoOwner).addOperators([gelatoCallerAddr]);
+    await manager.connect(arrakisDaoOwner).addOperators([gelatoCallerAddr]);
 
-    expect(await gasStation.operators(0)).to.be.eq(gelatoCallerAddr);
+    expect(await manager.operators(0)).to.be.eq(gelatoCallerAddr);
 
     // #endregion add caller as operators.
 
@@ -237,11 +255,11 @@ describe("Terms integration test!!!", async function () {
 
     const balance = ethers.utils.parseUnits("100", 18);
 
-    await gasStation.fundVaultBalance(vault, {
+    await manager.fundVaultBalance(vault, {
       value: balance,
     });
 
-    expect((await gasStation.vaults(vault)).balance).to.be.eq(balance);
+    expect((await manager.vaults(vault)).balance).to.be.eq(balance);
 
     // #endregion fund balance of vault.
 
@@ -261,7 +279,7 @@ describe("Terms integration test!!!", async function () {
       vault
     );
 
-    await gasStation
+    await manager
       .connect(gelatoCaller)
       .rebalance(
         vault,
@@ -338,7 +356,7 @@ describe("Terms integration test!!!", async function () {
       await terms.closeTerm(vault, userAddr, userAddr, userAddr)
     ).wait();
 
-    const closeTermsEvent = result.events?.find(
+    const closePALMTermsEvent = result.events?.find(
       (e) => e.event == "CloseTerm"
     )?.args;
 
@@ -354,18 +372,18 @@ describe("Terms integration test!!!", async function () {
 
     const afterUserB = await baseToken.balanceOf(userAddr);
 
-    expect(afterUserP.sub(beforeUserP)).to.be.eq(
-      closeTermsEvent?.amount0.sub(closeTermsEvent?.emolument0)
-    );
     expect(afterUserB.sub(beforeUserB)).to.be.eq(
-      closeTermsEvent?.amount1.sub(closeTermsEvent?.emolument1)
+      closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1)
+    );
+    expect(afterUserP.sub(beforeUserP)).to.be.eq(
+      closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0)
     );
 
-    expect(beforeTreasoryP.add(closeTermsEvent?.emolument0)).to.be.equal(
-      afterTreasoryP
-    );
-    expect(beforeTreasoryB.add(closeTermsEvent?.emolument1)).to.be.equal(
+    expect(beforeTreasoryB.add(closePALMTermsEvent?.emolument1)).to.be.equal(
       afterTreasoryB
+    );
+    expect(beforeTreasoryP.add(closePALMTermsEvent?.emolument0)).to.be.equal(
+      afterTreasoryP
     );
 
     vaultV2 = (await ethers.getContractAt(
@@ -377,12 +395,12 @@ describe("Terms integration test!!!", async function () {
     expect(await vaultV2.owner()).to.be.eq(userAddr);
     expect(await vaultV2.manager()).to.be.eq(userAddr);
 
-    expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.eq(0);
+    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.eq(0);
 
     await expect(terms.vaults(userAddr, 0)).to.be.reverted;
   });
 
-  it("#5: reopen Terms", async () => {
+  it("#5: reopen PALMTerms", async () => {
     // #region get mintAmount.
     // base token allocation 1000.
     // project token allocation 100000
@@ -412,9 +430,6 @@ describe("Terms integration test!!!", async function () {
       token1: projectTknIsTknZero ? baseToken.address : projectToken.address,
       projectTknIsTknZero: projectTknIsTknZero,
       owner: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
       amount0: result.amount0,
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
@@ -448,10 +463,10 @@ describe("Terms integration test!!!", async function () {
       projectTokenAllocation
     );
 
-    expect((await gasStation.getVaultInfo(vault)).strat).to.be.eq(
+    expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await gasStation.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
@@ -467,7 +482,7 @@ describe("Terms integration test!!!", async function () {
       .connect(user2)
       .setVaultStratByName(vault, "After Bootstrapping");
 
-    const vaultInfo = await gasStation.getVaultInfo(vault);
+    const vaultInfo = await manager.getVaultInfo(vault);
 
     expect(vaultInfo.strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["After Bootstrapping"])

@@ -11,9 +11,6 @@ struct SetupPayload {
     IERC20 token1;
     bool projectTknIsTknZero;
     address owner;
-    int24 maxTwapDeviation;
-    uint24 twapDuration;
-    uint24 maxSlippage;
     uint256 amount0;
     uint256 amount1;
     bytes datas;

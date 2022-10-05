@@ -7,7 +7,7 @@ import {
 import { Signer } from "ethers";
 import {
   BaseToken,
-  GasStationMock,
+  PALMManagerMock,
   IArrakisV2,
   IArrakisV2Factory,
   IUniswapV3Factory,
@@ -17,14 +17,14 @@ import { BigNumber } from "ethers";
 
 const { ethers, deployments } = hre;
 
-describe("GasStation unit test!!!", async function () {
+describe("PALMManager unit test!!!", async function () {
   this.timeout(0);
 
   let user: Signer;
   let userAddr: string;
   let user2: Signer;
   let addresses: Addresses;
-  let gasStationMock: GasStationMock;
+  let managerMock: PALMManagerMock;
   let arrakisV2Factory: IArrakisV2Factory;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
@@ -34,7 +34,7 @@ describe("GasStation unit test!!!", async function () {
   // let pool: IUniswapV3Pool;
   let vault: IArrakisV2;
 
-  beforeEach("Setting up for GasStation unit test", async function () {
+  beforeEach("Setting up for PALMManager unit test", async function () {
     if (hre.network.name !== "hardhat") {
       console.error("Test Suite is meant to be run on hardhat only");
       process.exit(1);
@@ -46,10 +46,10 @@ describe("GasStation unit test!!!", async function () {
     addresses = getAddressBookByNetwork(hre.network.name);
     await deployments.fixture();
 
-    gasStationMock = (await ethers.getContract(
-      "GasStationMock",
+    managerMock = (await ethers.getContract(
+      "PALMManagerMock",
       user
-    )) as GasStationMock;
+    )) as PALMManagerMock;
 
     baseToken = (await ethers.getContract("BaseToken")) as BaseToken;
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
@@ -98,10 +98,7 @@ describe("GasStation unit test!!!", async function () {
       owner: userAddr,
       init0: init0,
       init1: init1,
-      manager: gasStationMock.address,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
+      manager: managerMock.address,
     };
 
     const receipt = await (
@@ -119,48 +116,48 @@ describe("GasStation unit test!!!", async function () {
 
   it("#0: test add vault with vault zero", async () => {
     await expect(
-      gasStationMock.addVault(
+      managerMock.addVault(
         ethers.constants.AddressZero,
         ethers.constants.HashZero,
         "Gaussian"
       )
-    ).to.be.revertedWith("GasStation: address Zero");
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#1: test add vault with not whitelisted strategy", async () => {
     await expect(
-      gasStationMock
+      managerMock
         .connect(user)
         .addVault(vault.address, ethers.constants.HashZero, "Gaussian")
-    ).to.be.revertedWith("GasStation: Not whitelisted");
+    ).to.be.revertedWith("PALMManager: Not whitelisted");
   });
 
   it("#2: test add vault with vault already added", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
     await expect(
-      gasStationMock
+      managerMock
         .connect(user)
         .addVault(vault.address, ethers.constants.HashZero, "Gaussian")
-    ).to.be.revertedWith("GasStation: Vault already added");
+    ).to.be.revertedWith("PALMManager: Vault already added");
   });
 
   it("#3: test add vault with vault already added", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
     await expect(
-      gasStationMock
+      managerMock
         .connect(user)
         .addVault(vault.address, ethers.constants.HashZero, "Gaussian", {
           value: ethers.utils.parseEther("1"),
         })
     ).to.not.be.reverted;
 
-    expect((await gasStationMock.vaults(vault.address)).balance).to.be.eq(
+    expect((await managerMock.vaults(vault.address)).balance).to.be.eq(
       ethers.utils.parseEther("1")
     );
   });
@@ -171,40 +168,39 @@ describe("GasStation unit test!!!", async function () {
 
   it("#4: test remove vault with vault zero", async () => {
     await expect(
-      gasStationMock
+      managerMock
         .connect(user)
         .removeVault(ethers.constants.AddressZero, userAddr)
-    ).to.be.revertedWith("GasStation: address Zero");
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#5: test remove vault with not owner", async () => {
     await expect(
-      gasStationMock.connect(user2).removeVault(vault.address, userAddr)
-    ).to.be.revertedWith("GasStation: only vault owner");
+      managerMock.connect(user2).removeVault(vault.address, userAddr)
+    ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
   it("#6: test remove vault with vault not managed", async () => {
     await expect(
-      gasStationMock.connect(user).removeVault(vault.address, userAddr)
-    ).to.be.revertedWith("GasStation: Vault not managed");
+      managerMock.connect(user).removeVault(vault.address, userAddr)
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#7: test remove vault", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
-    await expect(
-      gasStationMock.connect(user).removeVault(vault.address, userAddr)
-    ).to.not.be.reverted;
+    await expect(managerMock.connect(user).removeVault(vault.address, userAddr))
+      .to.not.be.reverted;
   });
 
   it("#8: test remove vault with fund withdrawal", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian", {
         value: ethers.utils.parseEther("1"),
@@ -212,9 +208,8 @@ describe("GasStation unit test!!!", async function () {
 
     const balanceBefore = await user.getBalance();
 
-    await expect(
-      gasStationMock.connect(user).removeVault(vault.address, userAddr)
-    ).to.not.be.reverted;
+    await expect(managerMock.connect(user).removeVault(vault.address, userAddr))
+      .to.not.be.reverted;
 
     expect(await user.getBalance()).to.be.gt(balanceBefore);
   });
@@ -225,52 +220,52 @@ describe("GasStation unit test!!!", async function () {
 
   it("#9: test set vault data with vault is Zero Address", async () => {
     await expect(
-      gasStationMock.setVaultData(
+      managerMock.setVaultData(
         ethers.constants.AddressZero,
         ethers.constants.HashZero
       )
-    ).to.be.revertedWith("GasStation: address Zero");
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#10: test set vault data with not owner", async () => {
     await expect(
-      gasStationMock
+      managerMock
         .connect(user2)
         .setVaultData(vault.address, ethers.constants.HashZero)
-    ).to.be.revertedWith("GasStation: only vault owner");
+    ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
   it("#11: test set vault data with no managed vault", async () => {
     await expect(
-      gasStationMock.setVaultData(vault.address, ethers.constants.HashZero)
-    ).to.be.revertedWith("GasStation: Vault not managed");
+      managerMock.setVaultData(vault.address, ethers.constants.HashZero)
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#11: test set vault data with same data", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
     await expect(
-      gasStationMock.setVaultData(vault.address, ethers.constants.HashZero)
-    ).to.be.revertedWith("GasStation: data");
+      managerMock.setVaultData(vault.address, ethers.constants.HashZero)
+    ).to.be.revertedWith("PALMManager: data");
   });
 
   it("#12: test set vault data", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
     const data = ethers.utils.keccak256(ethers.constants.HashZero);
 
-    await expect(gasStationMock.setVaultData(vault.address, data)).to.not.be
+    await expect(managerMock.setVaultData(vault.address, data)).to.not.be
       .reverted;
 
-    expect((await gasStationMock.vaults(vault.address)).datas).to.be.eq(data);
+    expect((await managerMock.vaults(vault.address)).datas).to.be.eq(data);
   });
 
   // #endregion set vault data unit test.
@@ -279,54 +274,45 @@ describe("GasStation unit test!!!", async function () {
 
   it("#13: test set vault strat by name with vault is zero address", async () => {
     await expect(
-      gasStationMock.setVaultStraByName(
-        ethers.constants.AddressZero,
-        "Gaussian"
-      )
-    ).to.be.revertedWith("GasStation: address Zero");
+      managerMock.setVaultStraByName(ethers.constants.AddressZero, "Gaussian")
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#14: test set vault strat by name with no owner", async () => {
     await expect(
-      gasStationMock
-        .connect(user2)
-        .setVaultStraByName(vault.address, "Gaussian")
-    ).to.be.revertedWith("GasStation: only vault owner");
+      managerMock.connect(user2).setVaultStraByName(vault.address, "Gaussian")
+    ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
   it("#15: test set vault strat by name with no managed vault", async () => {
     await expect(
-      gasStationMock.connect(user).setVaultStraByName(vault.address, "Gaussian")
-    ).to.be.revertedWith("GasStation: Vault not managed");
+      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian")
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#15: test set vault strat by name with no managed vault", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
     await expect(
-      gasStationMock
-        .connect(user)
-        .setVaultStraByName(vault.address, "Gaussian 2")
-    ).to.be.revertedWith("GasStation: strat not whitelisted.");
+      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian 2")
+    ).to.be.revertedWith("PALMManager: strat not whitelisted.");
   });
 
   it("#16: test set vault strat by name", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock
+    await managerMock
       .connect(user)
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
-    await gasStationMock.whitelistStrat("Gaussian 2");
+    await managerMock.whitelistStrat("Gaussian 2");
 
     await expect(
-      gasStationMock
-        .connect(user)
-        .setVaultStraByName(vault.address, "Gaussian 2")
+      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian 2")
     ).to.not.be.reverted;
   });
 
@@ -336,25 +322,25 @@ describe("GasStation unit test!!!", async function () {
 
   it("#17: test add operators with operators eq to address zero", async () => {
     await expect(
-      gasStationMock.addOperators([ethers.constants.AddressZero])
-    ).to.be.revertedWith("GasStation: address Zero");
+      managerMock.addOperators([ethers.constants.AddressZero])
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#18: test add operators with not owner", async () => {
     await expect(
-      gasStationMock.connect(user2).addOperators([userAddr])
+      managerMock.connect(user2).addOperators([userAddr])
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("#19: test add operators with already operator", async () => {
-    gasStationMock.addOperators([userAddr]);
-    await expect(gasStationMock.addOperators([userAddr])).to.be.revertedWith(
-      "GasStation: operator"
+    managerMock.addOperators([userAddr]);
+    await expect(managerMock.addOperators([userAddr])).to.be.revertedWith(
+      "PALMManager: operator"
     );
   });
 
   it("#20: test add operators", async () => {
-    await expect(gasStationMock.addOperators([userAddr])).to.not.be.reverted;
+    await expect(managerMock.addOperators([userAddr])).to.not.be.reverted;
   });
 
   // #endregion add operators unit test.
@@ -363,26 +349,26 @@ describe("GasStation unit test!!!", async function () {
 
   it("#21: test remove operators with operators eq to address zero", async () => {
     await expect(
-      gasStationMock.removeOperators([ethers.constants.AddressZero])
-    ).to.be.revertedWith("GasStation: address Zero");
+      managerMock.removeOperators([ethers.constants.AddressZero])
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#22: test remove operators with not owner", async () => {
     await expect(
-      gasStationMock.connect(user2).removeOperators([userAddr])
+      managerMock.connect(user2).removeOperators([userAddr])
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("#23: test remove operators with already operator", async () => {
-    await expect(gasStationMock.removeOperators([userAddr])).to.be.revertedWith(
-      "GasStation: no operator"
+    await expect(managerMock.removeOperators([userAddr])).to.be.revertedWith(
+      "PALMManager: no operator"
     );
   });
 
   it("#24: test remove operators", async () => {
-    await expect(gasStationMock.addOperators([userAddr])).to.not.be.reverted;
+    await expect(managerMock.addOperators([userAddr])).to.not.be.reverted;
 
-    await expect(gasStationMock.removeOperators([userAddr])).to.not.be.reverted;
+    await expect(managerMock.removeOperators([userAddr])).to.not.be.reverted;
   });
 
   // #endregion remove operators unit test.
@@ -391,75 +377,75 @@ describe("GasStation unit test!!!", async function () {
 
   it("#25: test withdraw vault balance with address zero", async () => {
     await expect(
-      gasStationMock.withdrawVaultBalance(
+      managerMock.withdrawVaultBalance(
         ethers.constants.AddressZero,
         ethers.utils.parseEther("1"),
         userAddr
       )
-    ).to.be.revertedWith("GasStation: address Zero");
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#26: test withdraw vault balance with no vault owner", async () => {
     await expect(
-      gasStationMock
+      managerMock
         .connect(user2)
         .withdrawVaultBalance(
           vault.address,
           ethers.utils.parseEther("1"),
           userAddr
         )
-    ).to.be.revertedWith("GasStation: only vault owner");
+    ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
   it("#27: test withdraw vault balance with no managed vault", async () => {
     await expect(
-      gasStationMock.withdrawVaultBalance(
+      managerMock.withdrawVaultBalance(
         vault.address,
         ethers.utils.parseEther("1"),
         userAddr
       )
-    ).to.be.revertedWith("GasStation: Vault not managed");
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#28: test withdraw vault balance with to eq Address Zero", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian"
     );
     await expect(
-      gasStationMock.withdrawVaultBalance(
+      managerMock.withdrawVaultBalance(
         vault.address,
         ethers.utils.parseEther("1"),
         ethers.constants.AddressZero
       )
-    ).to.be.revertedWith("GasStation: address Zero");
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#29: test withdraw vault balance with to eq Address Zero", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian"
     );
 
     await expect(
-      gasStationMock.withdrawVaultBalance(
+      managerMock.withdrawVaultBalance(
         vault.address,
         ethers.utils.parseEther("1"),
         userAddr
       )
-    ).to.be.revertedWith("GasStation: amount exceeds available balance");
+    ).to.be.revertedWith("PALMManager: amount exceeds available balance");
   });
 
   it("#30: test withdraw vault balance", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian",
@@ -469,7 +455,7 @@ describe("GasStation unit test!!!", async function () {
     );
 
     await expect(
-      gasStationMock.withdrawVaultBalance(
+      managerMock.withdrawVaultBalance(
         vault.address,
         ethers.utils.parseEther("1"),
         userAddr
@@ -482,9 +468,9 @@ describe("GasStation unit test!!!", async function () {
   // #region fund vault balance unit test.
 
   it("#31: test fund vault balance with not managed vault", async () => {
-    // await gasStationMock.whitelistStrat("Gaussian");
+    // await managerMock.whitelistStrat("Gaussian");
 
-    // await gasStationMock.addVault(
+    // await managerMock.addVault(
     //   vault.address,
     //   ethers.constants.HashZero,
     //   "Gaussian",
@@ -494,23 +480,23 @@ describe("GasStation unit test!!!", async function () {
     // );
 
     await expect(
-      gasStationMock.fundVaultBalance(vault.address, {
+      managerMock.fundVaultBalance(vault.address, {
         value: ethers.utils.parseEther("1"),
       })
-    ).to.be.revertedWith("GasStation: Vault not managed");
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#32: test fund vault balance", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian"
     );
 
     await expect(
-      gasStationMock.fundVaultBalance(vault.address, {
+      managerMock.fundVaultBalance(vault.address, {
         value: ethers.utils.parseEther("1"),
       })
     ).to.not.be.reverted;
@@ -521,105 +507,70 @@ describe("GasStation unit test!!!", async function () {
   // #region expand MM Term Duration unit test.
 
   it("#33: test expand MM terms with not terms", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian"
     );
 
     await expect(
-      gasStationMock.connect(user2).expandMMTermDuration(vault.address)
-    ).to.be.revertedWith("GasStation: only Terms");
+      managerMock.connect(user2).expandMMTermDuration(vault.address)
+    ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#34: test expand MM terms with vault eq zero address", async () => {
     await expect(
-      gasStationMock.expandMMTermDuration(ethers.constants.AddressZero)
-    ).to.be.revertedWith("GasStation: address Zero");
+      managerMock.expandMMTermDuration(ethers.constants.AddressZero)
+    ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#35: test expand MM terms with no managed vault", async () => {
     await expect(
-      gasStationMock.expandMMTermDuration(vault.address)
-    ).to.be.revertedWith("GasStation: Vault not managed");
+      managerMock.expandMMTermDuration(vault.address)
+    ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
   it("#36: test expand MM terms", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
+    await managerMock.whitelistStrat("Gaussian");
 
-    await gasStationMock.addVault(
+    await managerMock.addVault(
       vault.address,
       ethers.constants.HashZero,
       "Gaussian"
     );
 
-    await expect(gasStationMock.expandMMTermDuration(vault.address)).to.not.be
+    await expect(managerMock.expandMMTermDuration(vault.address)).to.not.be
       .reverted;
   });
 
   // #endregion expand MM Term Duration unit test.
 
-  // #region toggleRestrictMint unit test.
-
-  it("#37: test toggleRestrictMint with vault eq zero address", async () => {
-    await expect(
-      gasStationMock.toggleRestrictMint(ethers.constants.AddressZero)
-    ).to.be.revertedWith("GasStation: address Zero");
-  });
-
-  it("#38: test toggleRestrictMint with no vault owner", async () => {
-    await expect(
-      gasStationMock.connect(user2).toggleRestrictMint(vault.address)
-    ).to.be.revertedWith("GasStation: only vault owner");
-  });
-
-  it("#39: test toggleRestrictMint with no managed vault", async () => {
-    await expect(
-      gasStationMock.toggleRestrictMint(vault.address)
-    ).to.be.revertedWith("GasStation: Vault not managed");
-  });
-
-  it("#40: test toggleRestrictMint", async () => {
-    await gasStationMock.whitelistStrat("Gaussian");
-
-    await gasStationMock.addVault(
-      vault.address,
-      ethers.constants.HashZero,
-      "Gaussian"
-    );
-
-    await expect(gasStationMock.toggleRestrictMint(vault.address)).to.not.be
-      .reverted;
-  });
-
-  // #endregion toggleRestrictMint unit test.
-
   // #region whitelistStrat unit test.
 
   it("#41: test whitelistStrat with no owner", async () => {
     await expect(
-      gasStationMock.connect(user2).whitelistStrat("")
+      managerMock.connect(user2).whitelistStrat("")
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
   it("#42: test whitelistStrat with empty string strat", async () => {
-    await expect(gasStationMock.whitelistStrat("")).to.be.revertedWith(
-      "GasStation: empty string"
+    await expect(managerMock.whitelistStrat("")).to.be.revertedWith(
+      "PALMManager: empty string"
     );
   });
 
   it("#43: test whitelistStrat with already added strat", async () => {
-    await gasStationMock.whitelistStrat("Bootstrapping");
+    await managerMock.whitelistStrat("Bootstrapping");
 
     await expect(
-      gasStationMock.whitelistStrat("Bootstrapping")
-    ).to.be.revertedWith("GasStation: strat whitelisted.");
+      managerMock.whitelistStrat("Bootstrapping")
+    ).to.be.revertedWith("PALMManager: strat whitelisted.");
   });
 
   it("#44: test whitelistStrat", async () => {
-    await expect(gasStationMock.whitelistStrat("Bootstrapping")).to.not.be
+    await expect(managerMock.whitelistStrat("Bootstrapping")).to.not.be
       .reverted;
   });
 

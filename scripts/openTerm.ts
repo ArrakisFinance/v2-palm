@@ -1,5 +1,5 @@
 import hre, { ethers } from "hardhat";
-import { ERC20, Terms } from "../typechain";
+import { ERC20, PALMTerms } from "../typechain";
 
 // #region user input values
 
@@ -11,13 +11,11 @@ const amount0 = ethers.utils.parseUnits("1", 18);
 const amount1 = ethers.utils.parseUnits("0.01", 18);
 const allocationBps = 250; // percent holdings to use as liquidity (e.g. 2.5%)
 const weightRightRange = 2;
+
 // #endregion user input values.
 
 // #region default inputs
 
-const maxTwapDeviation = 100; // twap deviation max value.
-const twapDuration = 2000; // number of seconds.
-const maxSlippage = 100; // number of bps.
 const strat = "BOOTSTRAPPING";
 const isBeacon = false;
 // #endregion default inputs
@@ -38,7 +36,7 @@ async function main() {
     signer
   )) as ERC20;
 
-  const terms = (await ethers.getContract("Terms", signer)) as Terms;
+  const terms = (await ethers.getContract("PALMTerms", signer)) as PALMTerms;
 
   await token0ERC20.approve(terms.address, amount0);
   await token1ERC20.approve(terms.address, amount1);
@@ -87,9 +85,6 @@ async function main() {
       token1,
       projectTknIsTknZero,
       owner: await signer.getAddress(),
-      maxTwapDeviation,
-      twapDuration,
-      maxSlippage,
       amount0,
       amount1,
       datas: dataFormatted,

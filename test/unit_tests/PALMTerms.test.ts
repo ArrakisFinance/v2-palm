@@ -12,22 +12,22 @@ import {
   IUniswapV3Factory,
   IUniswapV3Pool,
   ProjectToken,
-  GasStationMock,
-  TermsMock,
+  PALMManagerMock,
+  PALMTermsMock,
 } from "../../typechain";
 import { BigNumber } from "ethers";
 
 const { ethers, deployments } = hre;
 
-describe("Terms unit test!!!", async function () {
+describe("PALMTerms unit test!!!", async function () {
   this.timeout(0);
 
   let user: Signer;
   let userAddr: string;
   let owner: Signer;
   let addresses: Addresses;
-  let terms: TermsMock;
-  let gasStation: GasStationMock;
+  let terms: PALMTermsMock;
+  let manager: PALMManagerMock;
   let arrakisV2Factory: IArrakisV2Factory;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
@@ -37,7 +37,7 @@ describe("Terms unit test!!!", async function () {
   let projectTknIsTknZero: boolean;
   let vault: IArrakisV2;
 
-  beforeEach("Setting up for Terms unit test", async function () {
+  beforeEach("Setting up for PALMTerms unit test", async function () {
     if (hre.network.name !== "hardhat") {
       console.error("Test Suite is meant to be run on hardhat only");
       process.exit(1);
@@ -49,13 +49,13 @@ describe("Terms unit test!!!", async function () {
     addresses = getAddressBookByNetwork(hre.network.name);
     await deployments.fixture();
 
-    terms = (await ethers.getContract("TermsMock", user)) as TermsMock;
-    gasStation = (await ethers.getContract(
-      "GasStationMock",
+    terms = (await ethers.getContract("PALMTermsMock", user)) as PALMTermsMock;
+    manager = (await ethers.getContract(
+      "PALMManagerMock",
       user
-    )) as GasStationMock;
+    )) as PALMManagerMock;
 
-    await terms.connect(owner).setManager(gasStation.address);
+    await terms.connect(owner).setManager(manager.address);
 
     baseToken = (await ethers.getContract("BaseToken")) as BaseToken;
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
@@ -108,9 +108,6 @@ describe("Terms unit test!!!", async function () {
       init0: init0,
       init1: init1,
       manager: userAddr,
-      maxTwapDeviation: 100,
-      twapDuration: 1,
-      maxSlippage: 100,
     };
 
     const receipt = await (
@@ -134,7 +131,7 @@ describe("Terms unit test!!!", async function () {
 
   it("#1: setEmolument unit test with emolument > than the previous one", async () => {
     await expect(terms.connect(owner).setEmolument(1000)).to.be.revertedWith(
-      "Terms: new emolument >= old emolument"
+      "PALMTerms: new emolument >= old emolument"
     );
   });
 
@@ -155,13 +152,13 @@ describe("Terms unit test!!!", async function () {
   it("#4: setTermTreasury unit test with zero address", async () => {
     await expect(
       terms.connect(owner).setTermTreasury(ethers.constants.AddressZero)
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#5: setTermTreasury unit test with same term treasury", async () => {
     await expect(
       terms.connect(owner).setTermTreasury(await terms.termTreasury())
-    ).to.be.revertedWith("Terms: already term treasury");
+    ).to.be.revertedWith("PALMTerms: already term treasury");
   });
 
   it("#6: setTermTreasury unit test", async () => {
@@ -182,13 +179,13 @@ describe("Terms unit test!!!", async function () {
   it("#7: setResolver unit test with zero address", async () => {
     await expect(
       terms.connect(owner).setResolver(ethers.constants.AddressZero)
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#8: setResolver unit test with same resolver", async () => {
     await expect(
       terms.connect(owner).setResolver(await terms.resolver())
-    ).to.be.revertedWith("Terms: already resolver");
+    ).to.be.revertedWith("PALMTerms: already resolver");
   });
 
   it("#9: setResolver unit test", async () => {
@@ -208,14 +205,14 @@ describe("Terms unit test!!!", async function () {
   it("#11: setManager unit test with zero address", async () => {
     await expect(
       terms.connect(owner).setManager(ethers.constants.AddressZero)
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#12: setManager unit test with same manager", async () => {
     await terms.connect(owner).setManager(userAddr);
     await expect(
       terms.connect(owner).setManager(await terms.manager())
-    ).to.be.revertedWith("Terms: already manager");
+    ).to.be.revertedWith("PALMTerms: already manager");
   });
 
   it("#13: setManager unit test", async () => {
@@ -229,13 +226,13 @@ describe("Terms unit test!!!", async function () {
   it("#14: addPools unit test with vault zero address", async () => {
     await expect(
       terms.addPools(ethers.constants.AddressZero, [500])
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#15: addPools unit test with not owner", async () => {
     await expect(
       terms.connect(user).addPools(vault.address, [500])
-    ).to.be.revertedWith("Terms: not owner");
+    ).to.be.revertedWith("PALMTerms: not owner");
   });
 
   it("#16: addPools unit test", async () => {
@@ -254,13 +251,13 @@ describe("Terms unit test!!!", async function () {
   it("#17: removePools unit test with vault zero address", async () => {
     await expect(
       terms.removePools(ethers.constants.AddressZero, [pool.address])
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#18: removePools unit test with not owner", async () => {
     await expect(
       terms.connect(user).removePools(vault.address, [pool.address])
-    ).to.be.revertedWith("Terms: not owner");
+    ).to.be.revertedWith("PALMTerms: not owner");
   });
 
   it("#19: removePools unit test", async () => {
@@ -280,75 +277,6 @@ describe("Terms unit test!!!", async function () {
 
   // #endregion removePools unit test.
 
-  // #region setMaxTwapDeviation unit test.
-
-  it("#20: setMaxTwapDeviation unit test with vault zero address", async () => {
-    await expect(
-      terms.setMaxTwapDeviation(ethers.constants.AddressZero, 2000)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#21: setMaxTwapDeviation unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setMaxTwapDeviation(vault.address, 2000)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#22: setMaxTwapDeviation unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setMaxTwapDeviation(vault.address, 2000))
-      .to.not.be.reverted;
-  });
-
-  // #endregion setMaxTwapDeviation unit test.
-
-  // #region setTwapDuration unit test.
-
-  it("#23: setTwapDuration unit test with vault zero address", async () => {
-    await expect(
-      terms.setTwapDuration(ethers.constants.AddressZero, 200)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#24: setTwapDuration unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setTwapDuration(vault.address, 200)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#25: setTwapDuration unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setTwapDuration(vault.address, 200)).to
-      .not.be.reverted;
-  });
-
-  // #endregion setTwapDuration unit test.
-
-  // #region setMaxSlippage unit test.
-
-  it("#26: setMaxSlippage unit test with vault zero address", async () => {
-    await expect(
-      terms.setMaxSlippage(ethers.constants.AddressZero, 300)
-    ).to.be.revertedWith("Terms: address Zero");
-  });
-
-  it("#27: setMaxSlippage unit test with not owner", async () => {
-    await expect(
-      terms.connect(user).setMaxSlippage(vault.address, 300)
-    ).to.be.revertedWith("Terms: not owner");
-  });
-
-  it("#28: setMaxSlippage unit test", async () => {
-    await terms.connect(owner).addVault(vault.address);
-
-    await expect(terms.connect(owner).setMaxSlippage(vault.address, 300)).to.not
-      .be.reverted;
-  });
-
-  // #endregion setMaxSlippage unit test.
-
   // #region setVaultData unit test.
 
   it("#29: setVaultData unit test with vault zero address", async () => {
@@ -357,19 +285,19 @@ describe("Terms unit test!!!", async function () {
         ethers.constants.AddressZero,
         ethers.constants.HashZero
       )
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#30: setMaxSlippage unit test with not owner", async () => {
     await expect(
       terms.connect(user).setVaultData(vault.address, ethers.constants.HashZero)
-    ).to.be.revertedWith("Terms: not owner");
+    ).to.be.revertedWith("PALMTerms: not owner");
   });
 
   it("#31: setMaxSlippage unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await gasStation.addVaultMock(vault.address);
+    await manager.addVaultMock(vault.address);
 
     await expect(
       terms
@@ -388,20 +316,20 @@ describe("Terms unit test!!!", async function () {
   it("#32: setVaultStratByName unit test with vault zero address", async () => {
     await expect(
       terms.setVaultStratByName(ethers.constants.AddressZero, "Gaussian")
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#33: setVaultStratByName unit test with not owner", async () => {
     await expect(
       terms.connect(user).setVaultStratByName(vault.address, "Gaussian")
-    ).to.be.revertedWith("Terms: not owner");
+    ).to.be.revertedWith("PALMTerms: not owner");
   });
 
   it("#34: setVaultStratByName unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await gasStation.addVaultMock(vault.address);
-    await gasStation.whitelistStrat("Gaussian");
+    await manager.addVaultMock(vault.address);
+    await manager.whitelistStrat("Gaussian");
 
     await expect(
       terms.connect(owner).setVaultStratByName(vault.address, "Gaussian")
@@ -419,7 +347,7 @@ describe("Terms unit test!!!", async function () {
         ethers.constants.Zero,
         userAddr
       )
-    ).to.be.revertedWith("Terms: address Zero");
+    ).to.be.revertedWith("PALMTerms: address Zero");
   });
 
   it("#36: withdrawVaultBalance unit test with not owner", async () => {
@@ -427,13 +355,13 @@ describe("Terms unit test!!!", async function () {
       terms
         .connect(user)
         .withdrawVaultBalance(vault.address, ethers.constants.Zero, userAddr)
-    ).to.be.revertedWith("Terms: not owner");
+    ).to.be.revertedWith("PALMTerms: not owner");
   });
 
   it("#37: withdrawVaultBalance unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await gasStation.addVaultMock(vault.address, {
+    await manager.addVaultMock(vault.address, {
       value: ethers.utils.parseEther("1"),
     });
 

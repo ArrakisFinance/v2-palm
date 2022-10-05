@@ -2,7 +2,7 @@
 pragma solidity 0.8.13;
 
 import {IArrakisV2, Rebalance, Range} from "./interfaces/IArrakisV2.sol";
-import {IGasStation} from "./interfaces/IGasStation.sol";
+import {IPALMManager} from "./interfaces/IPALMManager.sol";
 import {
     IUniswapV3Pool
 } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
@@ -10,10 +10,10 @@ import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {GasStationStorage} from "./abstracts/GasStationStorage.sol";
-import {VaultInfo} from "./structs/SGasStation.sol";
+import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
+import {VaultInfo} from "./structs/SPALMManager.sol";
 
-contract GasStation is GasStationStorage {
+contract PALMManager is PALMManagerStorage {
     using SafeERC20 for IERC20;
 
     constructor(
@@ -22,7 +22,7 @@ contract GasStation is GasStationStorage {
         address terms_,
         uint256 mmTermDuration_
     )
-        GasStationStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_)
+        PALMManagerStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -37,7 +37,7 @@ contract GasStation is GasStationStorage {
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
         require(
             vaults[vault_].endOfMM > block.timestamp, // solhint-disable-line not-rely-on-time
-            "GasStation: vault no longer managed."
+            "PALMManager: vault no longer managed."
         );
         uint256 balance = _preExec(vault_, feeAmount_);
         IArrakisV2(vault_).rebalance(
@@ -56,8 +56,8 @@ contract GasStation is GasStationStorage {
     {
         VaultInfo memory vaultInfo = vaults[vault_];
         require(
-            vaultInfo.balance > feeAmount_,
-            "GasStation: Not enough balance to pay fee"
+            vaultInfo.balance >= feeAmount_,
+            "PALMManager: Not enough balance to pay fee"
         );
         balance = vaultInfo.balance - feeAmount_;
 
