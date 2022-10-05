@@ -38,8 +38,7 @@ async function main() {
 
   const terms = (await ethers.getContract("Terms", signer)) as Terms;
 
-  await token0ERC20.approve(terms.address, 
-  );
+  await token0ERC20.approve(terms.address, amount0);
   await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
