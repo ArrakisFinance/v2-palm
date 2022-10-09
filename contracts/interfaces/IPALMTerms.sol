@@ -51,6 +51,18 @@ interface IPALMTerms {
 
     event LogRemovePools(address creator, address vault, address[] pools);
 
+    event LogWhitelistRouters(
+        address creator,
+        address vault,
+        address[] routers
+    );
+
+    event LogBlacklistRouters(
+        address creator,
+        address vault,
+        address[] routers
+    );
+
     // #endregion vault modification events.
 
     // #region PALMManager interaction events.
@@ -105,6 +117,12 @@ interface IPALMTerms {
     function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_) external;
 
     function removePools(IArrakisV2 vault_, address[] calldata pools_) external;
+
+    function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
+        external;
+
+    function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
+        external;
 
     // #endregion Vault configuration functions.
 

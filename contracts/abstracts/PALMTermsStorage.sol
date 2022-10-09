@@ -148,6 +148,30 @@ abstract contract PALMTermsStorage is
         emit LogRemovePools(msg.sender, vaultAddr, pools_);
     }
 
+    function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        vault_.whitelistRouters(routers_);
+
+        emit LogWhitelistRouters(msg.sender, vaultAddr, routers_);
+    }
+
+    function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
+        external
+        override
+        requireAddressNotZero(address(vault_))
+    {
+        address vaultAddr = address(vault_);
+        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        vault_.blacklistRouters(routers_);
+
+        emit LogBlacklistRouters(msg.sender, vaultAddr, routers_);
+    }
+
     // #endregion vault config as admin.
 
     // #region manager config as vault owner.

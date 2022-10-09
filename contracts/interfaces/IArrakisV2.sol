@@ -78,6 +78,10 @@ interface IArrakisV2 {
 
     function removePools(address[] calldata pools_) external;
 
+    function whitelistRouters(address[] calldata routers_) external;
+
+    function blacklistRouters(address[] calldata routers_) external;
+
     function setManager(IPALMManager manager_) external;
 
     function token0() external view returns (IERC20);
