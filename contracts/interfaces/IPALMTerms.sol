@@ -8,7 +8,6 @@ import {IPALMManager} from "./IPALMManager.sol";
 import {
     SetupPayload,
     IncreaseBalance,
-    ExtendingTermData,
     DecreaseBalance
 } from "../structs/SPALMTerms.sol";
 
@@ -29,12 +28,7 @@ interface IPALMTerms {
 
     event SetupVault(address creator, address vault);
     event IncreaseLiquidity(address creator, address vault);
-    event ExtendingTerm(
-        address creator,
-        address vault,
-        uint256 emolument0,
-        uint256 emolument1
-    );
+    event RenewTerm(address vault, uint256 emolument0, uint256 emolument1);
     event DecreaseLiquidity(
         address creator,
         address vault,
@@ -92,10 +86,7 @@ interface IPALMTerms {
         uint256 mintAmount_
     ) external;
 
-    function extendingTerm(
-        ExtendingTermData calldata extensionData_,
-        uint256 mintAmount_
-    ) external;
+    function renewTerm(IArrakisV2 vault_) external;
 
     function decreaseLiquidity(
         DecreaseBalance calldata decreaseBalance_,

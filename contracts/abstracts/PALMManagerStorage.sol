@@ -49,7 +49,7 @@ abstract contract PALMManagerStorage is
 
     // #region PALMTerms Market Making Duration.
 
-    uint256 public immutable mmTermDuration;
+    uint256 public immutable termDuration;
 
     // #endregion PALMTerms Market Making Duration.
 
@@ -87,12 +87,7 @@ abstract contract PALMManagerStorage is
     }
 
     modifier onlyManagedVaults(address vault) {
-        require(
-            // solhint-disable-next-line not-rely-on-time
-            vaults[vault].endOfMM >= block.timestamp &&
-                vaults[vault].endOfMM != 0,
-            "PALMManager: Vault not managed"
-        );
+        require(vaults[vault].termEnd != 0, "PALMManager: Vault not managed");
         _;
     }
 
@@ -123,12 +118,12 @@ abstract contract PALMManagerStorage is
         address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
-        uint256 mmTermDuration_
+        uint256 termDuration_
     ) {
         gelato = payable(gelato_);
         managerFeeBPS = managerFeeBPS_;
         terms = terms_;
-        mmTermDuration = mmTermDuration_;
+        termDuration = termDuration_;
     }
 
     // #endregion constructor.
@@ -177,7 +172,7 @@ abstract contract PALMManagerStorage is
         requireAddressNotZero(vault_)
         onlyVaultOwner(vault_)
     {
-        require(vaults[vault_].endOfMM != 0, "PALMManager: Vault not managed");
+        require(vaults[vault_].termEnd != 0, "PALMManager: Vault not managed");
         _removeVault(vault_, to_);
     }
 
@@ -253,7 +248,7 @@ abstract contract PALMManagerStorage is
         _fundVaultBalance(vault_);
     }
 
-    function expandMMTermDuration(address vault_)
+    function renewTerm(address vault_)
         external
         override
         whenNotPaused
@@ -261,11 +256,11 @@ abstract contract PALMManagerStorage is
         requireAddressNotZero(vault_)
         onlyManagedVaults(vault_)
     {
-        emit ExpandTermDuration(
+        emit SetTermEnd(
             vault_,
-            vaults[vault_].endOfMM,
+            vaults[vault_].termEnd,
             // solhint-disable-next-line not-rely-on-time
-            vaults[vault_].endOfMM = block.timestamp + mmTermDuration
+            vaults[vault_].termEnd = block.timestamp + termDuration
         );
     }
 
@@ -320,14 +315,14 @@ abstract contract PALMManagerStorage is
             "PALMManager: Not whitelisted"
         );
         require(
-            vaults[vault_].endOfMM == 0,
+            vaults[vault_].termEnd == 0,
             "PALMManager: Vault already added"
         );
         vaults[vault_].datas = datas_;
         vaults[vault_].strat = stratEncoded;
 
         // solhint-disable-next-line not-rely-on-time
-        vaults[vault_].endOfMM = block.timestamp + mmTermDuration;
+        vaults[vault_].termEnd = block.timestamp + termDuration;
 
         emit AddVault(vault_, datas_, strat_);
     }

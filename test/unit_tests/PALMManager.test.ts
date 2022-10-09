@@ -516,20 +516,20 @@ describe("PALMManager unit test!!!", async function () {
     );
 
     await expect(
-      managerMock.connect(user2).expandMMTermDuration(vault.address)
+      managerMock.connect(user2).renewTerm(vault.address)
     ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#34: test expand MM terms with vault eq zero address", async () => {
     await expect(
-      managerMock.expandMMTermDuration(ethers.constants.AddressZero)
+      managerMock.renewTerm(ethers.constants.AddressZero)
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#35: test expand MM terms with no managed vault", async () => {
-    await expect(
-      managerMock.expandMMTermDuration(vault.address)
-    ).to.be.revertedWith("PALMManager: Vault not managed");
+    await expect(managerMock.renewTerm(vault.address)).to.be.revertedWith(
+      "PALMManager: Vault not managed"
+    );
   });
 
   it("#36: test expand MM terms", async () => {
@@ -541,8 +541,7 @@ describe("PALMManager unit test!!!", async function () {
       "Gaussian"
     );
 
-    await expect(managerMock.expandMMTermDuration(vault.address)).to.not.be
-      .reverted;
+    await expect(managerMock.renewTerm(vault.address)).to.not.be.reverted;
   });
 
   // #endregion expand MM Term Duration unit test.

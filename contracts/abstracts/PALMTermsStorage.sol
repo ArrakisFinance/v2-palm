@@ -38,11 +38,9 @@ abstract contract PALMTermsStorage is
     address public manager;
     uint16 public emolument;
     IArrakisV2Resolver public resolver;
+    mapping(address => address) public delegateByVaults;
 
     // #region no left over.
-
-    // New variable for Proxy.
-    mapping(address => address) public delegateByVaults;
 
     modifier noLeftOver(IERC20 token0_, IERC20 token1_) {
         uint256 token0Balance = token0_.balanceOf(address(this));
@@ -212,10 +210,10 @@ abstract contract PALMTermsStorage is
         address payable to_
     ) external override requireAddressNotZero(vault_) {
         address vaultAddr = address(vault_);
-        IPALMManager manager = IPALMManager(manager);
-        (uint256 balance, , , , ) = manager.vaults(vaultAddr);
+        IPALMManager manager_ = IPALMManager(manager);
+        (uint256 balance, , , , ) = manager_.vaults(vaultAddr);
         _requireIsOwner(vaults[msg.sender], vaultAddr);
-        manager.withdrawVaultBalance(vault_, amount_, to_);
+        manager_.withdrawVaultBalance(vault_, amount_, to_);
 
         emit LogWithdrawVaultBalance(msg.sender, vaultAddr, to_, balance);
     }

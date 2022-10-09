@@ -10,15 +10,21 @@ function _burn(
     IArrakisV2 vault_,
     address me,
     IArrakisV2Resolver resolver
-) returns (uint256 amount0, uint256 amount1) {
-    uint256 balanceOfArrakisTkn = IERC20(address(vault_)).balanceOf(me);
+)
+    returns (
+        uint256 amount0,
+        uint256 amount1,
+        uint256 balance
+    )
+{
+    balance = IERC20(address(vault_)).balanceOf(me);
 
     BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
-        balanceOfArrakisTkn,
+        balance,
         vault_
     );
 
-    (amount0, amount1) = vault_.burn(burnPayload, balanceOfArrakisTkn, me);
+    (amount0, amount1) = vault_.burn(burnPayload, balance, me);
 }
 
 function _getInits(
@@ -92,7 +98,7 @@ function _requireProjectAllocationGtZero(
     );
 }
 
-function _requireAddressNotZero(uint256 mintAmount_) pure {
+function _requireMintNotZero(uint256 mintAmount_) pure {
     require(mintAmount_ > 0, "PALMTerms: mintAmount zero.");
 }
 

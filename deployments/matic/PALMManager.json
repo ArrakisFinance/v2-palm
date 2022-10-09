@@ -180,17 +180,17 @@
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "oldMmTermDuration",
+          "name": "oldtermDuration",
           "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "newMmTermDuration",
+          "name": "newtermDuration",
           "type": "uint256"
         }
       ],
-      "name": "ExpandTermDuration",
+      "name": "SetTermEnd",
       "type": "event"
     },
     {
@@ -459,7 +459,7 @@
           "type": "address"
         }
       ],
-      "name": "expandMMTermDuration",
+      "name": "renewTerm",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -524,7 +524,7 @@
             },
             {
               "internalType": "uint256",
-              "name": "endOfMM",
+              "name": "termEnd",
               "type": "uint256"
             }
           ],
@@ -577,7 +577,7 @@
     },
     {
       "inputs": [],
-      "name": "mmTermDuration",
+      "name": "termDuration",
       "outputs": [
         {
           "internalType": "uint256",
@@ -963,7 +963,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "endOfMM",
+          "name": "termEnd",
           "type": "uint256"
         }
       ],

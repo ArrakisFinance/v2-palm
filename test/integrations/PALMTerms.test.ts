@@ -200,7 +200,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
@@ -395,7 +395,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect(await vaultV2.owner()).to.be.eq(userAddr);
     expect(await vaultV2.manager()).to.be.eq(userAddr);
 
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.eq(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.eq(0);
 
     await expect(terms.vaults(userAddr, 0)).to.be.reverted;
   });
@@ -466,7 +466,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
@@ -490,7 +490,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect(vaultInfo.datas).to.be.eq(newData);
 
     await hre.network.provider.send("evm_setNextBlockTimestamp", [
-      vaultInfo.endOfMM.toNumber() - 10,
+      vaultInfo.termEnd.toNumber() - 10,
     ]);
     await hre.network.provider.send("evm_mine");
 
@@ -505,20 +505,10 @@ describe("PALMTerms integration test!!!", async function () {
       await terms.termTreasury()
     );
 
-    const result = await (
-      await terms.connect(user2).extendingTerm(
-        {
-          vault: vault,
-          projectTknIsTknZero: projectTknIsTknZero,
-          amount0: ethers.constants.Zero,
-          amount1: ethers.constants.Zero,
-        },
-        ethers.utils.parseUnits("1000", 18)
-      )
-    ).wait();
+    const result = await (await terms.connect(user2).renewTerm(vault)).wait();
 
     const extendingEvent = result.events?.find(
-      (e) => e.event == "ExtendingTerm"
+      (e) => e.event == "RenewTerm"
     )?.args;
 
     const afterBTB = await baseToken.balanceOf(vault);
