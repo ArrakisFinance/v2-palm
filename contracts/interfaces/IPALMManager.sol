@@ -75,9 +75,6 @@ interface IPALMManager is IManager {
     function unpause() external;
 
     // ======= PUBLIC FUNCTIONS =====
-
-    function termDuration() external returns (uint256);
-
     function fundVaultBalance(address vault_) external payable;
 
     function renewTerm(address vault_) external;

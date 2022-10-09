@@ -182,11 +182,11 @@ contract PALMTerms is PALMTermsStorage {
         noLeftOver(vault_.token0(), vault_.token1())
     {
         IPALMManager manager_ = IPALMManager(manager);
-        require(
-            manager_.getVaultInfo(address(vault_)).termEnd <
-                block.timestamp + manager_.termDuration(), // solhint-disable-line not-rely-on-time
+        require( // solhint-disable-next-line not-rely-on-time
+            manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
             "PALMTerms: term not ended."
         );
+        IPALMManager(manager).renewTerm(address(vault_));
 
         (uint256 amount0, uint256 amount1, uint256 balance) = _burn(
             vault_,
@@ -214,8 +214,6 @@ contract PALMTerms is PALMTermsStorage {
         }
 
         vault_.mint(balance, address(this));
-
-        IPALMManager(manager).renewTerm(address(vault_));
 
         emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }

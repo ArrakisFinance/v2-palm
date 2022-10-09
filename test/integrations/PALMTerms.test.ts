@@ -471,7 +471,7 @@ describe("PALMTerms integration test!!!", async function () {
     // #endregion get mintAmount.
   });
 
-  it("#6: extending terms", async () => {
+  it("#6: renew terms", async () => {
     // set data and strat type.
 
     const newData = ethers.utils.defaultAbiCoder.encode(["string"], ["TEST"]);
@@ -489,8 +489,12 @@ describe("PALMTerms integration test!!!", async function () {
     );
     expect(vaultInfo.datas).to.be.eq(newData);
 
+    await expect(terms.renewTerm(vault)).to.be.revertedWith(
+      "PALMTerms: term not ended."
+    );
+
     await hre.network.provider.send("evm_setNextBlockTimestamp", [
-      vaultInfo.termEnd.toNumber() - 10,
+      vaultInfo.termEnd.toNumber() + 1,
     ]);
     await hre.network.provider.send("evm_mine");
 
@@ -505,7 +509,7 @@ describe("PALMTerms integration test!!!", async function () {
       await terms.termTreasury()
     );
 
-    const result = await (await terms.connect(user2).renewTerm(vault)).wait();
+    const result = await (await terms.renewTerm(vault)).wait();
 
     const extendingEvent = result.events?.find(
       (e) => e.event == "RenewTerm"
