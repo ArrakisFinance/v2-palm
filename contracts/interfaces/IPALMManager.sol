@@ -74,6 +74,9 @@ interface IPALMManager is IManager {
 
     function unpause() external;
 
+    function withdrawFeesEarned(address[] calldata tokens_, address to_)
+        external;
+
     // ======= PUBLIC FUNCTIONS =====
     function fundVaultBalance(address vault_) external payable;
 

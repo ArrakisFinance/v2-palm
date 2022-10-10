@@ -28,10 +28,12 @@ const config: HardhatUserConfig = {
     arrakisDaoAdmin: {
       default: 1,
       matic: "0xd06a7cc1a162fDfB515595A2eC1c47B75743C381",
+      mainnet: "0xb9229ea965FC84f21b63791efC643b2c7ffB77Be",
     },
     arrakisDaoOwner: {
       default: 2,
       matic: "0xDEb4C33D5C3E7e32F55a9D6336FE06010E40E3AB",
+      mainnet: "0x5108EF86cF493905BcD35A3736e4B46DeCD7de58",
     },
   },
 
@@ -39,8 +41,14 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 33952851,
+        blockNumber: 34176260,
       },
+    },
+
+    mainnet: {
+      accounts: PK ? [PK] : [],
+      chainId: 1,
+      url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_ID}`,
     },
 
     matic: {

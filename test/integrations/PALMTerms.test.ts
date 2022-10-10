@@ -371,20 +371,29 @@ describe("PALMTerms integration test!!!", async function () {
     const afterUserP = await projectToken.balanceOf(userAddr);
 
     const afterUserB = await baseToken.balanceOf(userAddr);
+    const B = projectTknIsTknZero
+      ? closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1)
+      : closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0);
+    const P = projectTknIsTknZero
+      ? closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0)
+      : closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1);
+    expect(afterUserB.sub(beforeUserB)).to.be.eq(B);
+    expect(afterUserP.sub(beforeUserP)).to.be.eq(P);
 
-    expect(afterUserB.sub(beforeUserB)).to.be.eq(
-      closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1)
-    );
-    expect(afterUserP.sub(beforeUserP)).to.be.eq(
-      closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0)
-    );
-
-    expect(beforeTreasoryB.add(closePALMTermsEvent?.emolument1)).to.be.equal(
-      afterTreasoryB
-    );
-    expect(beforeTreasoryP.add(closePALMTermsEvent?.emolument0)).to.be.equal(
-      afterTreasoryP
-    );
+    expect(
+      beforeTreasoryB.add(
+        projectTknIsTknZero
+          ? closePALMTermsEvent?.emolument1
+          : closePALMTermsEvent?.emolument0
+      )
+    ).to.be.equal(afterTreasoryB);
+    expect(
+      beforeTreasoryP.add(
+        projectTknIsTknZero
+          ? closePALMTermsEvent?.emolument0
+          : closePALMTermsEvent?.emolument1
+      )
+    ).to.be.equal(afterTreasoryP);
 
     vaultV2 = (await ethers.getContractAt(
       "IArrakisV2",

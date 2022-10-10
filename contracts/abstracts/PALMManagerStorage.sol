@@ -222,6 +222,20 @@ abstract contract PALMManagerStorage is
         _removeOperators(operators_);
     }
 
+    function withdrawFeesEarned(address[] calldata tokens_, address to_)
+        external
+        override
+        whenNotPaused
+        onlyOwner
+    {
+        for (uint256 i = 0; i < tokens_.length; i++) {
+            uint256 balance = IERC20(tokens_[i]).balanceOf(address(this));
+            if (balance > 0) {
+                IERC20(tokens_[i]).safeTransfer(to_, balance);
+            }
+        }
+    }
+
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,
