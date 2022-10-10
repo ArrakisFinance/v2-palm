@@ -35,10 +35,6 @@ contract PALMManager is PALMManagerStorage {
         Range[] calldata rangesToRemove_,
         uint256 feeAmount_
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
-        require(
-            vaults[vault_].termEnd > block.timestamp, // solhint-disable-line not-rely-on-time
-            "PALMManager: vault no longer managed."
-        );
         uint256 balance = _preExec(vault_, feeAmount_);
         IArrakisV2(vault_).rebalance(
             ranges_,
