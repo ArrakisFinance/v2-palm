@@ -69,6 +69,7 @@ async function main() {
       strat,
       isBeacon: isBeacon,
       delegate: ethers.constants.AddressZero,
+      routers: [],
     },
     ethers.utils.parseUnits("1", 18),
   ]);

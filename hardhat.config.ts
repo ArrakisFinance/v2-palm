@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 34176260,
+        blockNumber: 34208409,
       },
     },
 

@@ -17,6 +17,7 @@ struct SetupPayload {
     string strat;
     bool isBeacon;
     address delegate;
+    address[] routers;
 }
 
 struct IncreaseBalance {

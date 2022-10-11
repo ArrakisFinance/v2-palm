@@ -39,7 +39,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0xce3bE976c7c218C15553a4e258CF8734E64A7296",
         ArrakisV2Factory: "0xf5973723eb067F90276d9f9bE80F7C9De67d22af",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        PALMTerms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
+        PALMTerms: "",
       };
 
     case "goerli":
@@ -58,7 +58,7 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0xce3bE976c7c218C15553a4e258CF8734E64A7296",
         ArrakisV2Factory: "0xf5973723eb067F90276d9f9bE80F7C9De67d22af",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        PALMTerms: "0x631fCEC46c08C73AAeB765bF6362A37778D2C2c9",
+        PALMTerms: "",
       };
 
     default: {

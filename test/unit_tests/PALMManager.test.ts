@@ -99,6 +99,7 @@ describe("PALMManager unit test!!!", async function () {
       init0: init0,
       init1: init1,
       manager: managerMock.address,
+      routers: [],
     };
 
     const receipt = await (

@@ -69,7 +69,8 @@ contract PALMTerms is PALMTermsStorage {
                     owner: address(this),
                     init0: inits.init0,
                     init1: inits.init1,
-                    manager: manager
+                    manager: manager,
+                    routers: setup_.routers
                 }),
                 setup_.isBeacon
             );

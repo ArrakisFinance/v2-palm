@@ -164,8 +164,9 @@ describe("PALMTerms integration test!!!", async function () {
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
       strat: "Bootstrapping",
-      isBeacon: false,
+      isBeacon: true,
       delegate: ethers.constants.AddressZero,
+      routers: [],
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -445,6 +446,7 @@ describe("PALMTerms integration test!!!", async function () {
       strat: "Bootstrapping",
       isBeacon: false,
       delegate: await user2.getAddress(),
+      routers: [],
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
