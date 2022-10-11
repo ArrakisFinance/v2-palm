@@ -3,25 +3,23 @@ import { ERC20, PALMTerms } from "../typechain";
 
 // #region user input values
 
-const feeTier = 10000; // uniswap v3 feeTier.
-const token0 = "0x4e1581f01046eFDd7a1a2CDB0F82cdd7F71F2E59"; // token0 address.
-const token1 = "0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619"; // token1 address.
+const feeTier = 3000; // uniswap v3 feeTier.
+const token0 = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // token0 address.
+const token1 = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // token1 address.
 const projectTknIsTknZero = true; // eslint-disable-line
-const amount0 = ethers.utils.parseUnits("1", 18);
+const amount0 = ethers.utils.parseUnits("20", 6);
 const amount1 = ethers.utils.parseUnits("0.01", 18);
-const allocationBps = 250; // percent holdings to use as liquidity (e.g. 2.5%)
-const weightRightRange = 2;
 
 // #endregion user input values.
 
 // #region default inputs
 
 const strat = "BOOTSTRAPPING";
-const isBeacon = false;
+const isBeacon = true;
 // #endregion default inputs
 
 async function main() {
-  if (hre.network.name != "matic") return;
+  if (!(hre.network.name == "matic" || hre.network.name == "mainnet")) return;
   const [signer] = await ethers.getSigners();
 
   const token0ERC20: ERC20 = (await ethers.getContractAt(
@@ -42,17 +40,21 @@ async function main() {
   await token1ERC20.approve(terms.address, amount1);
 
   const stratData = {
-    projectTknIsTknZero: projectTknIsTknZero,
-    allocationBps: allocationBps,
-    weightLeftRange: 1,
-    weightRightRange: weightRightRange,
-    numberLeftRanges: 2,
-    numberRightRanges: 2,
-    sizeLeftRanges: 1,
-    sizeRightRanges: 1,
-    feeTiers: [feeTier],
-    strategy: ethers.utils.solidityKeccak256(["string"], [strat]),
-    version: 0.1,
+    assetIsTokenZero: true, // since v0.3
+    minTick: -700000, // since v0.1
+    maxTick: 700000, // since v0.1
+    feeTiers: [feeTier], // since v0.1
+    strategy: ethers.utils.solidityKeccak256(["string"], [strat]), // since v0.1
+    version: 0.3, // since v0.1
+    midAllocationBps: 400, // since v0.2
+    assetAllocationBps: 1000, // since v0.3
+    baseAllocationBps: 500, // since v0.2
+    rangeSize: 4, // since v0.2
+    assetRebalanceThreshold: 2, // since v0.3
+    baseRebalanceThreshold: 1, // since v0.2
+    maxSlippage: 500, // since v0.3
+    twapDuration: 1000, // since v0.3
+    maxTwapDeviation: 100, // since v0.3
   };
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
 
@@ -93,7 +95,8 @@ async function main() {
       delegate: ethers.constants.AddressZero,
       routers: [],
     },
-    ethers.utils.parseUnits("1", 18)
+    ethers.utils.parseUnits("1", 18),
+    { gasLimit: 3000000 }
   );
 
   console.log("SUCCESS");

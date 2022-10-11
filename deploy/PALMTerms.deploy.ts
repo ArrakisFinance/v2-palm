@@ -21,7 +21,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
     await getNamedAccounts();
 
-  const addresses = getAddressBookByNetwork("matic");
+  const addresses = getAddressBookByNetwork(hre.network.name);
 
   await deploy("PALMTerms", {
     from: deployer,

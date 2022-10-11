@@ -27,7 +27,7 @@ export const getAddressBookByNetwork = (network: string) => {
         Gelato: "0x3CACa7b48D0573D793d3b0279b5F0029180E83b6",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x7679028D2135c2cD622D71c891941359aC8339c7",
-        ArrakisV2Factory: "",
+        ArrakisV2Factory: "0xd9a23005bbe1562856346864BAeb6Ec4d37044Ec",
         UniswapV3Amount: "",
         PALMTerms: "",
       };
