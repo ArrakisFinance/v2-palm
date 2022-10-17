@@ -20,9 +20,9 @@ contract PALMManager is PALMManagerStorage {
         address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
-        uint256 mmTermDuration_
+        uint256 termDuration_
     )
-        PALMManagerStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_)
+        PALMManagerStorage(gelato_, managerFeeBPS_, terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -35,10 +35,6 @@ contract PALMManager is PALMManagerStorage {
         Range[] calldata rangesToRemove_,
         uint256 feeAmount_
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
-        require(
-            vaults[vault_].endOfMM > block.timestamp, // solhint-disable-line not-rely-on-time
-            "PALMManager: vault no longer managed."
-        );
         uint256 balance = _preExec(vault_, feeAmount_);
         IArrakisV2(vault_).rebalance(
             ranges_,

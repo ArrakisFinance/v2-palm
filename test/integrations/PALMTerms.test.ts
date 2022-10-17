@@ -164,8 +164,9 @@ describe("PALMTerms integration test!!!", async function () {
       amount1: result.amount1,
       datas: ethers.constants.HashZero,
       strat: "Bootstrapping",
-      isBeacon: false,
+      isBeacon: true,
       delegate: ethers.constants.AddressZero,
+      routers: [],
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -200,7 +201,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
@@ -371,20 +372,29 @@ describe("PALMTerms integration test!!!", async function () {
     const afterUserP = await projectToken.balanceOf(userAddr);
 
     const afterUserB = await baseToken.balanceOf(userAddr);
+    const B = projectTknIsTknZero
+      ? closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1)
+      : closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0);
+    const P = projectTknIsTknZero
+      ? closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0)
+      : closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1);
+    expect(afterUserB.sub(beforeUserB)).to.be.eq(B);
+    expect(afterUserP.sub(beforeUserP)).to.be.eq(P);
 
-    expect(afterUserB.sub(beforeUserB)).to.be.eq(
-      closePALMTermsEvent?.amount1.sub(closePALMTermsEvent?.emolument1)
-    );
-    expect(afterUserP.sub(beforeUserP)).to.be.eq(
-      closePALMTermsEvent?.amount0.sub(closePALMTermsEvent?.emolument0)
-    );
-
-    expect(beforeTreasoryB.add(closePALMTermsEvent?.emolument1)).to.be.equal(
-      afterTreasoryB
-    );
-    expect(beforeTreasoryP.add(closePALMTermsEvent?.emolument0)).to.be.equal(
-      afterTreasoryP
-    );
+    expect(
+      beforeTreasoryB.add(
+        projectTknIsTknZero
+          ? closePALMTermsEvent?.emolument1
+          : closePALMTermsEvent?.emolument0
+      )
+    ).to.be.equal(afterTreasoryB);
+    expect(
+      beforeTreasoryP.add(
+        projectTknIsTknZero
+          ? closePALMTermsEvent?.emolument0
+          : closePALMTermsEvent?.emolument1
+      )
+    ).to.be.equal(afterTreasoryP);
 
     vaultV2 = (await ethers.getContractAt(
       "IArrakisV2",
@@ -395,7 +405,7 @@ describe("PALMTerms integration test!!!", async function () {
     expect(await vaultV2.owner()).to.be.eq(userAddr);
     expect(await vaultV2.manager()).to.be.eq(userAddr);
 
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.eq(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.eq(0);
 
     await expect(terms.vaults(userAddr, 0)).to.be.reverted;
   });
@@ -436,6 +446,7 @@ describe("PALMTerms integration test!!!", async function () {
       strat: "Bootstrapping",
       isBeacon: false,
       delegate: await user2.getAddress(),
+      routers: [],
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -466,12 +477,12 @@ describe("PALMTerms integration test!!!", async function () {
     expect((await manager.getVaultInfo(vault)).strat).to.be.eq(
       ethers.utils.solidityKeccak256(["string"], ["Bootstrapping"])
     );
-    expect((await manager.getVaultInfo(vault)).endOfMM).to.be.gt(0);
+    expect((await manager.getVaultInfo(vault)).termEnd).to.be.gt(0);
 
     // #endregion get mintAmount.
   });
 
-  it("#6: extending terms", async () => {
+  it("#6: renew terms", async () => {
     // set data and strat type.
 
     const newData = ethers.utils.defaultAbiCoder.encode(["string"], ["TEST"]);
@@ -489,8 +500,12 @@ describe("PALMTerms integration test!!!", async function () {
     );
     expect(vaultInfo.datas).to.be.eq(newData);
 
+    await expect(terms.renewTerm(vault)).to.be.revertedWith(
+      "PALMTerms: term not ended."
+    );
+
     await hre.network.provider.send("evm_setNextBlockTimestamp", [
-      vaultInfo.endOfMM.toNumber() - 10,
+      vaultInfo.termEnd.toNumber() + 1,
     ]);
     await hre.network.provider.send("evm_mine");
 
@@ -505,20 +520,10 @@ describe("PALMTerms integration test!!!", async function () {
       await terms.termTreasury()
     );
 
-    const result = await (
-      await terms.connect(user2).extendingTerm(
-        {
-          vault: vault,
-          projectTknIsTknZero: projectTknIsTknZero,
-          amount0: ethers.constants.Zero,
-          amount1: ethers.constants.Zero,
-        },
-        ethers.utils.parseUnits("1000", 18)
-      )
-    ).wait();
+    const result = await (await terms.renewTerm(vault)).wait();
 
     const extendingEvent = result.events?.find(
-      (e) => e.event == "ExtendingTerm"
+      (e) => e.event == "RenewTerm"
     )?.args;
 
     const afterBTB = await baseToken.balanceOf(vault);

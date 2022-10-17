@@ -7,7 +7,6 @@ import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
-    ExtendingTermData,
     DecreaseBalance
 } from "../structs/SPALMTerms.sol";
 
@@ -39,10 +38,7 @@ contract PALMTermsMock is PALMTermsStorage {
         uint256 mintAmount_
     ) external override {}
 
-    function extendingTerm(
-        ExtendingTermData calldata extensionData_,
-        uint256 mintAmount_
-    ) external override {}
+    function renewTerm(IArrakisV2 vault_) external override {}
 
     function decreaseLiquidity(
         DecreaseBalance calldata decreaseBalance_,

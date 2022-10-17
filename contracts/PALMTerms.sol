@@ -12,13 +12,12 @@ import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     SetupPayload,
     IncreaseBalance,
-    ExtendingTermData,
     DecreaseBalance,
     Inits
 } from "./structs/SPALMTerms.sol";
 import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
-    _requireAddressNotZero,
+    _requireMintNotZero,
     _getInits,
     _requireTokenMatch,
     _requireIsOwnerOrDelegate,
@@ -45,7 +44,7 @@ contract PALMTerms is PALMTermsStorage {
         noLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
     {
-        _requireAddressNotZero(mintAmount_);
+        _requireMintNotZero(mintAmount_);
         _requireProjectAllocationGtZero(
             setup_.projectTknIsTknZero,
             setup_.amount0,
@@ -70,7 +69,8 @@ contract PALMTerms is PALMTermsStorage {
                     owner: address(this),
                     init0: inits.init0,
                     init1: inits.init1,
-                    manager: manager
+                    manager: manager,
+                    routers: setup_.routers
                 }),
                 setup_.isBeacon
             );
@@ -124,7 +124,7 @@ contract PALMTerms is PALMTermsStorage {
             increaseBalance_.vault.token1()
         )
     {
-        _requireAddressNotZero(mintAmount_);
+        _requireMintNotZero(mintAmount_);
         _requireProjectAllocationGtZero(
             increaseBalance_.projectTknIsTknZero,
             increaseBalance_.amount0,
@@ -132,7 +132,7 @@ contract PALMTerms is PALMTermsStorage {
         );
         _requireIsOwner(vaults[msg.sender], address(increaseBalance_.vault));
 
-        (uint256 amount0, uint256 amount1) = _burn(
+        (uint256 amount0, uint256 amount1, ) = _burn(
             increaseBalance_.vault,
             address(this),
             resolver
@@ -177,88 +177,46 @@ contract PALMTerms is PALMTermsStorage {
     }
 
     // solhint-disable-next-line function-max-lines
-    function extendingTerm(
-        ExtendingTermData calldata extensionData_,
-        uint256 mintAmount_
-    )
+    function renewTerm(IArrakisV2 vault_)
         external
         override
-        noLeftOver(extensionData_.vault.token0(), extensionData_.vault.token1())
+        noLeftOver(vault_.token0(), vault_.token1())
     {
-        _requireAddressNotZero(mintAmount_);
-        _requireIsOwnerOrDelegate(
-            delegateByVaults[address(extensionData_.vault)],
-            vaults[msg.sender],
-            address(extensionData_.vault)
+        IPALMManager manager_ = IPALMManager(manager);
+        require( // solhint-disable-next-line not-rely-on-time
+            manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
+            "PALMTerms: term not ended."
         );
-        require(
-            IPALMManager(manager)
-                .getVaultInfo(address(extensionData_.vault))
-                .endOfMM < block.timestamp + 60 * 60 * 24, // solhint-disable-line not-rely-on-time
-            "PALMTerms: terms is active."
-        );
+        IPALMManager(manager).renewTerm(address(vault_));
 
-        (uint256 amount0, uint256 amount1) = _burn(
-            extensionData_.vault,
+        (uint256 amount0, uint256 amount1, uint256 balance) = _burn(
+            vault_,
             address(this),
             resolver
         );
 
-        // Transfer to termTreasury the project token emolment.
-        extensionData_.vault.token0().safeTransferFrom(
-            msg.sender,
-            address(this),
-            extensionData_.amount0
-        );
-        extensionData_.vault.token1().safeTransferFrom(
-            msg.sender,
-            address(this),
-            extensionData_.amount1
-        );
-
         uint256 emolumentAmt0 = _getEmolument(amount0, emolument);
         uint256 emolumentAmt1 = _getEmolument(amount1, emolument);
-        extensionData_.vault.token0().approve(
-            address(extensionData_.vault),
-            extensionData_.amount0 + amount0 - emolumentAmt0
-        );
-        extensionData_.vault.token1().approve(
-            address(extensionData_.vault),
-            extensionData_.amount1 + amount1 - emolumentAmt1
-        );
+        vault_.token0().approve(address(vault_), amount0 - emolumentAmt0);
+        vault_.token1().approve(address(vault_), amount1 - emolumentAmt1);
         if (emolumentAmt0 > 0)
-            extensionData_.vault.token0().safeTransfer(
-                termTreasury,
-                emolumentAmt0
-            );
+            vault_.token0().safeTransfer(termTreasury, emolumentAmt0);
         if (emolumentAmt1 > 0)
-            extensionData_.vault.token1().safeTransfer(
-                termTreasury,
-                emolumentAmt1
-            );
+            vault_.token1().safeTransfer(termTreasury, emolumentAmt1);
         {
             Inits memory inits;
             (inits.init0, inits.init1) = _getInits(
-                mintAmount_,
-                extensionData_.amount0 + amount0 - emolumentAmt0,
-                extensionData_.amount1 + amount1 - emolumentAmt1
+                balance,
+                amount0 - emolumentAmt0,
+                amount1 - emolumentAmt1
             );
 
-            extensionData_.vault.setInits(inits.init0, inits.init1);
+            vault_.setInits(inits.init0, inits.init1);
         }
 
-        extensionData_.vault.mint(mintAmount_, address(this));
+        vault_.mint(balance, address(this));
 
-        IPALMManager(manager).expandMMTermDuration(
-            address(extensionData_.vault)
-        );
-
-        emit ExtendingTerm(
-            msg.sender,
-            address(extensionData_.vault),
-            emolumentAmt0,
-            emolumentAmt1
-        );
+        emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }
 
     // solhint-disable-next-line function-max-lines
@@ -273,12 +231,12 @@ contract PALMTerms is PALMTermsStorage {
             decreaseBalance_.vault.token1()
         )
     {
-        _requireAddressNotZero(mintAmount_);
+        _requireMintNotZero(mintAmount_);
         _requireIsOwner(vaults[msg.sender], address(decreaseBalance_.vault));
 
         address me = address(this);
 
-        (uint256 amount0, uint256 amount1) = _burn(
+        (uint256 amount0, uint256 amount1, ) = _burn(
             decreaseBalance_.vault,
             me,
             resolver
@@ -368,7 +326,7 @@ contract PALMTerms is PALMTermsStorage {
         }
         vaults[msg.sender].pop();
 
-        (uint256 amount0, uint256 amount1) = _burn(
+        (uint256 amount0, uint256 amount1, ) = _burn(
             vault_,
             address(this),
             resolver

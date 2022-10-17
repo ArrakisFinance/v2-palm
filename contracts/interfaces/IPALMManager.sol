@@ -2,10 +2,10 @@
 pragma solidity 0.8.13;
 
 import {Rebalance, Range} from "./IArrakisV2.sol";
-import {IManagerProxyV2} from "./IManagerProxyV2.sol";
+import {IManager} from "./IManager.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
-interface IPALMManager is IManagerProxyV2 {
+interface IPALMManager is IManager {
     event AddVault(address indexed vault, bytes datas, string strat);
 
     event RemoveVault(address indexed vault, uint256 sendBack);
@@ -22,10 +22,10 @@ interface IPALMManager is IManagerProxyV2 {
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
-    event ExpandTermDuration(
+    event SetTermEnd(
         address indexed vault,
-        uint256 oldMmTermDuration,
-        uint256 newMmTermDuration
+        uint256 oldtermDuration,
+        uint256 newtermDuration
     );
 
     event WithdrawVaultBalance(
@@ -74,11 +74,13 @@ interface IPALMManager is IManagerProxyV2 {
 
     function unpause() external;
 
-    // ======= PUBLIC FUNCTIONS =====
+    function withdrawFeesEarned(address[] calldata tokens_, address to_)
+        external;
 
+    // ======= PUBLIC FUNCTIONS =====
     function fundVaultBalance(address vault_) external payable;
 
-    function expandMMTermDuration(address vault_) external;
+    function renewTerm(address vault_) external;
 
     function getVaultInfo(address vault_)
         external
@@ -95,6 +97,6 @@ interface IPALMManager is IManagerProxyV2 {
             uint256 lastBalance,
             bytes memory datas,
             bytes32 strat,
-            uint256 endOfMM
+            uint256 termEnd
         );
 }

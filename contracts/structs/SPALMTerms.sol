@@ -17,16 +17,10 @@ struct SetupPayload {
     string strat;
     bool isBeacon;
     address delegate;
+    address[] routers;
 }
 
 struct IncreaseBalance {
-    IArrakisV2 vault;
-    bool projectTknIsTknZero;
-    uint256 amount0;
-    uint256 amount1;
-}
-
-struct ExtendingTermData {
     IArrakisV2 vault;
     bool projectTknIsTknZero;
     uint256 amount0;

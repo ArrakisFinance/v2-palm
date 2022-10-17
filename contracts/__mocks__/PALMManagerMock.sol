@@ -10,8 +10,8 @@ contract PALMManagerMock is PALMManagerStorage {
         address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
-        uint256 mmTermDuration_ // solhint-disable-next-line no-empty-blocks
-    ) PALMManagerStorage(gelato_, managerFeeBPS_, terms_, mmTermDuration_) {}
+        uint256 termDuration_ // solhint-disable-next-line no-empty-blocks
+    ) PALMManagerStorage(gelato_, managerFeeBPS_, terms_, termDuration_) {}
 
     function addVaultMock(address vault_) external payable {
         vaults[vault_] = VaultInfo({
@@ -19,7 +19,7 @@ contract PALMManagerMock is PALMManagerStorage {
             lastRebalance: 0,
             datas: "",
             strat: bytes32(0),
-            endOfMM: block.timestamp + 24 * 60 * 60 * 365 // solhint-disable-line not-rely-on-time
+            termEnd: block.timestamp + 24 * 60 * 60 * 365 // solhint-disable-line not-rely-on-time
         });
     }
 
