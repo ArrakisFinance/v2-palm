@@ -15,7 +15,9 @@ import {
     DecreaseBalance,
     Inits
 } from "./structs/SPALMTerms.sol";
-import {InitializePayload} from "./interfaces/IArrakisV2.sol";
+import {
+    InitializePayload
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {
     _requireMintNotZero,
     _getInits,

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {Rebalance, Range} from "./IArrakisV2.sol";
+import {
+    Range,
+    Rebalance
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {IManager} from "./IManager.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
