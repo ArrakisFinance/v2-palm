@@ -17,11 +17,7 @@
     "postinstall": "yarn husky install",
     "test": "npx hardhat test",
     "verify": "npx hardhat etherscan-verify",
-    "script-openTerm": "npx hardhat --network matic run ./scripts/openTerm.ts",
-    "script-openTermGnosis": "npx hardhat --network matic run ./scripts/openTermGnosis.ts",
-    "script-setVaultDataGnosis": "npx hardhat --network matic run ./scripts/setVaultDataGnosis.ts",
-    "script-closeTerm": "npx hardhat --network matic run ./scripts/closeTerm.ts",
-    "script-closeTermGnosis": "npx hardhat --network matic run ./scripts/closeTermGnosis.ts"
+    "script-openTerm": "npx hardhat run ./scripts/openTerm.ts"
   },
   "repository": {
     "type": "git",
