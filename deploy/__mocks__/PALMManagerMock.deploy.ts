@@ -1,5 +1,6 @@
 import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import { getAddressBookByNetwork } from "../../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../../src/utils";
 
@@ -19,6 +20,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
 
+  const addresses = getAddressBookByNetwork(hre.network.name);
+
   const oneYear = 60 * 60 * 24 * 365;
 
   await deploy("PALMManagerMock", {
@@ -33,7 +36,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         },
       },
     },
-    args: [100, deployer, oneYear],
+    args: [addresses.Gelato, 100, deployer, oneYear],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };

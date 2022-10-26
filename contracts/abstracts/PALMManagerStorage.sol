@@ -18,23 +18,22 @@ import {
     EnumerableSet
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
-import {
-    GelatoRelayContext
-} from "@gelatonetwork/relay-context/contracts/GelatoRelayContext.sol";
-import {
-    ERC2771Context
-} from "@gelatonetwork/relay-context/contracts/vendor/ERC2771Context.sol";
 
 /// @dev owner should be the PALMTerms smart contract.
 abstract contract PALMManagerStorage is
     IPALMManager,
     OwnableUpgradeable,
-    PausableUpgradeable,
-    GelatoRelayContext
+    PausableUpgradeable
 {
     using SafeERC20 for IERC20;
     using Address for address payable;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    // #region gelato bots.
+
+    address payable public immutable gelatoFeeCollector;
+
+    // #endregion gelato bots.
 
     // #region manager fees.
 
@@ -75,7 +74,7 @@ abstract contract PALMManagerStorage is
     // #region modifiers.
 
     modifier onlyPALMTerms() {
-        require(_msgSender() == terms, "PALMManager: only PALMTerms");
+        require(msg.sender == terms, "PALMManager: only PALMTerms");
         _;
     }
 
@@ -94,14 +93,14 @@ abstract contract PALMManagerStorage is
 
     modifier onlyVaultOwner(address vault) {
         require(
-            IArrakisV2(vault).owner() == _msgSender(),
+            IArrakisV2(vault).owner() == msg.sender,
             "PALMManager: only vault owner"
         );
         _;
     }
 
     modifier onlyOperators() {
-        (bool isOperator, ) = _isOperator(_msgSender());
+        (bool isOperator, ) = _isOperator(msg.sender);
         require(isOperator, "PALMManager: no operator");
         _;
     }
@@ -116,10 +115,12 @@ abstract contract PALMManagerStorage is
     // #region constructor.
 
     constructor(
+        address gelatoFeeCollector_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 termDuration_
     ) {
+        gelatoFeeCollector = payable(gelatoFeeCollector_);
         managerFeeBPS = managerFeeBPS_;
         terms = terms_;
         termDuration = termDuration_;
