@@ -12,17 +12,17 @@ import {
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {VaultInfo} from "./structs/SPALMManager.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract PALMManager is PALMManagerStorage {
     using SafeERC20 for IERC20;
 
     constructor(
-        address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 termDuration_
     )
-        PALMManagerStorage(gelato_, managerFeeBPS_, terms_, termDuration_)
+        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -51,16 +51,25 @@ contract PALMManager is PALMManagerStorage {
         returns (uint256 balance)
     {
         VaultInfo memory vaultInfo = vaults[vault_];
+        uint256 feeAmount = _isGelatoRelay(_msgSender())
+            ? _getFee()
+            : feeAmount_;
         require(
-            vaultInfo.balance >= feeAmount_,
+            vaultInfo.balance >= feeAmount,
             "PALMManager: Not enough balance to pay fee"
         );
-        balance = vaultInfo.balance - feeAmount_;
+        balance = vaultInfo.balance - feeAmount;
 
         // update lastRebalance time
         // solhint-disable-next-line not-rely-on-time
         vaults[vault_].lastRebalance = block.timestamp;
         vaults[vault_].balance = balance;
+
+        if (_isGelatoRelay(_msgSender())) {
+            _transferRelayFee();
+        } else {
+            Address.sendValue(payable(_msgSender()), feeAmount);
+        }
     }
 
     // #endregion ====== INTERNAL FUNCTIONS ========

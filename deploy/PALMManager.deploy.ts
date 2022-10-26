@@ -1,6 +1,5 @@
 import { deployments, getNamedAccounts, ethers } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getAddressBookByNetwork } from "../src/config";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../src/utils";
 
@@ -21,8 +20,6 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deployer, arrakisDaoAdmin, arrakisDaoOwner } =
     await getNamedAccounts();
 
-  const addresses = getAddressBookByNetwork(hre.network.name);
-
   const oneQuarter = (60 * 60 * 24 * 365) / 4;
 
   await deploy("PALMManager", {
@@ -37,12 +34,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         },
       },
     },
-    args: [
-      addresses.Gelato,
-      4750,
-      (await ethers.getContract("PALMTerms")).address,
-      oneQuarter,
-    ],
+    args: [4750, (await ethers.getContract("PALMTerms")).address, oneQuarter],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };
