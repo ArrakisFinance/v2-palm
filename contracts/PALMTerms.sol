@@ -102,8 +102,11 @@ contract PALMTerms is PALMTermsStorage {
             setup_.amount1
         );
 
-        setup_.token0.approve(vault, setup_.amount0);
-        setup_.token1.approve(vault, setup_.amount1);
+        setup_.token0.safeApprove(vault, 0);
+        setup_.token1.safeApprove(vault, 0);
+
+        setup_.token0.safeApprove(vault, setup_.amount0);
+        setup_.token1.safeApprove(vault, setup_.amount1);
 
         vaultV2.setRestrictedMint(address(this));
 
@@ -150,12 +153,19 @@ contract PALMTerms is PALMTermsStorage {
             increaseBalance_.amount1
         );
 
-        increaseBalance_.vault.token0().approve(
+        increaseBalance_.vault.token0().safeApprove(
+            address(increaseBalance_.vault),
+            0
+        );
+        increaseBalance_.vault.token1().safeApprove(
+            address(increaseBalance_.vault),
+            0
+        );
+        increaseBalance_.vault.token0().safeApprove(
             address(increaseBalance_.vault),
             increaseBalance_.amount0 + amount0
         );
-
-        increaseBalance_.vault.token1().approve(
+        increaseBalance_.vault.token1().safeApprove(
             address(increaseBalance_.vault),
             increaseBalance_.amount1 + amount1
         );
@@ -197,8 +207,10 @@ contract PALMTerms is PALMTermsStorage {
 
         uint256 emolumentAmt0 = _getEmolument(amount0, emolument);
         uint256 emolumentAmt1 = _getEmolument(amount1, emolument);
-        vault_.token0().approve(address(vault_), amount0 - emolumentAmt0);
-        vault_.token1().approve(address(vault_), amount1 - emolumentAmt1);
+        vault_.token0().safeApprove(address(vault_), 0);
+        vault_.token1().safeApprove(address(vault_), 0);
+        vault_.token0().safeApprove(address(vault_), amount0 - emolumentAmt0);
+        vault_.token1().safeApprove(address(vault_), amount1 - emolumentAmt1);
         if (emolumentAmt0 > 0)
             vault_.token0().safeTransfer(termTreasury, emolumentAmt0);
         if (emolumentAmt1 > 0)
@@ -276,11 +288,13 @@ contract PALMTerms is PALMTermsStorage {
                 decreaseBalance_.to,
                 decreaseBalance_.amount1 - emolumentAmt1
             );
-            token0.approve(
+            token0.safeApprove(address(decreaseBalance_.vault), 0);
+            token1.safeApprove(address(decreaseBalance_.vault), 0);
+            token0.safeApprove(
                 address(decreaseBalance_.vault),
                 amount0 - decreaseBalance_.amount0
             );
-            token1.approve(
+            token1.safeApprove(
                 address(decreaseBalance_.vault),
                 amount1 - decreaseBalance_.amount1
             );
