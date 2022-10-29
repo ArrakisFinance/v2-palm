@@ -6,7 +6,10 @@ import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
 import {IPALMManager} from "../interfaces/IPALMManager.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {
+    IERC20,
+    SafeERC20
+} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {
     OwnableUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -32,6 +35,8 @@ abstract contract PALMTermsStorage is
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable
 {
+    using SafeERC20 for IERC20;
+
     IArrakisV2Factory public immutable v2factory;
     mapping(address => address[]) public vaults;
     address public termTreasury;
@@ -48,8 +53,8 @@ abstract contract PALMTermsStorage is
         _;
         uint256 leftOver0 = token0_.balanceOf(address(this)) - token0Balance;
         uint256 leftOver1 = token1_.balanceOf(address(this)) - token1Balance;
-        if (leftOver0 > 0) token0_.transfer(msg.sender, leftOver0);
-        if (leftOver1 > 0) token1_.transfer(msg.sender, leftOver1);
+        if (leftOver0 > 0) token0_.safeTransfer(msg.sender, leftOver0);
+        if (leftOver1 > 0) token1_.safeTransfer(msg.sender, leftOver1);
     }
 
     modifier requireAddressNotZero(address addr) {
