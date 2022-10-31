@@ -40,10 +40,10 @@ contract PALMTermsMock is PALMTermsStorage {
 
     function renewTerm(IArrakisV2 vault_) external override {}
 
-    function decreaseLiquidity(
-        DecreaseBalance calldata decreaseBalance_,
-        uint256 mintAmount_
-    ) external override {}
+    function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
+        external
+        override
+    {}
 
     function closeTerm(
         IArrakisV2 vault_,
