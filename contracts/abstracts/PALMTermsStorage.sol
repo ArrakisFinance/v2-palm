@@ -16,19 +16,9 @@ import {
 import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {
     EnumerableSet
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    _getInits,
-    _requireTokenMatch,
-    _getEmolument,
-    _requireProjectAllocationGtZero,
-    _requireTknOrder,
-    _burn
-} from "../functions/FPALMTerms.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract PALMTermsStorage is

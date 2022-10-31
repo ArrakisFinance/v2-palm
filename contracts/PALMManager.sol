@@ -2,20 +2,11 @@
 pragma solidity 0.8.13;
 
 import {IArrakisV2, Rebalance, Range} from "./interfaces/IArrakisV2.sol";
-import {IPALMManager} from "./interfaces/IPALMManager.sol";
-import {
-    IUniswapV3Pool
-} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import {
-    IERC20,
-    SafeERC20
-} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {VaultInfo} from "./structs/SPALMManager.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract PALMManager is PALMManagerStorage {
-    using SafeERC20 for IERC20;
     using Address for address payable;
 
     constructor(
