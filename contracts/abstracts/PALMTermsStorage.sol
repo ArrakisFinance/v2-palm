@@ -16,18 +16,9 @@ import {
 import {
     ReentrancyGuardUpgradeable
 } from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
-import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {
-    _getInits,
-    _requireTokenMatch,
-    _requireIsOwnerOrDelegate,
-    _requireIsOwner,
-    _getEmolument,
-    _requireProjectAllocationGtZero,
-    _requireTknOrder,
-    _burn
-} from "../functions/FPALMTerms.sol";
+    EnumerableSet
+} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 // solhint-disable-next-line max-states-count
 abstract contract PALMTermsStorage is
@@ -36,9 +27,11 @@ abstract contract PALMTermsStorage is
     ReentrancyGuardUpgradeable
 {
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    mapping(address => EnumerableSet.AddressSet) internal _vaults;
 
     IArrakisV2Factory public immutable v2factory;
-    mapping(address => address[]) public vaults;
     address public termTreasury;
     address public manager;
     uint16 public emolument;
@@ -59,6 +52,23 @@ abstract contract PALMTermsStorage is
 
     modifier requireAddressNotZero(address addr) {
         require(addr != address(0), "PALMTerms: address Zero");
+        _;
+    }
+
+    modifier requireIsOwner(address vault_) {
+        require(_vaults[msg.sender].contains(vault_), "PALMTerms: not owner");
+        _;
+    }
+
+    modifier requireIsOwnerOrDelegate(address vault_) {
+        address delegate = delegateByVaults[vault_];
+        if (delegate != address(0))
+            require(msg.sender == delegate, "PALMTerms: no delegate");
+        else
+            require(
+                _vaults[msg.sender].contains(vault_),
+                "PALMTerms: not owner"
+            );
         _;
     }
 
@@ -133,48 +143,44 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(address(vault_))
+        requireIsOwner(address(vault_))
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.addPools(feeTiers_);
 
-        emit LogAddPools(msg.sender, vaultAddr, feeTiers_);
+        emit LogAddPools(msg.sender, address(vault_), feeTiers_);
     }
 
     function removePools(IArrakisV2 vault_, address[] calldata pools_)
         external
         override
         requireAddressNotZero(address(vault_))
+        requireIsOwner(address(vault_))
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.removePools(pools_);
 
-        emit LogRemovePools(msg.sender, vaultAddr, pools_);
+        emit LogRemovePools(msg.sender, address(vault_), pools_);
     }
 
     function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
         requireAddressNotZero(address(vault_))
+        requireIsOwner(address(vault_))
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.whitelistRouters(routers_);
 
-        emit LogWhitelistRouters(msg.sender, vaultAddr, routers_);
+        emit LogWhitelistRouters(msg.sender, address(vault_), routers_);
     }
 
     function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
         requireAddressNotZero(address(vault_))
+        requireIsOwner(address(vault_))
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
         vault_.blacklistRouters(routers_);
 
-        emit LogBlacklistRouters(msg.sender, vaultAddr, routers_);
+        emit LogBlacklistRouters(msg.sender, address(vault_), routers_);
     }
 
     // #endregion vault config as admin.
@@ -185,20 +191,15 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
+        requireIsOwnerOrDelegate(vault_)
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwnerOrDelegate(
-            delegateByVaults[vault_],
-            vaults[msg.sender],
-            vaultAddr
-        );
         IPALMManager(manager).setVaultData(vault_, data_);
 
         emit LogSetVaultData(
             delegateByVaults[vault_] != address(0)
                 ? delegateByVaults[vault_]
                 : msg.sender,
-            vaultAddr,
+            vault_,
             data_
         );
     }
@@ -207,58 +208,59 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
+        requireIsOwnerOrDelegate(vault_)
     {
-        address vaultAddr = address(vault_);
-        _requireIsOwnerOrDelegate(
-            delegateByVaults[vault_],
-            vaults[msg.sender],
-            vaultAddr
-        );
         IPALMManager(manager).setVaultStraByName(vault_, strat_);
 
         emit LogSetVaultStratByName(
             delegateByVaults[vault_] != address(0)
                 ? delegateByVaults[vault_]
                 : msg.sender,
-            vaultAddr,
+            vault_,
             strat_
         );
     }
 
-    function setDelegate(address vault_, address delegate_) external override {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
+    function setDelegate(address vault_, address delegate_)
+        external
+        override
+        requireIsOwner(vault_)
+    {
         _setDelegate(vault_, delegate_);
 
-        emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
+        emit LogSetDelegate(msg.sender, vault_, delegate_);
     }
 
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,
         address payable to_
-    ) external override requireAddressNotZero(vault_) {
-        address vaultAddr = address(vault_);
+    ) external override requireAddressNotZero(vault_) requireIsOwner(vault_) {
         IPALMManager manager_ = IPALMManager(manager);
-        (uint256 balance, , , , ) = manager_.vaults(vaultAddr);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        (uint256 balance, , , , ) = manager_.vaults(vault_);
         manager_.withdrawVaultBalance(vault_, amount_, to_);
 
-        emit LogWithdrawVaultBalance(msg.sender, vaultAddr, to_, balance);
+        emit LogWithdrawVaultBalance(msg.sender, vault_, to_, balance);
     }
 
     // #endregion manager config as vault owner.
 
+    function vaults(address creator_, uint256 index)
+        external
+        view
+        returns (address)
+    {
+        require(_vaults[creator_].length() > index, "PALMTerms: out of bonds.");
+
+        return _vaults[creator_].at(index);
+    }
+
     // #region internals setter.
 
     function _addVault(address creator_, address vault_) internal {
-        address[] storage vaultsOfCreator = vaults[creator_];
+        require(!_vaults[creator_].contains(vault_), "PALMTerms: vault exist");
 
-        for (uint256 i = 0; i < vaultsOfCreator.length; i++) {
-            require(vaultsOfCreator[i] != vault_, "PALMTerms: vault exist");
-        }
-
-        vaultsOfCreator.push(vault_);
+        _vaults[creator_].add(vault_);
         emit AddVault(creator_, vault_);
     }
 
