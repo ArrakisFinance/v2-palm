@@ -199,34 +199,20 @@ contract PALMTerms is PALMTermsStorage {
         );
         IPALMManager(manager).renewTerm(address(vault_));
 
-        (uint256 amount0, uint256 amount1, uint256 balance) = _burn(
-            vault_,
-            address(this),
-            resolver
+        uint256 balance = IERC20(address(vault_)).balanceOf(address(this));
+
+        uint256 emolumentShares = _getEmolument(balance, emolument);
+
+        BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
+            emolumentShares,
+            vault_
         );
 
-        uint256 emolumentAmt0 = _getEmolument(amount0, emolument);
-        uint256 emolumentAmt1 = _getEmolument(amount1, emolument);
-        vault_.token0().safeApprove(address(vault_), 0);
-        vault_.token1().safeApprove(address(vault_), 0);
-        vault_.token0().safeApprove(address(vault_), amount0 - emolumentAmt0);
-        vault_.token1().safeApprove(address(vault_), amount1 - emolumentAmt1);
-        if (emolumentAmt0 > 0)
-            vault_.token0().safeTransfer(termTreasury, emolumentAmt0);
-        if (emolumentAmt1 > 0)
-            vault_.token1().safeTransfer(termTreasury, emolumentAmt1);
-        {
-            Inits memory inits;
-            (inits.init0, inits.init1) = _getInits(
-                balance,
-                amount0 - emolumentAmt0,
-                amount1 - emolumentAmt1
-            );
-
-            vault_.setInits(inits.init0, inits.init1);
-        }
-
-        vault_.mint(balance, address(this));
+        (uint256 emolumentAmt0, uint256 emolumentAmt1) = vault_.burn(
+            burnPayload,
+            emolumentShares,
+            termTreasury
+        );
 
         emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }
