@@ -65,17 +65,20 @@ abstract contract PALMTermsStorage is
         _;
     }
 
-    modifier requireIsOwner(address creator_, address vault_) {
-        require(_vaults[creator_].contains(vault_), "PALMTerms: not owner");
+    modifier requireIsOwner(address vault_) {
+        require(_vaults[msg.sender].contains(vault_), "PALMTerms: not owner");
         _;
     }
 
-    modifier requireIsOwnerOrDelegate(address creator_, address vault_) {
+    modifier requireIsOwnerOrDelegate(address vault_) {
         address delegate = delegateByVaults[vault_];
         if (delegate != address(0))
             require(msg.sender == delegate, "PALMTerms: no delegate");
         else
-            require(_vaults[creator_].contains(vault_), "PALMTerms: not owner");
+            require(
+                _vaults[msg.sender].contains(vault_),
+                "PALMTerms: not owner"
+            );
         _;
     }
 
@@ -150,7 +153,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(address(vault_))
-        requireIsOwner(msg.sender, address(vault_))
+        requireIsOwner(address(vault_))
     {
         vault_.addPools(feeTiers_);
 
@@ -161,7 +164,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(address(vault_))
-        requireIsOwner(msg.sender, address(vault_))
+        requireIsOwner(address(vault_))
     {
         vault_.removePools(pools_);
 
@@ -172,7 +175,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(address(vault_))
-        requireIsOwner(msg.sender, address(vault_))
+        requireIsOwner(address(vault_))
     {
         vault_.whitelistRouters(routers_);
 
@@ -183,7 +186,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(address(vault_))
-        requireIsOwner(msg.sender, address(vault_))
+        requireIsOwner(address(vault_))
     {
         vault_.blacklistRouters(routers_);
 
@@ -198,7 +201,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
-        requireIsOwnerOrDelegate(msg.sender, vault_)
+        requireIsOwnerOrDelegate(vault_)
     {
         IPALMManager(manager).setVaultData(vault_, data_);
 
@@ -215,7 +218,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
-        requireIsOwnerOrDelegate(msg.sender, vault_)
+        requireIsOwnerOrDelegate(vault_)
     {
         IPALMManager(manager).setVaultStraByName(vault_, strat_);
 
@@ -231,7 +234,7 @@ abstract contract PALMTermsStorage is
     function setDelegate(address vault_, address delegate_)
         external
         override
-        requireIsOwner(msg.sender, vault_)
+        requireIsOwner(vault_)
     {
         _setDelegate(vault_, delegate_);
 
@@ -242,12 +245,7 @@ abstract contract PALMTermsStorage is
         address vault_,
         uint256 amount_,
         address payable to_
-    )
-        external
-        override
-        requireAddressNotZero(vault_)
-        requireIsOwner(msg.sender, vault_)
-    {
+    ) external override requireAddressNotZero(vault_) requireIsOwner(vault_) {
         IPALMManager manager_ = IPALMManager(manager);
         (uint256 balance, , , , ) = manager_.vaults(vault_);
         manager_.withdrawVaultBalance(vault_, amount_, to_);

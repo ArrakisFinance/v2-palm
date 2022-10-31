@@ -121,7 +121,7 @@ contract PALMTerms is PALMTermsStorage {
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
         override
-        requireIsOwner(msg.sender, address(increaseBalance_.vault))
+        requireIsOwner(address(increaseBalance_.vault))
     {
         _requireProjectAllocationGtZero(
             increaseBalance_.projectTknIsTknZero,
@@ -178,7 +178,7 @@ contract PALMTerms is PALMTermsStorage {
             decreaseBalance_.vault.token0(),
             decreaseBalance_.vault.token1()
         )
-        requireIsOwner(msg.sender, address(decreaseBalance_.vault))
+        requireIsOwner(address(decreaseBalance_.vault))
     {
         BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
             decreaseBalance_.burnAmount,
@@ -243,7 +243,7 @@ contract PALMTerms is PALMTermsStorage {
         override
         requireAddressNotZero(newOwner_)
         requireAddressNotZero(to_)
-        requireIsOwner(msg.sender, address(vault_))
+        requireIsOwner(address(vault_))
     {
         _vaults[msg.sender].remove(address(vault_));
 
