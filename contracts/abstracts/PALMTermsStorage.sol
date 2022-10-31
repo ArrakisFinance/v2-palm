@@ -186,11 +186,10 @@ abstract contract PALMTermsStorage is
         override
         requireAddressNotZero(vault_)
     {
-        address vaultAddr = address(vault_);
         _requireIsOwnerOrDelegate(
             delegateByVaults[vault_],
             vaults[msg.sender],
-            vaultAddr
+            vault_
         );
         IPALMManager(manager).setVaultData(vault_, data_);
 
@@ -198,7 +197,7 @@ abstract contract PALMTermsStorage is
             delegateByVaults[vault_] != address(0)
                 ? delegateByVaults[vault_]
                 : msg.sender,
-            vaultAddr,
+            vault_,
             data_
         );
     }
@@ -208,11 +207,10 @@ abstract contract PALMTermsStorage is
         override
         requireAddressNotZero(vault_)
     {
-        address vaultAddr = address(vault_);
         _requireIsOwnerOrDelegate(
             delegateByVaults[vault_],
             vaults[msg.sender],
-            vaultAddr
+            vault_
         );
         IPALMManager(manager).setVaultStraByName(vault_, strat_);
 
@@ -220,17 +218,16 @@ abstract contract PALMTermsStorage is
             delegateByVaults[vault_] != address(0)
                 ? delegateByVaults[vault_]
                 : msg.sender,
-            vaultAddr,
+            vault_,
             strat_
         );
     }
 
     function setDelegate(address vault_, address delegate_) external override {
-        address vaultAddr = address(vault_);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        _requireIsOwner(vaults[msg.sender], vault_);
         _setDelegate(vault_, delegate_);
 
-        emit LogSetDelegate(msg.sender, vaultAddr, delegate_);
+        emit LogSetDelegate(msg.sender, vault_, delegate_);
     }
 
     function withdrawVaultBalance(
@@ -238,13 +235,12 @@ abstract contract PALMTermsStorage is
         uint256 amount_,
         address payable to_
     ) external override requireAddressNotZero(vault_) {
-        address vaultAddr = address(vault_);
         IPALMManager manager_ = IPALMManager(manager);
-        (uint256 balance, , , , ) = manager_.vaults(vaultAddr);
-        _requireIsOwner(vaults[msg.sender], vaultAddr);
+        (uint256 balance, , , , ) = manager_.vaults(vault_);
+        _requireIsOwner(vaults[msg.sender], vault_);
         manager_.withdrawVaultBalance(vault_, amount_, to_);
 
-        emit LogWithdrawVaultBalance(msg.sender, vaultAddr, to_, balance);
+        emit LogWithdrawVaultBalance(msg.sender, vault_, to_, balance);
     }
 
     // #endregion manager config as vault owner.
