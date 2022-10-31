@@ -41,7 +41,7 @@ contract PALMTerms is PALMTermsStorage {
         external
         payable
         override
-        noLeftOver(setup_.token0, setup_.token1)
+        collectLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
     {
         _requireMintNotZero(mintAmount_);
@@ -172,7 +172,7 @@ contract PALMTerms is PALMTermsStorage {
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
         override
-        noLeftOver(
+        collectLeftOver(
             decreaseBalance_.vault.token0(),
             decreaseBalance_.vault.token1()
         )

@@ -47,7 +47,7 @@ abstract contract PALMTermsStorage is
 
     // #region no left over.
 
-    modifier noLeftOver(IERC20 token0_, IERC20 token1_) {
+    modifier collectLeftOver(IERC20 token0_, IERC20 token1_) {
         uint256 token0Balance = token0_.balanceOf(address(this));
         uint256 token1Balance = token1_.balanceOf(address(this));
         _;
