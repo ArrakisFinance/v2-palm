@@ -32,11 +32,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [deployer],
+          args: [deployer, addresses.Gelato],
         },
       },
     },
-    args: [addresses.Gelato, 100, deployer, oneYear],
+    args: [100, deployer, oneYear],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };

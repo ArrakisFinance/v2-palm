@@ -10,6 +10,9 @@ import {BurnLiquidity, IArrakisV2} from "./interfaces/IArrakisV2.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
 import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
+    EnumerableSet
+} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {
     SetupPayload,
     IncreaseBalance,
     DecreaseBalance,
@@ -19,9 +22,6 @@ import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
     _requireMintNotZero,
     _getInits,
-    _requireTokenMatch,
-    _requireIsOwnerOrDelegate,
-    _requireIsOwner,
     _getEmolument,
     _requireProjectAllocationGtZero,
     _requireTknOrder,
@@ -31,6 +31,7 @@ import {
 // solhint-disable-next-line no-empty-blocks
 contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     // solhint-disable-next-line no-empty-blocks
     constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
@@ -41,7 +42,7 @@ contract PALMTerms is PALMTermsStorage {
         external
         payable
         override
-        noLeftOver(setup_.token0, setup_.token1)
+        collectLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
     {
         _requireMintNotZero(mintAmount_);
@@ -116,82 +117,33 @@ contract PALMTerms is PALMTermsStorage {
     }
 
     // solhint-disable-next-line function-max-lines
-    function increaseLiquidity(
-        IncreaseBalance calldata increaseBalance_, // memory instead of calldata to set values
-        uint256 mintAmount_
-    )
+    function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
         override
-        noLeftOver(
-            increaseBalance_.vault.token0(),
-            increaseBalance_.vault.token1()
-        )
+        requireIsOwner(address(increaseBalance_.vault))
     {
-        _requireMintNotZero(mintAmount_);
         _requireProjectAllocationGtZero(
             increaseBalance_.projectTknIsTknZero,
             increaseBalance_.amount0,
             increaseBalance_.amount1
-        );
-        _requireIsOwner(vaults[msg.sender], address(increaseBalance_.vault));
+        ); // TODO: can we also allow increase of only base tokens allocation.
 
-        (uint256 amount0, uint256 amount1, ) = _burn(
-            increaseBalance_.vault,
-            address(this),
-            resolver
-        );
-
-        // Transfer to termTreasury the project token emolment.
         increaseBalance_.vault.token0().safeTransferFrom(
             msg.sender,
-            address(this),
+            address(increaseBalance_.vault),
             increaseBalance_.amount0
         );
         increaseBalance_.vault.token1().safeTransferFrom(
             msg.sender,
-            address(this),
+            address(increaseBalance_.vault),
             increaseBalance_.amount1
         );
-
-        increaseBalance_.vault.token0().safeApprove(
-            address(increaseBalance_.vault),
-            0
-        );
-        increaseBalance_.vault.token1().safeApprove(
-            address(increaseBalance_.vault),
-            0
-        );
-        increaseBalance_.vault.token0().safeApprove(
-            address(increaseBalance_.vault),
-            increaseBalance_.amount0 + amount0
-        );
-        increaseBalance_.vault.token1().safeApprove(
-            address(increaseBalance_.vault),
-            increaseBalance_.amount1 + amount1
-        );
-
-        {
-            Inits memory inits;
-            (inits.init0, inits.init1) = _getInits(
-                mintAmount_,
-                increaseBalance_.amount0 + amount0,
-                increaseBalance_.amount1 + amount1
-            );
-
-            increaseBalance_.vault.setInits(inits.init0, inits.init1);
-        }
-
-        increaseBalance_.vault.mint(mintAmount_, address(this));
 
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
 
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2 vault_)
-        external
-        override
-        noLeftOver(vault_.token0(), vault_.token1())
-    {
+    function renewTerm(IArrakisV2 vault_) external override {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
@@ -218,87 +170,62 @@ contract PALMTerms is PALMTermsStorage {
     }
 
     // solhint-disable-next-line function-max-lines
-    function decreaseLiquidity(
-        DecreaseBalance calldata decreaseBalance_,
-        uint256 mintAmount_
-    )
+    function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
         override
-        noLeftOver(
+        collectLeftOver(
             decreaseBalance_.vault.token0(),
             decreaseBalance_.vault.token1()
         )
+        requireIsOwner(address(decreaseBalance_.vault))
     {
-        _requireMintNotZero(mintAmount_);
-        _requireIsOwner(vaults[msg.sender], address(decreaseBalance_.vault));
-
-        address me = address(this);
-
-        (uint256 amount0, uint256 amount1, ) = _burn(
-            decreaseBalance_.vault,
-            me,
-            resolver
+        BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
+            decreaseBalance_.burnAmount,
+            decreaseBalance_.vault
         );
+
+        (uint256 amount0, uint256 amount1) = decreaseBalance_.vault.burn(
+            burnPayload,
+            decreaseBalance_.burnAmount,
+            address(this)
+        );
+
         require(
-            decreaseBalance_.amount0 < amount0,
-            "PALMTerms: send back amount0 > amount0"
-        );
-        require(
-            decreaseBalance_.amount1 < amount1,
-            "PALMTerms: send back amount1 > amount1"
+            amount0 >= decreaseBalance_.amount0Min &&
+                amount1 >= decreaseBalance_.amount1Min,
+            "PALMTerms: received below minimum"
         );
 
-        uint256 emolumentAmt0 = _getEmolument(
-            decreaseBalance_.amount0,
-            emolument
-        );
-        uint256 emolumentAmt1 = _getEmolument(
-            decreaseBalance_.amount1,
-            emolument
-        );
+        uint256 emolumentAmt0;
+        uint256 emolumentAmt1;
 
-        {
+        if (amount0 > 0) {
             IERC20 token0 = decreaseBalance_.vault.token0();
+
+            emolumentAmt0 = _getEmolument(amount0, emolument);
+            token0.safeTransfer(termTreasury, emolumentAmt0);
+            token0.safeTransfer(
+                decreaseBalance_.receiver,
+                amount0 - emolumentAmt0
+            );
+        }
+
+        if (amount1 > 0) {
             IERC20 token1 = decreaseBalance_.vault.token1();
 
-            if (emolumentAmt0 > 0)
-                token0.safeTransfer(termTreasury, emolumentAmt0);
-            if (emolumentAmt1 > 0)
-                token1.safeTransfer(termTreasury, emolumentAmt1);
-
-            token0.safeTransfer(
-                decreaseBalance_.to,
-                decreaseBalance_.amount0 - emolumentAmt0
-            );
+            emolumentAmt1 = _getEmolument(amount1, emolument);
+            token1.safeTransfer(termTreasury, emolumentAmt1);
             token1.safeTransfer(
-                decreaseBalance_.to,
-                decreaseBalance_.amount1 - emolumentAmt1
-            );
-            token0.safeApprove(address(decreaseBalance_.vault), 0);
-            token1.safeApprove(address(decreaseBalance_.vault), 0);
-            token0.safeApprove(
-                address(decreaseBalance_.vault),
-                amount0 - decreaseBalance_.amount0
-            );
-            token1.safeApprove(
-                address(decreaseBalance_.vault),
-                amount1 - decreaseBalance_.amount1
+                decreaseBalance_.receiver,
+                amount1 - emolumentAmt1
             );
         }
-        {
-            (uint256 init0, uint256 init1) = _getInits(
-                mintAmount_,
-                amount0 - decreaseBalance_.amount0,
-                amount1 - decreaseBalance_.amount1
-            );
-            decreaseBalance_.vault.setInits(init0, init1);
-        }
-
-        decreaseBalance_.vault.mint(mintAmount_, me);
 
         emit DecreaseLiquidity(
             msg.sender,
             address(decreaseBalance_.vault),
+            amount0,
+            amount1,
             emolumentAmt0,
             emolumentAmt1
         );
@@ -315,16 +242,9 @@ contract PALMTerms is PALMTermsStorage {
         override
         requireAddressNotZero(newOwner_)
         requireAddressNotZero(to_)
+        requireIsOwner(address(vault_))
     {
-        address vaultAddr = address(vault_);
-        uint256 index = _requireIsOwner(vaults[msg.sender], vaultAddr);
-
-        delete vaults[msg.sender][index];
-
-        for (uint256 i = index; i < vaults[msg.sender].length - 1; i++) {
-            vaults[msg.sender][i] = vaults[msg.sender][i + 1];
-        }
-        vaults[msg.sender].pop();
+        _vaults[msg.sender].remove(address(vault_));
 
         (uint256 amount0, uint256 amount1, ) = _burn(
             vault_,
@@ -345,14 +265,14 @@ contract PALMTerms is PALMTermsStorage {
         if (amount1 > 0)
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
-        IPALMManager(manager).removeVault(vaultAddr, payable(to_));
+        IPALMManager(manager).removeVault(address(vault_), payable(to_));
         vault_.setManager(IPALMManager(newManager_));
         vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 
         emit CloseTerm(
             msg.sender,
-            vaultAddr,
+            address(vault_),
             amount0,
             amount1,
             to_,

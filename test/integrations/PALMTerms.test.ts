@@ -42,6 +42,8 @@ describe("PALMTerms integration test!!!", async function () {
   let uniswapV3Amount: Contract;
   let vault: string;
   let vaultV2: IArrakisV2;
+  let lowerTick: number;
+  let upperTick: number;
 
   before("Setting up for V2 functions integration test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -216,19 +218,16 @@ describe("PALMTerms integration test!!!", async function () {
     await baseToken.approve(terms.address, baseTokenAllocation);
     await projectToken.approve(terms.address, projectTokenAllocation);
 
-    await terms.increaseLiquidity(
-      {
-        vault: vault,
-        projectTknIsTknZero: projectTknIsTknZero,
-        amount0: projectTknIsTknZero
-          ? projectTokenAllocation
-          : baseTokenAllocation,
-        amount1: projectTknIsTknZero
-          ? baseTokenAllocation
-          : projectTokenAllocation,
-      },
-      ethers.utils.parseUnits("1000", 18)
-    );
+    await terms.increaseLiquidity({
+      vault: vault,
+      projectTknIsTknZero: projectTknIsTknZero,
+      amount0: projectTknIsTknZero
+        ? projectTokenAllocation
+        : baseTokenAllocation,
+      amount1: projectTknIsTknZero
+        ? baseTokenAllocation
+        : projectTokenAllocation,
+    });
 
     const afterBTB = await baseToken.balanceOf(vault);
     const afterPTB = await projectToken.balanceOf(vault);
@@ -272,8 +271,8 @@ describe("PALMTerms integration test!!!", async function () {
     const slot0 = await pool.slot0();
     const tickSpacing = await pool.tickSpacing();
 
-    const lowerTick = slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
-    const upperTick = slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
+    lowerTick = slot0.tick - (slot0.tick % tickSpacing) - tickSpacing;
+    upperTick = slot0.tick - (slot0.tick % tickSpacing) + 2 * tickSpacing;
 
     const rebalanceParams = await arrakisV2Resolver.standardRebalance(
       [{ range: { lowerTick, upperTick, feeTier: 500 }, weight: 10000 }],
@@ -294,50 +293,69 @@ describe("PALMTerms integration test!!!", async function () {
   });
 
   it("#3: Decrease Liquidity", async () => {
-    const baseTokenAllocation = ethers.utils.parseUnits("100", 18);
-    const projectTokenAllocation = ethers.utils.parseUnits("10000", 18);
-
     const beforeBTB = await baseToken.balanceOf(userAddr);
     const beforePTB = await projectToken.balanceOf(userAddr);
 
-    await terms.decreaseLiquidity(
-      {
-        vault: vault,
-        amount0: projectTknIsTknZero
-          ? projectTokenAllocation
-          : baseTokenAllocation,
-        amount1: projectTknIsTknZero
-          ? baseTokenAllocation
-          : projectTokenAllocation,
-        to: userAddr,
-      },
-      ethers.utils.parseUnits("1000", 18)
+    // #region get burn payload
+
+    const vaultERC20 = (await ethers.getContractAt(
+      "IERC20",
+      vault,
+      user
+    )) as IERC20;
+    const balance = await vaultERC20.balanceOf(terms.address);
+    const burnPayloads = await arrakisV2Resolver.standardBurnParams(
+      balance.mul(10).div(100),
+      vault
     );
 
-    let feeTaken = baseTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
+    // #endregion get burn payload
+
+    const receipt = await (
+      await terms.decreaseLiquidity({
+        vault,
+        burns: burnPayloads,
+        burnAmount: balance.mul(10).div(100),
+        amount0Min: ethers.constants.Zero,
+        amount1Min: ethers.constants.Zero,
+        receiver: userAddr,
+      })
+    ).wait();
+
+    const decreaseLiquidityEvent = receipt.events?.find(
+      (e) => e.event == "DecreaseLiquidity"
+    )?.args;
 
     expect(await baseToken.balanceOf(await terms.termTreasury())).to.be.eq(
-      feeTaken
+      projectTknIsTknZero
+        ? decreaseLiquidityEvent?.emolument1
+        : decreaseLiquidityEvent?.emolument0
     );
 
-    feeTaken = projectTokenAllocation
-      .mul(await terms.emolument())
-      .div(10000)
-      .toString();
-
     expect(await projectToken.balanceOf(await terms.termTreasury())).to.be.eq(
-      feeTaken
+      projectTknIsTknZero
+        ? decreaseLiquidityEvent?.emolument0
+        : decreaseLiquidityEvent?.emolument1
     );
 
     const afterBTB = await baseToken.balanceOf(userAddr);
     const afterPTB = await projectToken.balanceOf(userAddr);
 
     // lt because left over is transfered to owner.
-    expect(beforeBTB.sub(baseTokenAllocation)).to.be.lt(afterBTB);
-    expect(beforePTB.sub(projectTokenAllocation)).to.be.lt(afterPTB);
+    expect(
+      beforeBTB.sub(
+        projectTknIsTknZero
+          ? decreaseLiquidityEvent?.amount1
+          : decreaseLiquidityEvent?.amount0
+      )
+    ).to.be.lt(afterBTB);
+    expect(
+      beforePTB.sub(
+        projectTknIsTknZero
+          ? decreaseLiquidityEvent?.amount0
+          : decreaseLiquidityEvent?.amount1
+      )
+    ).to.be.lt(afterPTB);
   });
 
   it("#4: Close Term", async () => {
