@@ -6,50 +6,11 @@ import {
 } from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Factory.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPALMManager} from "./IPALMManager.sol";
-
-// structs copied from v2-core/contracts/structs/SVaultV2.sol
-struct PositionLiquidity {
-    uint128 liquidity;
-    Range range;
-}
-
-struct BurnLiquidity {
-    uint128 liquidity;
-    Range range;
-}
-
-struct SwapPayload {
-    bytes payload;
-    address router;
-    uint256 amountIn;
-    uint256 expectedMinReturn;
-    bool zeroForOne;
-}
-
-struct Range {
-    int24 lowerTick;
-    int24 upperTick;
-    uint24 feeTier;
-}
-
-struct Rebalance {
-    PositionLiquidity[] removes;
-    PositionLiquidity[] deposits;
-    SwapPayload swap;
-    uint256 minDeposit0;
-    uint256 minDeposit1;
-}
-
-struct InitializePayload {
-    uint24[] feeTiers;
-    address token0;
-    address token1;
-    address owner;
-    uint256 init0;
-    uint256 init1;
-    address manager;
-    address[] routers;
-}
+import {
+    BurnLiquidity,
+    Range,
+    Rebalance
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 
 interface IArrakisV2 {
     function mint(uint256 mintAmount_, address receiver_)

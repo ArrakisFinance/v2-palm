@@ -2,7 +2,9 @@
 pragma solidity 0.8.13;
 
 import {IArrakisV2Beacon} from "./IArrakisV2Beacon.sol";
-import {InitializePayload} from "./IArrakisV2.sol";
+import {
+    InitializePayload
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 
 interface IArrakisV2Factory {
     event VaultCreated(address indexed manager, address indexed vault);
