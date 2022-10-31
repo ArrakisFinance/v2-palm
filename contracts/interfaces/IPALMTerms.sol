@@ -95,10 +95,8 @@ interface IPALMTerms {
         payable
         returns (address vault);
 
-    function increaseLiquidity(
-        IncreaseBalance calldata increaseBalance_,
-        uint256 mintAmount_
-    ) external;
+    function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
+        external;
 
     function renewTerm(IArrakisV2 vault_) external;
 

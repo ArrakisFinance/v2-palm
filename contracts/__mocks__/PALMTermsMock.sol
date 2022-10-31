@@ -5,6 +5,9 @@ import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
 import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
+    EnumerableSet
+} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {
     SetupPayload,
     IncreaseBalance,
     DecreaseBalance
@@ -13,13 +16,15 @@ import {
 // solhint-disable
 
 contract PALMTermsMock is PALMTermsStorage {
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     // solhint-disable-next-line no-empty-blocks
     constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     // #region mock functions.
 
     function addVault(address vault_) external {
-        vaults[msg.sender].push(vault_);
+        _vaults[msg.sender].add(vault_);
     }
 
     // #endregion mock functions.
@@ -33,10 +38,10 @@ contract PALMTermsMock is PALMTermsStorage {
         vault = address(0);
     }
 
-    function increaseLiquidity(
-        IncreaseBalance calldata increaseBalance_,
-        uint256 mintAmount_
-    ) external override {}
+    function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
+        external
+        override
+    {}
 
     function renewTerm(IArrakisV2 vault_) external override {}
 

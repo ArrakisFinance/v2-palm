@@ -319,28 +319,45 @@ describe("PALMManager unit test!!!", async function () {
 
   // #endregion set Vault strat by name.
 
+  // #region set gelato fee collector.
+
+  it("#17: test set gelato fee collector with not owner", async () => {
+    await expect(
+      managerMock.connect(user2).setGelatoFeeCollector(userAddr)
+    ).to.be.revertedWith("Ownable: caller is not the owner");
+  });
+
+  it("#18: test set gelato fee collector", async () => {
+    await expect(managerMock.setGelatoFeeCollector(userAddr)).to.not.be
+      .reverted;
+
+    expect(await managerMock.gelatoFeeCollector()).to.be.equal(userAddr);
+  });
+
+  // #endregion set gelato fee collector.
+
   // #region add operators unit test.
 
-  it("#17: test add operators with operators eq to address zero", async () => {
+  it("#19: test add operators with operators eq to address zero", async () => {
     await expect(
       managerMock.addOperators([ethers.constants.AddressZero])
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
-  it("#18: test add operators with not owner", async () => {
+  it("#20: test add operators with not owner", async () => {
     await expect(
       managerMock.connect(user2).addOperators([userAddr])
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("#19: test add operators with already operator", async () => {
+  it("#21: test add operators with already operator", async () => {
     managerMock.addOperators([userAddr]);
     await expect(managerMock.addOperators([userAddr])).to.be.revertedWith(
       "PALMManager: operator"
     );
   });
 
-  it("#20: test add operators", async () => {
+  it("#22: test add operators", async () => {
     await expect(managerMock.addOperators([userAddr])).to.not.be.reverted;
   });
 
@@ -348,25 +365,25 @@ describe("PALMManager unit test!!!", async function () {
 
   // #region remove operators unit test.
 
-  it("#21: test remove operators with operators eq to address zero", async () => {
+  it("#23: test remove operators with operators eq to address zero", async () => {
     await expect(
       managerMock.removeOperators([ethers.constants.AddressZero])
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
-  it("#22: test remove operators with not owner", async () => {
+  it("#24: test remove operators with not owner", async () => {
     await expect(
       managerMock.connect(user2).removeOperators([userAddr])
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("#23: test remove operators with already operator", async () => {
+  it("#25: test remove operators with already operator", async () => {
     await expect(managerMock.removeOperators([userAddr])).to.be.revertedWith(
       "PALMManager: no operator"
     );
   });
 
-  it("#24: test remove operators", async () => {
+  it("#26: test remove operators", async () => {
     await expect(managerMock.addOperators([userAddr])).to.not.be.reverted;
 
     await expect(managerMock.removeOperators([userAddr])).to.not.be.reverted;
@@ -376,7 +393,7 @@ describe("PALMManager unit test!!!", async function () {
 
   // #region withdrawVaultBalance unit test.
 
-  it("#25: test withdraw vault balance with address zero", async () => {
+  it("#27: test withdraw vault balance with address zero", async () => {
     await expect(
       managerMock.withdrawVaultBalance(
         ethers.constants.AddressZero,
@@ -386,7 +403,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
-  it("#26: test withdraw vault balance with no vault owner", async () => {
+  it("#28: test withdraw vault balance with no vault owner", async () => {
     await expect(
       managerMock
         .connect(user2)
@@ -398,7 +415,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
-  it("#27: test withdraw vault balance with no managed vault", async () => {
+  it("#29: test withdraw vault balance with no managed vault", async () => {
     await expect(
       managerMock.withdrawVaultBalance(
         vault.address,
@@ -408,7 +425,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
-  it("#28: test withdraw vault balance with to eq Address Zero", async () => {
+  it("#30: test withdraw vault balance with to eq Address Zero", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -425,7 +442,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
-  it("#29: test withdraw vault balance with to eq Address Zero", async () => {
+  it("#31: test withdraw vault balance with to eq Address Zero", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -443,7 +460,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: amount exceeds available balance");
   });
 
-  it("#30: test withdraw vault balance", async () => {
+  it("#32: test withdraw vault balance", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -468,7 +485,7 @@ describe("PALMManager unit test!!!", async function () {
 
   // #region fund vault balance unit test.
 
-  it("#31: test fund vault balance with not managed vault", async () => {
+  it("#33: test fund vault balance with not managed vault", async () => {
     // await managerMock.whitelistStrat("Gaussian");
 
     // await managerMock.addVault(
@@ -487,7 +504,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
-  it("#32: test fund vault balance", async () => {
+  it("#34: test fund vault balance", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -507,7 +524,7 @@ describe("PALMManager unit test!!!", async function () {
 
   // #region expand MM Term Duration unit test.
 
-  it("#33: test expand MM terms with not terms", async () => {
+  it("#35: test expand MM terms with not terms", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -521,19 +538,19 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
-  it("#34: test expand MM terms with vault eq zero address", async () => {
+  it("#36: test expand MM terms with vault eq zero address", async () => {
     await expect(
       managerMock.renewTerm(ethers.constants.AddressZero)
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
-  it("#35: test expand MM terms with no managed vault", async () => {
+  it("#37: test expand MM terms with no managed vault", async () => {
     await expect(managerMock.renewTerm(vault.address)).to.be.revertedWith(
       "PALMManager: Vault not managed"
     );
   });
 
-  it("#36: test expand MM terms", async () => {
+  it("#38: test expand MM terms", async () => {
     await managerMock.whitelistStrat("Gaussian");
 
     await managerMock.addVault(
@@ -549,19 +566,19 @@ describe("PALMManager unit test!!!", async function () {
 
   // #region whitelistStrat unit test.
 
-  it("#41: test whitelistStrat with no owner", async () => {
+  it("#39: test whitelistStrat with no owner", async () => {
     await expect(
       managerMock.connect(user2).whitelistStrat("")
     ).to.be.revertedWith("Ownable: caller is not the owner");
   });
 
-  it("#42: test whitelistStrat with empty string strat", async () => {
+  it("#40: test whitelistStrat with empty string strat", async () => {
     await expect(managerMock.whitelistStrat("")).to.be.revertedWith(
       "PALMManager: empty string"
     );
   });
 
-  it("#43: test whitelistStrat with already added strat", async () => {
+  it("#41: test whitelistStrat with already added strat", async () => {
     await managerMock.whitelistStrat("Bootstrapping");
 
     await expect(
@@ -569,7 +586,7 @@ describe("PALMManager unit test!!!", async function () {
     ).to.be.revertedWith("PALMManager: strat whitelisted.");
   });
 
-  it("#44: test whitelistStrat", async () => {
+  it("#42: test whitelistStrat", async () => {
     await expect(managerMock.whitelistStrat("Bootstrapping")).to.not.be
       .reverted;
   });

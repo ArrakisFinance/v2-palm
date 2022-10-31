@@ -51,35 +51,6 @@ function _requireTokenMatch(
     );
 }
 
-function _requireIsOwnerOrDelegate(
-    address delegate_,
-    address[] memory vaults_,
-    address vault_
-) view {
-    if (delegate_ != address(0)) {
-        require(msg.sender == delegate_, "PALMTerms: no delegate");
-    } else _requireIsOwner(vaults_, vault_);
-}
-
-function _requireIsOwner(address[] memory vaults_, address vault_)
-    pure
-    returns (uint256 index)
-{
-    bool isOwner;
-    (isOwner, index) = _isOwnerOfVault(vaults_, address(vault_));
-    require(isOwner, "PALMTerms: not owner");
-}
-
-function _isOwnerOfVault(address[] memory vaults_, address vault_)
-    pure
-    returns (bool, uint256 index)
-{
-    for (index = 0; index < vaults_.length; index++) {
-        if (vaults_[index] == vault_) return (true, index);
-    }
-    return (false, 0);
-}
-
 function _getEmolument(uint256 projectTokenAllocation_, uint16 emolument_)
     pure
     returns (uint256)
