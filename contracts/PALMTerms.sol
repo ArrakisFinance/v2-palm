@@ -10,6 +10,9 @@ import {BurnLiquidity, IArrakisV2} from "./interfaces/IArrakisV2.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
 import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
+    EnumerableSet
+} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import {
     SetupPayload,
     IncreaseBalance,
     DecreaseBalance,
@@ -20,8 +23,6 @@ import {
     _requireMintNotZero,
     _getInits,
     _requireTokenMatch,
-    _requireIsOwnerOrDelegate,
-    _requireIsOwner,
     _getEmolument,
     _requireProjectAllocationGtZero,
     _requireTknOrder,
@@ -31,6 +32,7 @@ import {
 // solhint-disable-next-line no-empty-blocks
 contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     // solhint-disable-next-line no-empty-blocks
     constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
@@ -119,13 +121,13 @@ contract PALMTerms is PALMTermsStorage {
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
         override
+        requireIsOwner(msg.sender, address(increaseBalance_.vault))
     {
         _requireProjectAllocationGtZero(
             increaseBalance_.projectTknIsTknZero,
             increaseBalance_.amount0,
             increaseBalance_.amount1
         ); // TODO: can we also allow increase of only base tokens allocation.
-        _requireIsOwner(vaults[msg.sender], address(increaseBalance_.vault));
 
         increaseBalance_.vault.token0().safeTransferFrom(
             msg.sender,
@@ -176,9 +178,8 @@ contract PALMTerms is PALMTermsStorage {
             decreaseBalance_.vault.token0(),
             decreaseBalance_.vault.token1()
         )
+        requireIsOwner(msg.sender, address(decreaseBalance_.vault))
     {
-        _requireIsOwner(vaults[msg.sender], address(decreaseBalance_.vault));
-
         BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
             decreaseBalance_.burnAmount,
             decreaseBalance_.vault
@@ -242,16 +243,9 @@ contract PALMTerms is PALMTermsStorage {
         override
         requireAddressNotZero(newOwner_)
         requireAddressNotZero(to_)
+        requireIsOwner(msg.sender, address(vault_))
     {
-        address vaultAddr = address(vault_);
-        uint256 index = _requireIsOwner(vaults[msg.sender], vaultAddr);
-
-        delete vaults[msg.sender][index];
-
-        for (uint256 i = index; i < vaults[msg.sender].length - 1; i++) {
-            vaults[msg.sender][i] = vaults[msg.sender][i + 1];
-        }
-        vaults[msg.sender].pop();
+        _vaults[msg.sender].remove(address(vault_));
 
         (uint256 amount0, uint256 amount1, ) = _burn(
             vault_,
@@ -272,14 +266,14 @@ contract PALMTerms is PALMTermsStorage {
         if (amount1 > 0)
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
-        IPALMManager(manager).removeVault(vaultAddr, payable(to_));
+        IPALMManager(manager).removeVault(address(vault_), payable(to_));
         vault_.setManager(IPALMManager(newManager_));
         vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 
         emit CloseTerm(
             msg.sender,
-            vaultAddr,
+            address(vault_),
             amount0,
             amount1,
             to_,
