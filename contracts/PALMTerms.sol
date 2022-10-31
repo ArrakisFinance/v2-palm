@@ -22,7 +22,6 @@ import {InitializePayload} from "./interfaces/IArrakisV2.sol";
 import {
     _requireMintNotZero,
     _getInits,
-    _requireTokenMatch,
     _getEmolument,
     _requireProjectAllocationGtZero,
     _requireTknOrder,
