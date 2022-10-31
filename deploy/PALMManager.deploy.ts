@@ -33,16 +33,11 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
       execute: {
         init: {
           methodName: "initialize",
-          args: [arrakisDaoOwner],
+          args: [arrakisDaoOwner, addresses.Gelato],
         },
       },
     },
-    args: [
-      addresses.Gelato,
-      4750,
-      (await ethers.getContract("PALMTerms")).address,
-      oneQuarter,
-    ],
+    args: [4750, (await ethers.getContract("PALMTerms")).address, oneQuarter],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };

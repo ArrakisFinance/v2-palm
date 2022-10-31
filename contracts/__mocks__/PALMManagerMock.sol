@@ -7,11 +7,15 @@ import {VaultInfo} from "../structs/SPALMManager.sol";
 
 contract PALMManagerMock is PALMManagerStorage {
     constructor(
-        address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
-        uint256 termDuration_ // solhint-disable-next-line no-empty-blocks
-    ) PALMManagerStorage(gelato_, managerFeeBPS_, terms_, termDuration_) {}
+        uint256 termDuration_
+    )
+        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
+    // solhint-disable-next-line no-empty-blocks
+    {
+
+    }
 
     function addVaultMock(address vault_) external payable {
         vaults[vault_] = VaultInfo({
