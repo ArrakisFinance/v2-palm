@@ -22,6 +22,11 @@ interface IPALMManager is IManager {
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
+    event SetGelatoFeeCollector(
+        address indexed vault,
+        address gelatoFeeCollector
+    );
+
     event SetTermEnd(
         address indexed vault,
         uint256 oldtermDuration,
@@ -64,6 +69,9 @@ interface IPALMManager is IManager {
     function setVaultData(address vault_, bytes calldata data_) external;
 
     function setVaultStraByName(address vault_, string calldata strat_)
+        external;
+
+    function setGelatoFeeCollector(address payable gelatoFeeCollector_)
         external;
 
     function addOperators(address[] calldata operators_) external;
