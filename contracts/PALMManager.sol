@@ -10,17 +10,11 @@ contract PALMManager is PALMManagerStorage {
     using Address for address payable;
 
     constructor(
-        address gelatoFeeCollector_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 termDuration_
     )
-        PALMManagerStorage(
-            gelatoFeeCollector_,
-            managerFeeBPS_,
-            terms_,
-            termDuration_
-        )
+        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
