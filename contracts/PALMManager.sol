@@ -2,27 +2,19 @@
 pragma solidity 0.8.13;
 
 import {IArrakisV2, Rebalance, Range} from "./interfaces/IArrakisV2.sol";
-import {IPALMManager} from "./interfaces/IPALMManager.sol";
-import {
-    IUniswapV3Pool
-} from "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import {
-    IERC20,
-    SafeERC20
-} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {VaultInfo} from "./structs/SPALMManager.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract PALMManager is PALMManagerStorage {
-    using SafeERC20 for IERC20;
+    using Address for address payable;
 
     constructor(
-        address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 termDuration_
     )
-        PALMManagerStorage(gelato_, managerFeeBPS_, terms_, termDuration_)
+        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -61,6 +53,8 @@ contract PALMManager is PALMManagerStorage {
         // solhint-disable-next-line not-rely-on-time
         vaults[vault_].lastRebalance = block.timestamp;
         vaults[vault_].balance = balance;
+
+        Address.sendValue(gelatoFeeCollector, feeAmount_);
     }
 
     // #endregion ====== INTERNAL FUNCTIONS ========

@@ -1,105 +1,93 @@
-import hre, { ethers } from "hardhat";
-import { ERC20, PALMTerms } from "../typechain";
+import { ethers } from "hardhat";
 
 // #region user input values
-
-const feeTier = 3000; // uniswap v3 feeTier.
-const token0 = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"; // token0 address.
-const token1 = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"; // token1 address.
-const projectTknIsTknZero = true; // eslint-disable-line
-const amount0 = ethers.utils.parseUnits("20", 6);
-const amount1 = ethers.utils.parseUnits("0.01", 18);
-
+const owner = "";
+const feeTier = 10000; // uniswap v3 feeTier.
+const token0 = ""; // token0 address.
+const token1 = ""; // token1 address.
+const amount0 = ethers.utils.parseUnits("1", 18);
+const amount1 = ethers.utils.parseUnits("1", 18);
+const assetIsTokenZero = true; // eslint-disable-line
+const midAllocationBps = 100;
+const assetAllocationBps = 300;
+const baseAllocationBps = 200;
+const rangeSize = 2;
+const assetRebalanceThreshold = 1;
+const baseRebalanceThreshold = 1;
+const delegate = ethers.constants.AddressZero;
 // #endregion user input values.
 
 // #region default inputs
-
+const version = 0.4;
 const strat = "BOOTSTRAPPING";
 const isBeacon = true;
+const swapRouter = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
+const twapDuration = 2000;
+const maxTwapDeviation = 100;
+const maxSlippage = 100;
+const baseMaxSwapAmount = 1;
+const assetMaxSwapAmount = 1;
+const minTick = -700000;
+const maxTick = 700000;
 // #endregion default inputs
 
+function buf2hex(buffer: any) {
+  // buffer is an ArrayBuffer
+  return [...new Uint8Array(buffer)]
+    .map((x) => x.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 async function main() {
-  if (!(hre.network.name == "matic" || hre.network.name == "mainnet")) return;
-  const [signer] = await ethers.getSigners();
-
-  const token0ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token0,
-    signer
-  )) as ERC20;
-
-  const token1ERC20: ERC20 = (await ethers.getContractAt(
-    "ERC20",
-    token1,
-    signer
-  )) as ERC20;
-
-  const terms = (await ethers.getContract("PALMTerms", signer)) as PALMTerms;
-
-  await token0ERC20.approve(terms.address, amount0);
-  await token1ERC20.approve(terms.address, amount1);
-
   const stratData = {
-    assetIsTokenZero: true, // since v0.3
-    minTick: -700000, // since v0.1
-    maxTick: 700000, // since v0.1
-    feeTiers: [feeTier], // since v0.1
-    strategy: ethers.utils.solidityKeccak256(["string"], [strat]), // since v0.1
-    version: 0.3, // since v0.1
-    midAllocationBps: 400, // since v0.2
-    assetAllocationBps: 1000, // since v0.3
-    baseAllocationBps: 500, // since v0.2
-    rangeSize: 4, // since v0.2
-    assetRebalanceThreshold: 2, // since v0.3
-    baseRebalanceThreshold: 1, // since v0.2
-    maxSlippage: 500, // since v0.3
-    twapDuration: 1000, // since v0.3
-    maxTwapDeviation: 100, // since v0.3
+    assetIsTokenZero: assetIsTokenZero,
+    minTick: minTick,
+    maxTick: maxTick,
+    feeTiers: [feeTier],
+    strategy: ethers.utils.solidityKeccak256(["string"], [strat]),
+    midAllocationBps: midAllocationBps,
+    assetAllocationBps: assetAllocationBps,
+    baseAllocationBps: baseAllocationBps,
+    rangeSize: rangeSize,
+    assetRebalanceThreshold: assetRebalanceThreshold,
+    baseRebalanceThreshold: baseRebalanceThreshold,
+    version: version,
+    twapDuration: twapDuration,
+    maxTwapDeviation: maxTwapDeviation,
+    maxSlippage: maxSlippage,
+    baseMaxSwapAmount: baseMaxSwapAmount,
+    assetMaxSwapAmount: assetMaxSwapAmount,
   };
+
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
 
-  //   const data = terms.interface.encodeFunctionData("openTerm", [
-  //       {
-  //         feeTiers: [feeTier.toString()],
-  //         token0,
-  //         token1,
-  //         projectTknIsTknZero,
-  //         owner: await signer.getAddress(),
-  //         maxTwapDeviation,
-  //         twapDuration,
-  //         maxSlippage,
-  //         amount0,
-  //         amount1,
-  //         datas: dataFormatted,
-  //         strat,
-  //         isBeacon: isBeacon,
-  //       },
-  //       ethers.utils.parseUnits("1", 18)
-  //     ]
-  //   );
+  const hexData = "0x" + buf2hex(dataFormatted.buffer);
 
-  //   console.log(data);
+  const setupPayload = {
+    // Initialized Payload properties
+    feeTiers: [feeTier.toString()],
+    token0: token0,
+    token1: token1,
+    projectTknIsTknZero: assetIsTokenZero,
+    owner: owner,
+    amount0: amount0.toString(),
+    amount1: amount1.toString(),
+    datas: hexData,
+    strat: strat,
+    isBeacon: isBeacon,
+    delegate: delegate,
+    routers: [swapRouter],
+  };
 
-  await terms.openTerm(
-    {
-      feeTiers: [feeTier.toString()],
-      token0,
-      token1,
-      projectTknIsTknZero,
-      owner: await signer.getAddress(),
-      amount0,
-      amount1,
-      datas: dataFormatted,
-      strat,
-      isBeacon: isBeacon,
-      delegate: ethers.constants.AddressZero,
-      routers: [],
-    },
-    ethers.utils.parseUnits("1", 18),
-    { gasLimit: 3000000 }
-  );
+  const mintAmount = ethers.utils.parseUnits("1", 18);
 
-  console.log("SUCCESS");
+  const setupValues = Object.values(setupPayload);
+  const params = [];
+  params.push(JSON.stringify(setupValues));
+  params.push(mintAmount.toString());
+  console.log("params: ", params);
+  console.log("labeled setup params:", setupPayload);
+  console.log("labeled strategy params:", stratData);
 }
 
 main()

@@ -20,6 +20,7 @@ import {
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
 /// @dev owner should be the PALMTerms smart contract.
+// solhint-disable-next-line max-states-count
 abstract contract PALMManagerStorage is
     IPALMManager,
     OwnableUpgradeable,
@@ -28,12 +29,6 @@ abstract contract PALMManagerStorage is
     using SafeERC20 for IERC20;
     using Address for address payable;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    // #region gelato bots.
-
-    address payable public immutable gelato;
-
-    // #endregion gelato bots.
 
     // #region manager fees.
 
@@ -58,6 +53,12 @@ abstract contract PALMManagerStorage is
     EnumerableSet.Bytes32Set internal _whitelistedStrat;
 
     // #endregion whitelisted strategies.
+
+    // #region gelato bots.
+
+    address payable public gelatoFeeCollector;
+
+    // #endregion gelato bots.
 
     // #region vaults related data.
 
@@ -115,12 +116,10 @@ abstract contract PALMManagerStorage is
     // #region constructor.
 
     constructor(
-        address gelato_,
         uint16 managerFeeBPS_,
         address terms_,
         uint256 termDuration_
     ) {
-        gelato = payable(gelato_);
         managerFeeBPS = managerFeeBPS_;
         terms = terms_;
         termDuration = termDuration_;
@@ -130,9 +129,14 @@ abstract contract PALMManagerStorage is
 
     // #region initialize function.
 
-    function initialize(address owner_) external initializer {
+    function initialize(address owner_, address gelatoFeeCollector_)
+        external
+        initializer
+    {
         _transferOwnership(owner_);
         __Pausable_init();
+        gelatoFeeCollector = payable(gelatoFeeCollector_);
+        emit SetGelatoFeeCollector(address(this), gelatoFeeCollector_);
     }
 
     // #endregion initialize function.
@@ -196,6 +200,18 @@ abstract contract PALMManagerStorage is
         onlyManagedVaults(vault_)
     {
         _setVaultStrat(vault_, keccak256(abi.encodePacked(strat_)));
+    }
+
+    function setGelatoFeeCollector(address payable gelatoFeeCollector_)
+        external
+        override
+        whenNotPaused
+        onlyOwner
+    {
+        emit SetGelatoFeeCollector(
+            address(this),
+            gelatoFeeCollector = gelatoFeeCollector_
+        );
     }
 
     function addOperators(address[] calldata operators_)
