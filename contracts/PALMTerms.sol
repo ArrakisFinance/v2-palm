@@ -116,82 +116,33 @@ contract PALMTerms is PALMTermsStorage {
     }
 
     // solhint-disable-next-line function-max-lines
-    function increaseLiquidity(
-        IncreaseBalance calldata increaseBalance_, // memory instead of calldata to set values
-        uint256 mintAmount_
-    )
+    function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
         override
-        noLeftOver(
-            increaseBalance_.vault.token0(),
-            increaseBalance_.vault.token1()
-        )
     {
-        _requireMintNotZero(mintAmount_);
         _requireProjectAllocationGtZero(
             increaseBalance_.projectTknIsTknZero,
             increaseBalance_.amount0,
             increaseBalance_.amount1
-        );
+        ); // TODO: can we also allow increase of only base tokens allocation.
         _requireIsOwner(vaults[msg.sender], address(increaseBalance_.vault));
 
-        (uint256 amount0, uint256 amount1, ) = _burn(
-            increaseBalance_.vault,
-            address(this),
-            resolver
-        );
-
-        // Transfer to termTreasury the project token emolment.
         increaseBalance_.vault.token0().safeTransferFrom(
             msg.sender,
-            address(this),
+            address(increaseBalance_.vault),
             increaseBalance_.amount0
         );
         increaseBalance_.vault.token1().safeTransferFrom(
             msg.sender,
-            address(this),
+            address(increaseBalance_.vault),
             increaseBalance_.amount1
         );
-
-        increaseBalance_.vault.token0().safeApprove(
-            address(increaseBalance_.vault),
-            0
-        );
-        increaseBalance_.vault.token1().safeApprove(
-            address(increaseBalance_.vault),
-            0
-        );
-        increaseBalance_.vault.token0().safeApprove(
-            address(increaseBalance_.vault),
-            increaseBalance_.amount0 + amount0
-        );
-        increaseBalance_.vault.token1().safeApprove(
-            address(increaseBalance_.vault),
-            increaseBalance_.amount1 + amount1
-        );
-
-        {
-            Inits memory inits;
-            (inits.init0, inits.init1) = _getInits(
-                mintAmount_,
-                increaseBalance_.amount0 + amount0,
-                increaseBalance_.amount1 + amount1
-            );
-
-            increaseBalance_.vault.setInits(inits.init0, inits.init1);
-        }
-
-        increaseBalance_.vault.mint(mintAmount_, address(this));
 
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
 
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2 vault_)
-        external
-        override
-        noLeftOver(vault_.token0(), vault_.token1())
-    {
+    function renewTerm(IArrakisV2 vault_) external override {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,

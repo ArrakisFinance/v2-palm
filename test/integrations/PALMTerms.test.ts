@@ -218,19 +218,16 @@ describe("PALMTerms integration test!!!", async function () {
     await baseToken.approve(terms.address, baseTokenAllocation);
     await projectToken.approve(terms.address, projectTokenAllocation);
 
-    await terms.increaseLiquidity(
-      {
-        vault: vault,
-        projectTknIsTknZero: projectTknIsTknZero,
-        amount0: projectTknIsTknZero
-          ? projectTokenAllocation
-          : baseTokenAllocation,
-        amount1: projectTknIsTknZero
-          ? baseTokenAllocation
-          : projectTokenAllocation,
-      },
-      ethers.utils.parseUnits("1000", 18)
-    );
+    await terms.increaseLiquidity({
+      vault: vault,
+      projectTknIsTknZero: projectTknIsTknZero,
+      amount0: projectTknIsTknZero
+        ? projectTokenAllocation
+        : baseTokenAllocation,
+      amount1: projectTknIsTknZero
+        ? baseTokenAllocation
+        : projectTokenAllocation,
+    });
 
     const afterBTB = await baseToken.balanceOf(vault);
     const afterPTB = await projectToken.balanceOf(vault);
