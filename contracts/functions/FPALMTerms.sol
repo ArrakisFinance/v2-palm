@@ -51,22 +51,17 @@ function _requireTokenMatch(
     );
 }
 
-function _getEmolument(uint256 projectTokenAllocation_, uint16 emolument_)
+function _getEmolument(uint256 allocation_, uint16 emolument_)
     pure
     returns (uint256)
 {
-    return (projectTokenAllocation_ * emolument_) / 10000;
+    return (allocation_ * emolument_) / 10000;
 }
 
-function _requireProjectAllocationGtZero(
-    bool projectTknIsTknZero_,
-    uint256 amount0_,
-    uint256 amount1_
-) pure {
-    require(
-        projectTknIsTknZero_ ? amount0_ > 0 : amount1_ > 0,
-        "PALMTerms: no project token allocation."
-    );
+function _requireTokensAllocationsGtZero(uint256 amount0_, uint256 amount1_)
+    pure
+{
+    require(amount0_ > 0 || amount1_ > 0, "PALMTerms: no tokens allocations.");
 }
 
 function _requireMintNotZero(uint256 mintAmount_) pure {

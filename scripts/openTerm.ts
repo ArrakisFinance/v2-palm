@@ -68,7 +68,6 @@ async function main() {
     feeTiers: [feeTier.toString()],
     token0: token0,
     token1: token1,
-    projectTknIsTknZero: assetIsTokenZero,
     owner: owner,
     amount0: amount0.toString(),
     amount1: amount1.toString(),

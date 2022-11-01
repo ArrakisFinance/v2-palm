@@ -10,7 +10,6 @@ struct SetupPayload {
     uint24[] feeTiers;
     IERC20 token0;
     IERC20 token1;
-    bool projectTknIsTknZero;
     address owner;
     uint256 amount0;
     uint256 amount1;
@@ -23,7 +22,6 @@ struct SetupPayload {
 
 struct IncreaseBalance {
     IArrakisV2 vault;
-    bool projectTknIsTknZero;
     uint256 amount0;
     uint256 amount1;
 }
