@@ -220,7 +220,6 @@ describe("PALMTerms integration test!!!", async function () {
 
     await terms.increaseLiquidity({
       vault: vault,
-      projectTknIsTknZero: projectTknIsTknZero,
       amount0: projectTknIsTknZero
         ? projectTokenAllocation
         : baseTokenAllocation,

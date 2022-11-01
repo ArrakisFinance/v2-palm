@@ -25,7 +25,7 @@ import {
     _requireMintNotZero,
     _getInits,
     _getEmolument,
-    _requireProjectAllocationGtZero,
+    _requireTokensAllocationsGtZero,
     _requireTknOrder,
     _burn
 } from "./functions/FPALMTerms.sol";
@@ -48,11 +48,7 @@ contract PALMTerms is PALMTermsStorage {
         returns (address vault)
     {
         _requireMintNotZero(mintAmount_);
-        _requireProjectAllocationGtZero(
-            setup_.projectTknIsTknZero,
-            setup_.amount0,
-            setup_.amount1
-        );
+        _requireTokensAllocationsGtZero(setup_.amount0, setup_.amount1);
         _requireTknOrder(address(setup_.token0), address(setup_.token1));
 
         {
@@ -124,11 +120,10 @@ contract PALMTerms is PALMTermsStorage {
         override
         requireIsOwner(address(increaseBalance_.vault))
     {
-        _requireProjectAllocationGtZero(
-            increaseBalance_.projectTknIsTknZero,
+        _requireTokensAllocationsGtZero(
             increaseBalance_.amount0,
             increaseBalance_.amount1
-        ); // TODO: can we also allow increase of only base tokens allocation.
+        );
 
         increaseBalance_.vault.token0().safeTransferFrom(
             msg.sender,
