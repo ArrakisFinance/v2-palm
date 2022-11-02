@@ -54,12 +54,6 @@ abstract contract PALMManagerStorage is
 
     // #endregion whitelisted strategies.
 
-    // #region gelato bots.
-
-    address payable public gelatoFeeCollector;
-
-    // #endregion gelato bots.
-
     // #region vaults related data.
 
     mapping(address => VaultInfo) public vaults;
@@ -71,6 +65,12 @@ abstract contract PALMManagerStorage is
     address[] public operators;
 
     // #endregion operators.
+
+    // #region gelato bots.
+
+    address payable public gelatoFeeCollector;
+
+    // #endregion gelato bots.
 
     // #region modifiers.
 
@@ -208,6 +208,10 @@ abstract contract PALMManagerStorage is
         whenNotPaused
         onlyOwner
     {
+        require(
+            gelatoFeeCollector != gelatoFeeCollector_,
+            "PALMManager: gelatoFeeCollector"
+        );
         emit SetGelatoFeeCollector(
             address(this),
             gelatoFeeCollector = gelatoFeeCollector_
