@@ -17,18 +17,15 @@ interface IPALMManager is IManager {
 
     event SetVaultStrat(address indexed vault, bytes32 strat);
 
-    event WhitelistStrat(address indexed manager, string strat);
+    event WhitelistStrat(string strat);
 
-    event AddOperators(address indexed manager, address[] operators);
+    event AddOperators(address[] operators);
 
-    event RemoveOperators(address indexed manager, address[] operators);
+    event RemoveOperators(address[] operators);
 
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
-    event SetGelatoFeeCollector(
-        address indexed manager,
-        address gelatoFeeCollector
-    );
+    event SetGelatoFeeCollector(address gelatoFeeCollector);
 
     event SetTermEnd(
         address indexed vault,
