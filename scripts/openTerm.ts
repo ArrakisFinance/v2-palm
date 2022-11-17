@@ -1,34 +1,46 @@
-import { ethers } from "hardhat";
+import hre from "hardhat";
+import { PALMTerms, IERC20 } from "../typechain";
+import { getAddressBookByNetwork } from "../src/config/addressBooks";
+import { sleep } from "../src/utils";
+const { ethers } = hre;
 
-// #region user input values
+const addresses = getAddressBookByNetwork(hre.network.name);
+
+// #region critical input values VERIFY THESE!
 const owner = "";
-const feeTier = 10000; // uniswap v3 feeTier.
+const feeTier = 500; // uniswap v3 feeTier.
 const token0 = ""; // token0 address.
 const token1 = ""; // token1 address.
-const amount0 = ethers.utils.parseUnits("1", 18);
-const amount1 = ethers.utils.parseUnits("1", 18);
+const amount0 = 1; // ethers.utils.parseUnits("0.01", 18);
+const amount1 = 1; // ethers.utils.parseUnits("0.01", 6);
 const assetIsTokenZero = true; // eslint-disable-line
-const midAllocationBps = 100;
-const assetAllocationBps = 300;
-const baseAllocationBps = 200;
-const rangeSize = 2;
+const midAllocationBps = 500;
+const assetAllocationBps = 1500;
+const baseAllocationBps = 1000;
+const rangeSize = 10;
 const assetRebalanceThreshold = 1;
 const baseRebalanceThreshold = 1;
-const delegate = ethers.constants.AddressZero;
-// #endregion user input values.
+const baseMinVwapAmount = 300000;
+const assetMinVwapAmount = 300000;
+const maxGasPrice = 0; // ethers.utils.parseUnits("500", "gwei")
+const baseMinRebalanceAmount = 1; // ethers.utils.parseUnits("0.1", 18);
+const assetMinRebalanceAmount = 1; // ethers.utils.parseUnits("0.1", 6);
+// #endregion critical input values VERIFY THESE!
 
 // #region default inputs
-const version = 0.4;
+const version = 0.7;
 const strat = "BOOTSTRAPPING";
 const isBeacon = true;
-const swapRouter = "0xE592427A0AEce92De3Edee1F18E0157C05861564";
-const twapDuration = 2000;
-const maxTwapDeviation = 100;
-const maxSlippage = 100;
+const swapRouter = addresses.UniswapV3SwapRouter;
+const delegate = addresses.DevMultisig;
+const twapDuration = 600;
+const maxTwapDeviation = 200;
+const maxSlippage = 200;
 const baseMaxSwapAmount = 1;
 const assetMaxSwapAmount = 1;
 const minTick = -700000;
 const maxTick = 700000;
+
 // #endregion default inputs
 
 function buf2hex(buffer: any) {
@@ -39,6 +51,15 @@ function buf2hex(buffer: any) {
 }
 
 async function main() {
+  if (
+    hre.network.name === "mainnet" ||
+    hre.network.name === "matic" ||
+    hre.network.name === "optimism"
+  ) {
+    console.log(`OPEN TERM to ${hre.network.name}. Hit ctrl + c to abort`);
+    await sleep(10000);
+  }
+  const [user] = await ethers.getSigners();
   const stratData = {
     assetIsTokenZero: assetIsTokenZero,
     minTick: minTick,
@@ -57,6 +78,11 @@ async function main() {
     maxSlippage: maxSlippage,
     baseMaxSwapAmount: baseMaxSwapAmount,
     assetMaxSwapAmount: assetMaxSwapAmount,
+    baseMinVwapAmount: baseMinVwapAmount,
+    assetMinVwapAmount: assetMinVwapAmount,
+    baseMinRebalanceAmount: baseMinRebalanceAmount,
+    assetMinRebalanceAmount: assetMinRebalanceAmount,
+    maxGasPrice: maxGasPrice,
   };
 
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
@@ -78,15 +104,27 @@ async function main() {
     routers: [swapRouter],
   };
 
-  const mintAmount = ethers.utils.parseUnits("1", 18);
-
-  const setupValues = Object.values(setupPayload);
-  const params = [];
-  params.push(JSON.stringify(setupValues));
-  params.push(mintAmount.toString());
-  console.log("params: ", params);
-  console.log("labeled setup params:", setupPayload);
-  console.log("labeled strategy params:", stratData);
+  const mintAmount = ethers.utils.parseEther("1");
+  const t0 = (await ethers.getContractAt("IERC20", token0, user)) as IERC20;
+  const t1 = (await ethers.getContractAt("IERC20", token1, user)) as IERC20;
+  const terms = (await ethers.getContractAt(
+    "PALMTerms",
+    addresses.PALMTerms,
+    user
+  )) as PALMTerms;
+  await t0.approve(addresses.PALMTerms, amount0, {
+    gasPrice: ethers.utils.parseUnits("80", "gwei"),
+  });
+  const tx1 = await t1.approve(addresses.PALMTerms, amount1, {
+    gasPrice: ethers.utils.parseUnits("80", "gwei"),
+  });
+  await tx1.wait();
+  const tx2 = await terms.openTerm(setupPayload, mintAmount, {
+    value: ethers.utils.parseEther("2"),
+    gasPrice: ethers.utils.parseUnits("80", "gwei"),
+  });
+  console.log("OPENING TERMS:");
+  console.log("TX HASH:", tx2.hash);
 }
 
 main()
