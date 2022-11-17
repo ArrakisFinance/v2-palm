@@ -12,41 +12,37 @@ const owner = "";
 const feeTier = 10000; // uniswap v3 feeTier.
 const token0 = ""; // token0 address.
 const token1 = ""; // token1 address.
-const amount0 = "1";
-const amount1 = "1";
-const assetIsTokenZero = true; // eslint-disable-line
+const isAssetTokenZero = true;
 const midAllocationBps = 100;
 const baseAllocationBps = 200;
 const assetAllocationBps = 300;
-const rangeSize = 1;
+const rangeSize = 2;
 const assetRebalanceThreshold = 1;
 const baseRebalanceThreshold = 1;
+const maxRebalanceGasPrice = 5000000000000; // 500 gwei
+const amount0 = "1";
+const amount1 = "1";
 const baseMinRebalanceAmount = "0";
 const assetMinRebalanceAmount = "2";
 const baseMaxSwapAmount = "1";
 const assetMaxSwapAmount = "1";
 const baseMinVwapAmount = "1";
 const assetMinVwapAmount = "1";
-const maxGasPrice = 5000000000000; // 500 gwei
-const gasTankAmount = ethers.utils.parseEther("1");
-const txGasPrice = ethers.utils.parseUnits("20", "gwei");
-
-// #endregion critical input values VERIFY THESE!
-
-// #region default inputs
-
-const version = 0.7;
-const strat = "BOOTSTRAPPING";
-const isBeacon = true;
-const swapRouter = addresses.UniswapV3SwapRouter;
-const delegate = addresses.DevMultisig;
 const twapDuration = 1000;
 const maxTwapDeviation = 100;
 const maxSlippage = 100;
 const minTick = -700000;
 const maxTick = 700000;
+const swapRouter = addresses.UniswapV3SwapRouter;
+const delegate = addresses.DevMultisig;
+const isBeacon = true;
+const strat = "BOOTSTRAPPING";
+const version = 0.7;
 
-// #endregion default inputs
+const gasTankAmount = ethers.utils.parseEther("1");
+const txGasPrice = ethers.utils.parseUnits("20", "gwei");
+
+// #endregion critical input values VERIFY THESE!
 
 function buf2hex(buffer: any) {
   // buffer is an ArrayBuffer
@@ -56,17 +52,8 @@ function buf2hex(buffer: any) {
 }
 
 async function main() {
-  if (
-    hre.network.name === "mainnet" ||
-    hre.network.name === "matic" ||
-    hre.network.name === "optimism"
-  ) {
-    console.log(`OPEN TERM to ${hre.network.name}. Hit ctrl + c to abort`);
-    await sleep(10000);
-  }
-  const [user] = await ethers.getSigners();
   const stratData = {
-    assetIsTokenZero: assetIsTokenZero,
+    assetIsTokenZero: isAssetTokenZero,
     minTick: minTick,
     maxTick: maxTick,
     feeTiers: [feeTier],
@@ -87,8 +74,22 @@ async function main() {
     assetMinVwapAmount: assetMinVwapAmount,
     baseMinRebalanceAmount: baseMinRebalanceAmount,
     assetMinRebalanceAmount: assetMinRebalanceAmount,
-    maxGasPrice: maxGasPrice,
+    maxGasPrice: maxRebalanceGasPrice,
   };
+  if (
+    hre.network.name === "mainnet" ||
+    hre.network.name === "matic" ||
+    hre.network.name === "optimism"
+  ) {
+    console.log(`OPEN TERM to ${hre.network.name}. Hit ctrl + c to abort\n\n`);
+    console.log("VAULT DATA:");
+    console.log(stratData);
+    console.log("owner:", owner);
+    console.log("token0:", token0);
+    console.log("token1:", token1);
+    await sleep(20000);
+  }
+  const [user] = await ethers.getSigners();
 
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
 
