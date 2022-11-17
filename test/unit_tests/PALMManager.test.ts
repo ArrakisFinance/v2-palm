@@ -275,19 +275,19 @@ describe("PALMManager unit test!!!", async function () {
 
   it("#13: test set vault strat by name with vault is zero address", async () => {
     await expect(
-      managerMock.setVaultStraByName(ethers.constants.AddressZero, "Gaussian")
+      managerMock.setVaultStratByName(ethers.constants.AddressZero, "Gaussian")
     ).to.be.revertedWith("PALMManager: address Zero");
   });
 
   it("#14: test set vault strat by name with no owner", async () => {
     await expect(
-      managerMock.connect(user2).setVaultStraByName(vault.address, "Gaussian")
+      managerMock.connect(user2).setVaultStratByName(vault.address, "Gaussian")
     ).to.be.revertedWith("PALMManager: only vault owner");
   });
 
   it("#15: test set vault strat by name with no managed vault", async () => {
     await expect(
-      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian")
+      managerMock.connect(user).setVaultStratByName(vault.address, "Gaussian")
     ).to.be.revertedWith("PALMManager: Vault not managed");
   });
 
@@ -299,7 +299,7 @@ describe("PALMManager unit test!!!", async function () {
       .addVault(vault.address, ethers.constants.HashZero, "Gaussian");
 
     await expect(
-      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian 2")
+      managerMock.connect(user).setVaultStratByName(vault.address, "Gaussian 2")
     ).to.be.revertedWith("PALMManager: strat not whitelisted.");
   });
 
@@ -313,7 +313,7 @@ describe("PALMManager unit test!!!", async function () {
     await managerMock.whitelistStrat("Gaussian 2");
 
     await expect(
-      managerMock.connect(user).setVaultStraByName(vault.address, "Gaussian 2")
+      managerMock.connect(user).setVaultStratByName(vault.address, "Gaussian 2")
     ).to.not.be.reverted;
   });
 

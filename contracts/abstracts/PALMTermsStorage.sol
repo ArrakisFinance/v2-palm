@@ -212,7 +212,7 @@ abstract contract PALMTermsStorage is
         requireAddressNotZero(vault_)
         requireDelegateWhenDelegateExistsOtherwiseRequireIsOwner(vault_)
     {
-        IPALMManager(manager).setVaultStraByName(vault_, strat_);
+        IPALMManager(manager).setVaultStratByName(vault_, strat_);
 
         emit LogSetVaultStratByName(
             delegateByVaults[vault_] != address(0)
