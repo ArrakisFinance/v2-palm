@@ -350,7 +350,7 @@ describe("PALMManager unit test!!!", async function () {
   it("#20: test add operators with operators eq to address zero", async () => {
     await expect(
       managerMock.addOperators([ethers.constants.AddressZero])
-    ).to.be.revertedWith("PALMManager: address Zero");
+    ).to.be.revertedWith("PALMManager: operator");
   });
 
   it("#21: test add operators with not owner", async () => {
@@ -373,12 +373,6 @@ describe("PALMManager unit test!!!", async function () {
   // #endregion add operators unit test.
 
   // #region remove operators unit test.
-
-  it("#24: test remove operators with operators eq to address zero", async () => {
-    await expect(
-      managerMock.removeOperators([ethers.constants.AddressZero])
-    ).to.be.revertedWith("PALMManager: address Zero");
-  });
 
   it("#25: test remove operators with not owner", async () => {
     await expect(

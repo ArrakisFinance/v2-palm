@@ -29,6 +29,7 @@ abstract contract PALMManagerStorage is
     using SafeERC20 for IERC20;
     using Address for address payable;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     // #region manager fees.
 
@@ -54,17 +55,17 @@ abstract contract PALMManagerStorage is
 
     // #endregion whitelisted strategies.
 
+    // #region operators.
+
+    EnumerableSet.AddressSet internal _operators;
+
+    // #endregion operators.
+
     // #region vaults related data.
 
     mapping(address => VaultInfo) public vaults;
 
     // #endregion vaults related data.
-
-    // #region operators.
-
-    address[] public operators;
-
-    // #endregion operators.
 
     // #region gelato bots.
 
@@ -101,8 +102,7 @@ abstract contract PALMManagerStorage is
     }
 
     modifier onlyOperators() {
-        (bool isOperator, ) = _isOperator(msg.sender);
-        require(isOperator, "PALMManager: no operator");
+        require(_isOperator(msg.sender), "PALMManager: no operator");
         _;
     }
 
@@ -224,10 +224,11 @@ abstract contract PALMManagerStorage is
         whenNotPaused
         onlyOwner
     {
-        for (uint256 i = 0; i < operators_.length; i++) {
-            (bool isOperator, ) = _isOperator(operators_[i]);
-            require(!isOperator, "PALMManager: operator");
-            operators.push(operators_[i]);
+        for (uint256 i = 0; i < operators_.length; ++i) {
+            require(
+                operators_[i] != address(0) && _operators.add(operators_[i]),
+                "PALMManager: operator"
+            );
         }
 
         emit AddOperators(address(this), operators_);
@@ -336,6 +337,10 @@ abstract contract PALMManagerStorage is
         return vaults[vault_];
     }
 
+    function getOperators() external view override returns (address[] memory) {
+        return _operators.values();
+    }
+
     // #region internal functions.
 
     function _addVault(
@@ -402,11 +407,11 @@ abstract contract PALMManagerStorage is
     }
 
     function _removeOperators(address[] memory operators_) internal {
-        for (uint256 i = 0; i < operators_.length; i++) {
-            (bool isOperator, uint256 index) = _isOperator(operators_[i]);
-            require(isOperator, "PALMManager: no operator");
-
-            delete operators[index];
+        for (uint256 i = 0; i < operators_.length; ++i) {
+            require(
+                _operators.remove(operators_[i]),
+                "PALMManager: no operator"
+            );
         }
 
         emit RemoveOperators(address(this), operators_);
@@ -431,12 +436,9 @@ abstract contract PALMManagerStorage is
         internal
         view
         requireAddressNotZero(operator_)
-        returns (bool, uint256)
+        returns (bool)
     {
-        for (uint256 index = 0; index < operators.length; index++) {
-            if (operators[index] == operator_) return (true, index);
-        }
-        return (false, 0);
+        return _operators.contains(operator_);
     }
 
     // #endregion internal functions.

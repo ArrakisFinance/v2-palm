@@ -246,7 +246,7 @@ describe("PALMTerms integration test!!!", async function () {
 
     await manager.connect(arrakisDaoOwner).addOperators([gelatoCallerAddr]);
 
-    expect(await manager.operators(0)).to.be.eq(gelatoCallerAddr);
+    expect((await manager.getOperators())[0]).to.be.eq(gelatoCallerAddr);
 
     // #endregion add caller as operators.
 

@@ -110,4 +110,6 @@ interface IPALMManager is IManager {
             bytes32 strat,
             uint256 termEnd
         );
+
+    function getOperators() external view returns (address[] memory);
 }
