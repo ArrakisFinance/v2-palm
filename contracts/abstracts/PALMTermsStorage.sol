@@ -60,9 +60,7 @@ abstract contract PALMTermsStorage is
         _;
     }
 
-    modifier requireDelegateWhenDelegateExistsOtherwiseRequireIsOwner(
-        address vault_
-    ) {
+    modifier requireIsDelegateIfExistsElseIsOwner(address vault_) {
         address delegate = delegateByVaults[vault_];
         if (delegate != address(0))
             require(msg.sender == delegate, "PALMTerms: no delegate");
@@ -193,7 +191,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
-        requireDelegateWhenDelegateExistsOtherwiseRequireIsOwner(vault_)
+        requireIsDelegateIfExistsElseIsOwner(vault_)
     {
         IPALMManager(manager).setVaultData(vault_, data_);
 
@@ -210,7 +208,7 @@ abstract contract PALMTermsStorage is
         external
         override
         requireAddressNotZero(vault_)
-        requireDelegateWhenDelegateExistsOtherwiseRequireIsOwner(vault_)
+        requireIsDelegateIfExistsElseIsOwner(vault_)
     {
         IPALMManager(manager).setVaultStraByName(vault_, strat_);
 
