@@ -191,7 +191,7 @@ abstract contract PALMManagerStorage is
         _setVaultData(vault_, data_);
     }
 
-    function setVaultStraByName(address vault_, string calldata strat_)
+    function setVaultStratByName(address vault_, string calldata strat_)
         external
         override
         whenNotPaused

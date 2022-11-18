@@ -71,7 +71,7 @@ interface IPALMManager is IManager {
 
     function setVaultData(address vault_, bytes calldata data_) external;
 
-    function setVaultStraByName(address vault_, string calldata strat_)
+    function setVaultStratByName(address vault_, string calldata strat_)
         external;
 
     function setGelatoFeeCollector(address payable gelatoFeeCollector_)
