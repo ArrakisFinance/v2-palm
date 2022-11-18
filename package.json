@@ -17,7 +17,8 @@
     "postpack": "pinst --enable",
     "test": "npx hardhat test",
     "verify": "npx hardhat etherscan-verify",
-    "script-openTerm": "npx hardhat run ./scripts/openTerm.ts"
+    "script-openTerm": "npx hardhat run ./scripts/openTerm.ts",
+    "script-setData": "npx hardhat run ./scripts/setVaultData.ts"
   },
   "repository": {
     "type": "git",
