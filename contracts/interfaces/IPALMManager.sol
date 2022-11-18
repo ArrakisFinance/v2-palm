@@ -26,7 +26,7 @@ interface IPALMManager is IManager {
     event UpdateVaultBalance(address indexed vault, uint256 newBalance);
 
     event SetGelatoFeeCollector(
-        address indexed vault,
+        address indexed manager,
         address gelatoFeeCollector
     );
 
