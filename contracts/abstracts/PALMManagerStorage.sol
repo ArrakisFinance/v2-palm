@@ -136,7 +136,7 @@ abstract contract PALMManagerStorage is
         _transferOwnership(owner_);
         __Pausable_init();
         gelatoFeeCollector = payable(gelatoFeeCollector_);
-        emit SetGelatoFeeCollector(address(this), gelatoFeeCollector_);
+        emit SetGelatoFeeCollector(gelatoFeeCollector_);
     }
 
     // #endregion initialize function.
@@ -212,10 +212,7 @@ abstract contract PALMManagerStorage is
             gelatoFeeCollector != gelatoFeeCollector_,
             "PALMManager: gelatoFeeCollector"
         );
-        emit SetGelatoFeeCollector(
-            address(this),
-            gelatoFeeCollector = gelatoFeeCollector_
-        );
+        emit SetGelatoFeeCollector(gelatoFeeCollector = gelatoFeeCollector_);
     }
 
     function addOperators(address[] calldata operators_)
@@ -231,7 +228,7 @@ abstract contract PALMManagerStorage is
             );
         }
 
-        emit AddOperators(address(this), operators_);
+        emit AddOperators(operators_);
     }
 
     function removeOperators(address[] calldata operators_)
@@ -315,7 +312,7 @@ abstract contract PALMManagerStorage is
         );
         _whitelistedStrat.add(stratB32);
 
-        emit WhitelistStrat(address(this), strat_);
+        emit WhitelistStrat(strat_);
     }
 
     function getWhitelistedStrat()
@@ -414,7 +411,7 @@ abstract contract PALMManagerStorage is
             );
         }
 
-        emit RemoveOperators(address(this), operators_);
+        emit RemoveOperators(operators_);
     }
 
     function _withdrawVaultBalance(
