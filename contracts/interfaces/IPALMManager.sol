@@ -32,8 +32,8 @@ interface IPALMManager is IManager {
 
     event SetTermEnd(
         address indexed vault,
-        uint256 oldtermDuration,
-        uint256 newtermDuration
+        uint256 oldtermEnd,
+        uint256 newtermEnd
     );
 
     event WithdrawVaultBalance(
