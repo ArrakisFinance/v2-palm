@@ -239,10 +239,9 @@ abstract contract PALMTermsStorage is
         address payable to_
     ) external override requireAddressNotZero(vault_) requireIsOwner(vault_) {
         IPALMManager manager_ = IPALMManager(manager);
-        (uint256 balance, , , , ) = manager_.vaults(vault_);
         manager_.withdrawVaultBalance(vault_, amount_, to_);
 
-        emit LogWithdrawVaultBalance(msg.sender, vault_, to_, balance);
+        emit LogWithdrawVaultBalance(msg.sender, vault_, to_, amount_);
     }
 
     // #endregion manager config as vault owner.
