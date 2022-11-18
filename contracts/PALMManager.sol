@@ -42,12 +42,12 @@ contract PALMManager is PALMManagerStorage {
         internal
         returns (uint256 balance)
     {
-        VaultInfo memory vaultInfo = vaults[vault_];
+        uint256 vaultBalance = vaults[vault_].balance;
         require(
-            vaultInfo.balance >= feeAmount_,
+            vaultBalance >= feeAmount_,
             "PALMManager: Not enough balance to pay fee"
         );
-        balance = vaultInfo.balance - feeAmount_;
+        balance = vaultBalance - feeAmount_;
 
         // update lastRebalance time
         // solhint-disable-next-line not-rely-on-time
