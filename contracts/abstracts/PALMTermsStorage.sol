@@ -91,6 +91,9 @@ abstract contract PALMTermsStorage is
         termTreasury = termTreasury_;
         emolument = emolument_;
         resolver = resolver_;
+        emit SetTermTreasury(address(0), termTreasury_);
+        emit SetEmolument(0, emolument_);
+        emit SetResolver(IArrakisV2Resolver(address(0)), resolver_);
     }
 
     // #region setter.
