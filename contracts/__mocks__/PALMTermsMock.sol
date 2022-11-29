@@ -29,7 +29,7 @@ contract PALMTermsMock is PALMTermsStorage {
 
     // #endregion mock functions.
 
-    function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
+    function openTerm(SetupPayload calldata setup_)
         external
         payable
         override

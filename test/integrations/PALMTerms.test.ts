@@ -174,9 +174,7 @@ describe("PALMTerms integration test!!!", async function () {
     await baseToken.approve(terms.address, baseTokenAllocation);
     await projectToken.approve(terms.address, projectTokenAllocation);
 
-    const receipt = await (
-      await terms.openTerm(setup, result.mintAmount)
-    ).wait();
+    const receipt = await (await terms.openTerm(setup)).wait();
 
     vault = receipt.events![receipt.events!.length - 1].args!.vault;
 
@@ -187,7 +185,7 @@ describe("PALMTerms integration test!!!", async function () {
     )) as IERC20;
 
     expect(await vaultERC20.balanceOf(terms.address)).to.be.eq(
-      result.mintAmount
+      ethers.utils.parseUnits("1", 18)
     );
 
     expect(await baseToken.balanceOf(vault)).to.be.eq(baseTokenAllocation);
@@ -469,9 +467,7 @@ describe("PALMTerms integration test!!!", async function () {
     await baseToken.approve(terms.address, baseTokenAllocation);
     await projectToken.approve(terms.address, projectTokenAllocation);
 
-    const receipt = await (
-      await terms.openTerm(setup, result.mintAmount)
-    ).wait();
+    const receipt = await (await terms.openTerm(setup)).wait();
 
     vault = receipt.events![receipt.events!.length - 1].args!.vault;
 
@@ -482,7 +478,7 @@ describe("PALMTerms integration test!!!", async function () {
     )) as IERC20;
 
     expect(await vaultERC20.balanceOf(terms.address)).to.be.eq(
-      result.mintAmount
+      ethers.utils.parseUnits("1", 18)
     );
 
     expect(await baseToken.balanceOf(vault)).to.be.eq(baseTokenAllocation);

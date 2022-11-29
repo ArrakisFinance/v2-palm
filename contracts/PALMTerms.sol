@@ -22,7 +22,6 @@ import {
     InitializePayload
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {
-    _requireMintNotZero,
     _getInits,
     _getEmolument,
     _requireTokensAllocationsGtZero,
@@ -40,21 +39,21 @@ contract PALMTerms is PALMTermsStorage {
 
     /// @notice do all neccesary step to initialize market making.
     // solhint-disable-next-line function-max-lines
-    function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
+    function openTerm(SetupPayload calldata setup_)
         external
         payable
         override
         collectLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
     {
-        _requireMintNotZero(mintAmount_);
         _requireTokensAllocationsGtZero(setup_.amount0, setup_.amount1);
         _requireTknOrder(address(setup_.token0), address(setup_.token1));
 
+        uint256 mintAmount = 1e18;
         {
             Inits memory inits;
             (inits.init0, inits.init1) = _getInits(
-                mintAmount_,
+                mintAmount,
                 setup_.amount0,
                 setup_.amount1
             );
@@ -109,7 +108,7 @@ contract PALMTerms is PALMTermsStorage {
 
         vaultV2.setRestrictedMint(address(this));
 
-        vaultV2.mint(mintAmount_, address(this));
+        vaultV2.mint(mintAmount, address(this));
 
         emit SetupVault(setup_.owner, vault);
     }

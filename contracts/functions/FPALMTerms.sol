@@ -64,10 +64,6 @@ function _requireTokensAllocationsGtZero(uint256 amount0_, uint256 amount1_)
     require(amount0_ > 0 || amount1_ > 0, "PALMTerms: no tokens allocations.");
 }
 
-function _requireMintNotZero(uint256 mintAmount_) pure {
-    require(mintAmount_ > 0, "PALMTerms: mintAmount zero.");
-}
-
 function _requireTknOrder(address token0_, address token1_) pure {
     require(token0_ < token1_, "PALMTerms: tokens order inverted.");
 }
