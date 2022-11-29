@@ -180,6 +180,12 @@ contract PALMTerms is PALMTermsStorage {
             decreaseBalance_.vault
         );
 
+        require(
+            IERC20(address(decreaseBalance_.vault)).balanceOf(address(this)) >
+                decreaseBalance_.burnAmount,
+            "PALMTerms: burn all vault tokens no allowed."
+        );
+
         (uint256 amount0, uint256 amount1) = decreaseBalance_.vault.burn(
             burnPayload,
             decreaseBalance_.burnAmount,
