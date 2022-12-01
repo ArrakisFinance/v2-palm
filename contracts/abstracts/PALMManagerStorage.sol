@@ -163,6 +163,7 @@ abstract contract PALMManagerStorage is
         override
         whenNotPaused
         requireAddressNotZero(vault_)
+        onlyPALMTerms
         onlyPALMTermsVaults(vault_)
     {
         _addVault(vault_, datas_, strat_);
