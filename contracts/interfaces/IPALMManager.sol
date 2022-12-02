@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IManager} from "./IManager.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 import {
     Range,
     Rebalance
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 
-interface IPALMManager is IManager {
+interface IPALMManager {
     event AddVault(address indexed vault, bytes datas, string strat);
 
     event RemoveVault(address indexed vault, uint256 sendBack);
@@ -16,6 +15,8 @@ interface IPALMManager is IManager {
     event SetVaultData(address indexed vault, bytes data);
 
     event SetVaultStrat(address indexed vault, bytes32 strat);
+
+    event SetManagerFeeBPS(address indexed vault, uint16 managerFeeBPS);
 
     event WhitelistStrat(string strat);
 
@@ -73,6 +74,8 @@ interface IPALMManager is IManager {
 
     function setGelatoFeeCollector(address payable gelatoFeeCollector_)
         external;
+
+    function setManagerFeeBPS(address vault_, uint16 managerFeeBPS_) external;
 
     function addOperators(address[] calldata operators_) external;
 

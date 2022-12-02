@@ -9,12 +9,8 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 contract PALMManager is PALMManagerStorage {
     using Address for address payable;
 
-    constructor(
-        uint16 managerFeeBPS_,
-        address terms_,
-        uint256 termDuration_
-    )
-        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
+    constructor(address terms_, uint256 termDuration_)
+        PALMManagerStorage(terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 

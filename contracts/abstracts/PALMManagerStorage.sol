@@ -31,12 +31,6 @@ abstract contract PALMManagerStorage is
     using EnumerableSet for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    // #region manager fees.
-
-    uint16 public immutable managerFeeBPS;
-
-    // #endregion manager fees.
-
     // #region PALMTerms.
 
     address public immutable terms;
@@ -115,12 +109,7 @@ abstract contract PALMManagerStorage is
 
     // #region constructor.
 
-    constructor(
-        uint16 managerFeeBPS_,
-        address terms_,
-        uint256 termDuration_
-    ) {
-        managerFeeBPS = managerFeeBPS_;
+    constructor(address terms_, uint256 termDuration_) {
         terms = terms_;
         termDuration = termDuration_;
     }
@@ -214,6 +203,16 @@ abstract contract PALMManagerStorage is
             "PALMManager: gelatoFeeCollector"
         );
         emit SetGelatoFeeCollector(gelatoFeeCollector = gelatoFeeCollector_);
+    }
+
+    function setManagerFeeBPS(address vault_, uint16 managerFeeBPS_)
+        external
+        override
+        whenNotPaused
+        onlyOwner
+    {
+        IArrakisV2(vault_).setManagerFeeBPS(managerFeeBPS_);
+        emit SetManagerFeeBPS(vault_, managerFeeBPS_);
     }
 
     function addOperators(address[] calldata operators_)

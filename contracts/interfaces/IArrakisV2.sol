@@ -35,6 +35,8 @@ interface IArrakisV2 {
 
     function setInits(uint256 init0_, uint256 init1_) external;
 
+    function setManagerFeeBPS(uint16 managerFeeBPS_) external;
+
     function addPools(uint24[] calldata feeTiers_) external;
 
     function removePools(address[] calldata pools_) external;

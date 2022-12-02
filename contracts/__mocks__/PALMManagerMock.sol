@@ -6,12 +6,8 @@ import {Range, Rebalance} from "../interfaces/IArrakisV2.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
 contract PALMManagerMock is PALMManagerStorage {
-    constructor(
-        uint16 managerFeeBPS_,
-        address terms_,
-        uint256 termDuration_
-    )
-        PALMManagerStorage(managerFeeBPS_, terms_, termDuration_)
+    constructor(address terms_, uint256 termDuration_)
+        PALMManagerStorage(terms_, termDuration_)
     // solhint-disable-next-line no-empty-blocks
     {
 
