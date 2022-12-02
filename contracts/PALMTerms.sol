@@ -139,7 +139,11 @@ contract PALMTerms is PALMTermsStorage {
     }
 
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2 vault_) external override {
+    function renewTerm(IArrakisV2 vault_)
+        external
+        override
+        requireIsOwner(address(vault_))
+    {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
