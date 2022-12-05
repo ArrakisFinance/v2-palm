@@ -29,6 +29,8 @@ import {
     _burn
 } from "./functions/FPALMTerms.sol";
 
+/// @title Portfolio automated liquidity management
+/// @notice Smart contract creating market making terms btw client and Arrakis Finance
 // solhint-disable-next-line no-empty-blocks
 contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
@@ -38,6 +40,9 @@ contract PALMTerms is PALMTermsStorage {
     constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     /// @notice do all neccesary step to initialize market making.
+    /// @param setup_ contain all data to create Arrakis V2 vault,
+    /// to create a term btw client and PALM and to manage it.
+    /// @return vault created Arrakis V2 vault address
     // solhint-disable-next-line function-max-lines
     function openTerm(SetupPayload calldata setup_)
         external
@@ -58,7 +63,6 @@ contract PALMTerms is PALMTermsStorage {
                 setup_.amount1
             );
 
-            // Create vaultV2.
             vault = v2factory.deployVault(
                 InitializePayload({
                     feeTiers: setup_.feeTiers,
@@ -79,16 +83,15 @@ contract PALMTerms is PALMTermsStorage {
         _addVault(setup_.owner, vault);
 
         if (setup_.delegate != address(0)) _setDelegate(vault, setup_.delegate);
-        // Mint vaultV2 token.
 
-        // Call the manager to make it manage the new vault.
+        vaultV2.setRestrictedMint(address(this));
+
         IPALMManager(manager).addVault{value: msg.value}(
             vault,
             setup_.datas,
             setup_.strat
         );
 
-        // Transfer to termTreasury the project token emolment.
         setup_.token0.safeTransferFrom(
             msg.sender,
             address(this),
@@ -106,13 +109,15 @@ contract PALMTerms is PALMTermsStorage {
         setup_.token0.safeApprove(vault, setup_.amount0);
         setup_.token1.safeApprove(vault, setup_.amount1);
 
-        vaultV2.setRestrictedMint(address(this));
-
         vaultV2.mint(mintAmount, address(this));
 
         emit SetupVault(setup_.owner, vault);
     }
 
+    /// @notice to increase tokens allocation on client Arrakis V2 vault.
+    /// @param increaseBalance_ contain all data to increase Arrakis V2 vault
+    /// allocations
+    /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
@@ -138,6 +143,9 @@ contract PALMTerms is PALMTermsStorage {
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
 
+    /// @notice to renew term btw PALM and client on Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
     function renewTerm(IArrakisV2 vault_)
         external
@@ -149,7 +157,7 @@ contract PALMTerms is PALMTermsStorage {
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
             "PALMTerms: term not ended."
         );
-        IPALMManager(manager).renewTerm(address(vault_));
+        manager_.renewTerm(address(vault_));
 
         uint256 balance = IERC20(address(vault_)).balanceOf(address(this));
 
@@ -169,6 +177,11 @@ contract PALMTerms is PALMTermsStorage {
         emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }
 
+    /// @notice to decrease tokens allocation on client Arrakis V2 vault.
+    /// automated management.
+    /// @param decreaseBalance_ contain all data to decrease Arrakis V2 vault
+    /// allocations
+    /// @dev only vault owner can call it. And client will pay emoluments.
     // solhint-disable-next-line function-max-lines
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
@@ -237,6 +250,13 @@ contract PALMTerms is PALMTermsStorage {
         );
     }
 
+    /// @notice to close term btw PALM and client.
+    /// automated management.
+    /// @param vault_  Arrakis V2 vault
+    /// @param to_  address that will receive fund.
+    /// @param newOwner_  new owner of the Arrakis V2 vault.
+    /// @param newManager_  new manager of the Arrakis V2 vault.
+    /// @dev only vault owner can call it. And client will pay emoluments.
     // solhint-disable-next-line function-max-lines, code-complexity
     function closeTerm(
         IArrakisV2 vault_,

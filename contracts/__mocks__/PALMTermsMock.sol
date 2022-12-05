@@ -56,4 +56,6 @@ contract PALMTermsMock is PALMTermsStorage {
         address newOwner_,
         address newManager_
     ) external {}
+
+    receive() external payable {}
 }

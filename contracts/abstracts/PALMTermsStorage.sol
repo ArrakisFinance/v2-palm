@@ -87,6 +87,11 @@ abstract contract PALMTermsStorage is
         IArrakisV2Resolver resolver_
     ) external initializer {
         require(emolument < 10000, "PALMTerms: emolument >= 100%.");
+        require(owner_ != address(0), "PALMTerms: owner is address zero.");
+        require(
+            termTreasury_ != address(0),
+            "PALMTerms: term treasury is address zero."
+        );
         _transferOwnership(owner_);
         termTreasury = termTreasury_;
         emolument = emolument_;
@@ -98,6 +103,9 @@ abstract contract PALMTermsStorage is
 
     // #region setter.
 
+    /// @notice for setting emolument percentage
+    /// @param emolument_ new emolument
+    /// @dev only be callable by owner
     function setEmolument(uint16 emolument_) external onlyOwner {
         require(
             emolument_ < emolument,
@@ -106,6 +114,9 @@ abstract contract PALMTermsStorage is
         emit SetEmolument(emolument, emolument = emolument_);
     }
 
+    /// @notice for setting term treasury
+    /// @param termTreasury_ address of fess receiver
+    /// @dev only be callable by owner
     function setTermTreasury(address termTreasury_)
         external
         onlyOwner
@@ -118,6 +129,9 @@ abstract contract PALMTermsStorage is
         emit SetTermTreasury(termTreasury, termTreasury = termTreasury_);
     }
 
+    /// @notice for setting resolver address
+    /// @param resolver_ new resolver
+    /// @dev only be callable by owner
     function setResolver(IArrakisV2Resolver resolver_)
         external
         onlyOwner
@@ -130,6 +144,9 @@ abstract contract PALMTermsStorage is
         emit SetResolver(resolver, resolver = resolver_);
     }
 
+    /// @notice for setting manager_ address
+    /// @param manager_ new manager
+    /// @dev only be callable by owner
     function setManager(address manager_)
         external
         override
@@ -144,6 +161,10 @@ abstract contract PALMTermsStorage is
 
     // #region vault config as admin.
 
+    /// @notice for adding new Pools on Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @param feeTiers_ feeTiers to add
+    /// @dev only be callable by owner of the vault
     function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_)
         external
         override
@@ -155,6 +176,10 @@ abstract contract PALMTermsStorage is
         emit LogAddPools(msg.sender, address(vault_), feeTiers_);
     }
 
+    /// @notice for removing Pools on Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @param pools_ pools to remove
+    /// @dev only be callable by owner of the vault
     function removePools(IArrakisV2 vault_, address[] calldata pools_)
         external
         override
@@ -166,6 +191,10 @@ abstract contract PALMTermsStorage is
         emit LogRemovePools(msg.sender, address(vault_), pools_);
     }
 
+    /// @notice for whitelisting routers on Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @param routers_ routers to whitelist
+    /// @dev only be callable by owner of the vault
     function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
@@ -177,6 +206,10 @@ abstract contract PALMTermsStorage is
         emit LogWhitelistRouters(msg.sender, address(vault_), routers_);
     }
 
+    /// @notice for blacklist routers on Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @param routers_ routers to blacklist
+    /// @dev only be callable by owner of the vault
     function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
@@ -191,7 +224,10 @@ abstract contract PALMTermsStorage is
     // #endregion vault config as admin.
 
     // #region manager config as vault owner.
-
+    /// @notice set Arrakis V2 vault meta data
+    /// @param vault_ Arrakis V2 vault
+    /// @param data_ meta data to use during market making
+    /// @dev only be callable by delegate of the vault by default or otherwise owner
     function setVaultData(address vault_, bytes calldata data_)
         external
         override
@@ -209,6 +245,10 @@ abstract contract PALMTermsStorage is
         );
     }
 
+    /// @notice set Arrakis V2 vault strategy
+    /// @param vault_ Arrakis V2 vault
+    /// @param strat_ strategy to apply during market making
+    /// @dev only be callable by delegate of the vault by default or otherwise owner
     function setVaultStratByName(address vault_, string calldata strat_)
         external
         override
@@ -226,6 +266,10 @@ abstract contract PALMTermsStorage is
         );
     }
 
+    /// @notice set delegate for managing Arrakis V2 vault
+    /// @param vault_ Arrakis V2 vault
+    /// @param delegate_ that will manage Arrakis V2 vault
+    /// @dev only be callable by owner of vault
     function setDelegate(address vault_, address delegate_)
         external
         override
@@ -236,6 +280,11 @@ abstract contract PALMTermsStorage is
         emit LogSetDelegate(msg.sender, vault_, delegate_);
     }
 
+    /// @notice for withdrawing vault balance
+    /// @param vault_ Arrakis V2 vault
+    /// @param amount_ amount of balance that receiver will get back
+    /// @param to_ address of the receiver of balance
+    /// @dev only be callable by owner of vault
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,
@@ -249,6 +298,10 @@ abstract contract PALMTermsStorage is
 
     // #endregion manager config as vault owner.
 
+    /// @notice get vault of creator
+    /// @param creator_ creator of Arrakis V2 vault
+    /// @param index index on the list of vaults
+    /// @return address of the Arrakis Vault V2
     function vaults(address creator_, uint256 index)
         external
         view

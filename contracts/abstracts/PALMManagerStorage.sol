@@ -87,14 +87,6 @@ abstract contract PALMManagerStorage is
         _;
     }
 
-    modifier onlyVaultOwner(address vault) {
-        require(
-            IArrakisV2(vault).owner() == msg.sender,
-            "PALMManager: only vault owner"
-        );
-        _;
-    }
-
     modifier onlyOperators() {
         require(_isOperator(msg.sender), "PALMManager: no operator");
         _;
@@ -122,6 +114,11 @@ abstract contract PALMManagerStorage is
         external
         initializer
     {
+        require(owner_ != address(0), "PALMManager: owner is address zero");
+        require(
+            gelatoFeeCollector_ != address(0),
+            "PALMManager: gelatoFeeCollector is address zero"
+        );
         _transferOwnership(owner_);
         __Pausable_init();
         gelatoFeeCollector = payable(gelatoFeeCollector_);
@@ -142,6 +139,13 @@ abstract contract PALMManagerStorage is
 
     // #endregion permissioned owner functions.
 
+    /// @notice add vault to manage
+    /// @param vault_ Arrakis V2 vault address
+    /// @param datas_ meta data that be used by PALM
+    /// to manage the vault
+    /// @param strat_ strategy type chosen by client
+    /// @dev only be callable by Terms sm and only for Terms owned
+    /// vault.
     function addVault(
         address vault_,
         bytes calldata datas_,
@@ -159,52 +163,77 @@ abstract contract PALMManagerStorage is
         if (msg.value > 0) _fundVaultBalance(vault_);
     }
 
+    /// @notice remove vault from management
+    /// @param vault_ Arrakis V2 vault address
+    /// @param to_ address that will left over balance.
+    /// @dev only be callable by Terms sm and only for Terms owned
+    /// vault.
     function removeVault(address vault_, address payable to_)
         external
         override
         whenNotPaused
         requireAddressNotZero(vault_)
-        onlyVaultOwner(vault_)
+        onlyPALMTerms
+        onlyManagedVaults(vault_)
     {
-        require(vaults[vault_].termEnd != 0, "PALMManager: Vault not managed");
         _removeVault(vault_, to_);
     }
 
+    /// @notice for setting managed vault meta data
+    /// @param vault_ Arrakis V2 vault address
+    /// @param data_ meta data that be used by PALM
+    /// to manage the vault
+    /// @dev only be callable by Terms sm and only for Terms owned
+    /// vault.
     function setVaultData(address vault_, bytes calldata data_)
         external
         override
         whenNotPaused
         requireAddressNotZero(vault_)
-        onlyVaultOwner(vault_)
+        onlyPALMTerms
         onlyManagedVaults(vault_)
     {
         _setVaultData(vault_, data_);
     }
 
+    /// @notice for changing strategy type
+    /// @param vault_ Arrakis V2 vault address
+    /// @param strat_  strategy type chosen by client
+    /// @dev only be callable by Terms sm and only for Terms owned
+    /// vault.
     function setVaultStratByName(address vault_, string calldata strat_)
         external
         override
         whenNotPaused
         requireAddressNotZero(vault_)
-        onlyVaultOwner(vault_)
+        onlyPALMTerms
         onlyManagedVaults(vault_)
     {
         _setVaultStrat(vault_, keccak256(abi.encodePacked(strat_)));
     }
 
+    /// @notice for setting gelato fee collector
+    /// @param gelatoFeeCollector_ new gelato fee collector address
+    /// @dev only be callable by owner
     function setGelatoFeeCollector(address payable gelatoFeeCollector_)
         external
         override
         whenNotPaused
         onlyOwner
+        requireAddressNotZero(gelatoFeeCollector_)
     {
         require(
             gelatoFeeCollector != gelatoFeeCollector_,
             "PALMManager: gelatoFeeCollector"
         );
-        emit SetGelatoFeeCollector(gelatoFeeCollector = gelatoFeeCollector_);
+        gelatoFeeCollector = gelatoFeeCollector_;
+        emit SetGelatoFeeCollector(gelatoFeeCollector_);
     }
 
+    /// @notice for setting manager fee
+    /// @param vault_ Arrakis V2 vault address
+    /// @param managerFeeBPS_ new manager fee
+    /// @dev only be callable by owner
     function setManagerFeeBPS(address vault_, uint16 managerFeeBPS_)
         external
         override
@@ -215,13 +244,16 @@ abstract contract PALMManagerStorage is
         emit SetManagerFeeBPS(vault_, managerFeeBPS_);
     }
 
+    /// @notice for adding operators
+    /// @param operators_ list of operators to add
+    /// @dev only be callable by owner
     function addOperators(address[] calldata operators_)
         external
         override
         whenNotPaused
         onlyOwner
     {
-        for (uint256 i = 0; i < operators_.length; ++i) {
+        for (uint256 i; i < operators_.length; ++i) {
             require(
                 operators_[i] != address(0) && _operators.add(operators_[i]),
                 "PALMManager: operator"
@@ -231,6 +263,9 @@ abstract contract PALMManagerStorage is
         emit AddOperators(operators_);
     }
 
+    /// @notice for removing operators
+    /// @param operators_ list of operators to remove
+    /// @dev only be callable by owner
     function removeOperators(address[] calldata operators_)
         external
         override
@@ -240,13 +275,17 @@ abstract contract PALMManagerStorage is
         _removeOperators(operators_);
     }
 
+    /// @notice for withdrawing fee earn as manager
+    /// @param tokens_ list of tokens where withdrawing fees
+    /// @param to_ receiver of fees
+    /// @dev only be callable by owner
     function withdrawFeesEarned(address[] calldata tokens_, address to_)
         external
         override
         whenNotPaused
         onlyOwner
     {
-        for (uint256 i = 0; i < tokens_.length; i++) {
+        for (uint256 i; i < tokens_.length; i++) {
             uint256 balance = IERC20(tokens_[i]).balanceOf(address(this));
             if (balance > 0) {
                 IERC20(tokens_[i]).safeTransfer(to_, balance);
@@ -254,6 +293,11 @@ abstract contract PALMManagerStorage is
         }
     }
 
+    /// @notice for withdrawing vault fund balance
+    /// @param vault_ Arrakis V2 vault address
+    /// @param amount_ amount of balance to retrieve
+    /// @param to_ receiver of balance
+    /// @dev only be callable by palm term and managed vault
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,
@@ -263,13 +307,16 @@ abstract contract PALMManagerStorage is
         override
         whenNotPaused
         requireAddressNotZero(vault_)
-        onlyVaultOwner(vault_)
+        onlyPALMTerms
         onlyManagedVaults(vault_)
         requireAddressNotZero(address(to_))
     {
         _withdrawVaultBalance(vault_, amount_, to_);
     }
 
+    /// @notice fund vault balance
+    /// @param vault_ Arrakis V2 vault address
+    /// @dev only for managed vault
     function fundVaultBalance(address vault_)
         external
         payable
@@ -280,6 +327,9 @@ abstract contract PALMManagerStorage is
         _fundVaultBalance(vault_);
     }
 
+    /// @notice fund vault balance
+    /// @param vault_ Arrakis V2 vault address
+    /// @dev only for managed vault
     function renewTerm(address vault_)
         external
         override
@@ -296,6 +346,9 @@ abstract contract PALMManagerStorage is
         );
     }
 
+    /// @notice whitelist strategy as owner
+    /// @param strat_ strategy type to whitelist
+    /// @dev only for managed vault
     function whitelistStrat(string calldata strat_)
         external
         whenNotPaused
@@ -315,6 +368,7 @@ abstract contract PALMManagerStorage is
         emit WhitelistStrat(strat_);
     }
 
+    /// @notice get whitelisted list of strategies
     function getWhitelistedStrat()
         external
         view
@@ -324,6 +378,9 @@ abstract contract PALMManagerStorage is
         return _whitelistedStrat.values();
     }
 
+    /// @notice get vault info
+    /// @param vault_ Arrakis V2 vault address
+    /// @return vaultInfo data related to Arrakis V2 vault managed
     function getVaultInfo(address vault_)
         external
         view
@@ -334,6 +391,8 @@ abstract contract PALMManagerStorage is
         return vaults[vault_];
     }
 
+    /// @notice get list of operators
+    /// @return operators array of address representing operators
     function getOperators() external view override returns (address[] memory) {
         return _operators.values();
     }
@@ -364,13 +423,13 @@ abstract contract PALMManagerStorage is
     }
 
     function _fundVaultBalance(address vault_) internal {
+        require(msg.value > 0, "PALMManager: cannot fund with 0");
         vaults[vault_].balance += msg.value;
         emit UpdateVaultBalance(vault_, vaults[vault_].balance);
     }
 
     function _removeVault(address vault_, address payable to_) internal {
         uint256 balance = vaults[vault_].balance;
-        vaults[vault_].balance = 0;
 
         delete vaults[vault_];
 
@@ -404,7 +463,7 @@ abstract contract PALMManagerStorage is
     }
 
     function _removeOperators(address[] memory operators_) internal {
-        for (uint256 i = 0; i < operators_.length; ++i) {
+        for (uint256 i; i < operators_.length; ++i) {
             require(
                 _operators.remove(operators_[i]),
                 "PALMManager: no operator"

@@ -16,6 +16,14 @@ contract PALMManager is PALMManagerStorage {
 
     }
 
+    /// @notice rebalance Arrakis V2 tokens allocation on
+    /// Uniswap V3.
+    /// @param vault_  Arrakis V2 vault address
+    /// @param ranges_  ranges to tracks
+    /// @param rebalanceParams_  contains all data for doing reblance
+    /// @param rangesToRemove_  ranges to remove
+    /// @param feeAmount_ gas cost of rebalance
+    /// @dev only operators can call it
     function rebalance(
         address vault_,
         Range[] calldata ranges_,

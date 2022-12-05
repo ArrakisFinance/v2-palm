@@ -298,7 +298,30 @@ describe("PALMTerms unit test!!!", async function () {
   it("#31: setMaxSlippage unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await manager.addVaultMock(vault.address);
+    manager = (await (
+      await ethers.getContractFactory("PALMManagerMock", user)
+    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [terms.address],
+    });
+
+    const s = await ethers.getSigner(terms.address);
+
+    await user.sendTransaction({
+      to: terms.address,
+      value: ethers.utils.parseEther("1"),
+    });
+
+    await manager.connect(s).addVaultMock(vault.address);
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: [terms.address],
+    });
+
+    await terms.connect(owner).setManager(manager.address);
 
     await expect(
       terms
@@ -329,8 +352,34 @@ describe("PALMTerms unit test!!!", async function () {
   it("#34: setVaultStratByName unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await manager.addVaultMock(vault.address);
-    await manager.whitelistStrat("Gaussian");
+    manager = (await (
+      await ethers.getContractFactory("PALMManagerMock", user)
+    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [terms.address],
+    });
+
+    const s = await ethers.getSigner(terms.address);
+
+    await user.sendTransaction({
+      to: terms.address,
+      value: ethers.utils.parseEther("1"),
+    });
+
+    await manager.connect(s).addVaultMock(vault.address);
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: [terms.address],
+    });
+
+    await terms.connect(owner).setManager(manager.address);
+
+    await manager.initialize(userAddr, userAddr);
+
+    await manager.connect(user).whitelistStrat("Gaussian");
 
     await expect(
       terms.connect(owner).setVaultStratByName(vault.address, "Gaussian")
@@ -362,9 +411,34 @@ describe("PALMTerms unit test!!!", async function () {
   it("#37: withdrawVaultBalance unit test", async () => {
     await terms.connect(owner).addVault(vault.address);
 
-    await manager.addVaultMock(vault.address, {
-      value: ethers.utils.parseEther("1"),
+    manager = (await (
+      await ethers.getContractFactory("PALMManagerMock", user)
+    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+
+    await hre.network.provider.request({
+      method: "hardhat_impersonateAccount",
+      params: [terms.address],
     });
+
+    const s = await ethers.getSigner(terms.address);
+
+    await user.sendTransaction({
+      to: terms.address,
+      value: ethers.utils.parseEther("2"),
+    });
+
+    await manager
+      .connect(s)
+      .addVaultMock(vault.address, { value: ethers.utils.parseEther("1") });
+
+    await hre.network.provider.request({
+      method: "hardhat_stopImpersonatingAccount",
+      params: [terms.address],
+    });
+
+    await terms.connect(owner).setManager(manager.address);
+
+    await manager.initialize(userAddr, userAddr);
 
     await expect(
       terms
