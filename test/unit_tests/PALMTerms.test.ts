@@ -7,7 +7,7 @@ import {
 import { Signer } from "ethers";
 import {
   BaseToken,
-  IArrakisV2,
+  IArrakisV2Extended,
   IArrakisV2Factory,
   IUniswapV3Factory,
   IUniswapV3Pool,
@@ -35,7 +35,7 @@ describe("PALMTerms unit test!!!", async function () {
   let pool: IUniswapV3Pool;
   // eslint-disable-next-line
   let projectTknIsTknZero: boolean;
-  let vault: IArrakisV2;
+  let vault: IArrakisV2Extended;
 
   beforeEach("Setting up for PALMTerms unit test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -109,6 +109,7 @@ describe("PALMTerms unit test!!!", async function () {
       init1: init1,
       manager: userAddr,
       routers: [],
+      burnBuffer: 1000,
     };
 
     const receipt = await (
@@ -116,10 +117,10 @@ describe("PALMTerms unit test!!!", async function () {
     ).wait();
 
     vault = (await ethers.getContractAt(
-      "IArrakisV2",
+      "IArrakisV2Extended",
       receipt.events![receipt.events!.length - 1].args!.vault,
       user
-    )) as IArrakisV2;
+    )) as IArrakisV2Extended;
   });
 
   // #region set Emolument unit test.
@@ -300,7 +301,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     manager = (await (
       await ethers.getContractFactory("PALMManagerMock", user)
-    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+    ).deploy(terms.address, 60 * 60 * 24 * 365, 4750)) as PALMManagerMock;
 
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -354,7 +355,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     manager = (await (
       await ethers.getContractFactory("PALMManagerMock", user)
-    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+    ).deploy(terms.address, 60 * 60 * 24 * 365, 4750)) as PALMManagerMock;
 
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",
@@ -413,7 +414,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     manager = (await (
       await ethers.getContractFactory("PALMManagerMock", user)
-    ).deploy(terms.address, 60 * 60 * 24 * 365)) as PALMManagerMock;
+    ).deploy(terms.address, 60 * 60 * 24 * 365, 4750)) as PALMManagerMock;
 
     await hre.network.provider.request({
       method: "hardhat_impersonateAccount",

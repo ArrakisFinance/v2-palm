@@ -8,7 +8,7 @@ import { Signer } from "ethers";
 import {
   BaseToken,
   PALMManagerMock,
-  IArrakisV2,
+  IArrakisV2Extended,
   IArrakisV2Factory,
   IUniswapV3Factory,
   ProjectToken,
@@ -32,7 +32,7 @@ describe("PALMManager unit test!!!", async function () {
   // eslint-disable-next-line
   let projectTknIsTknZero: boolean;
   // let pool: IUniswapV3Pool;
-  let vault: IArrakisV2;
+  let vault: IArrakisV2Extended;
 
   beforeEach("Setting up for PALMManager unit test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -100,6 +100,7 @@ describe("PALMManager unit test!!!", async function () {
       init1: init1,
       manager: managerMock.address,
       routers: [],
+      burnBuffer: 4750,
     };
 
     const receipt = await (
@@ -107,10 +108,10 @@ describe("PALMManager unit test!!!", async function () {
     ).wait();
 
     vault = (await ethers.getContractAt(
-      "IArrakisV2",
+      "IArrakisV2Extended",
       receipt.events![receipt.events!.length - 1].args!.vault,
       user
-    )) as IArrakisV2;
+    )) as IArrakisV2Extended;
   });
 
   // #region add vault unit test.
