@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Factory} from "../interfaces/IArrakisV2Factory.sol";
-import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
+import {
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
+import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
 import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
@@ -43,7 +45,7 @@ contract PALMTermsMock is PALMTermsStorage {
         override
     {}
 
-    function renewTerm(IArrakisV2 vault_) external override {}
+    function renewTerm(IArrakisV2Extended vault_) external override {}
 
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
@@ -51,9 +53,11 @@ contract PALMTermsMock is PALMTermsStorage {
     {}
 
     function closeTerm(
-        IArrakisV2 vault_,
+        IArrakisV2Extended vault_,
         address to_,
         address newOwner_,
         address newManager_
     ) external {}
+
+    receive() external payable {}
 }
