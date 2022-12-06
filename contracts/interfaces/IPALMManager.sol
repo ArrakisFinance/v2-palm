@@ -75,7 +75,7 @@ interface IPALMManager {
     function setGelatoFeeCollector(address payable gelatoFeeCollector_)
         external;
 
-    function setManagerFeeBPS(address vault_, uint16 managerFeeBPS_) external;
+    function setManagerFeeBPS(address vault_) external;
 
     function addOperators(address[] calldata operators_) external;
 
@@ -112,4 +112,6 @@ interface IPALMManager {
         );
 
     function getOperators() external view returns (address[] memory);
+
+    function managerFeeBPS() external view returns (uint16);
 }

@@ -9,7 +9,7 @@ import { Contract } from "ethers";
 import {
   BaseToken,
   PALMManager,
-  IArrakisV2,
+  IArrakisV2Extended,
   IArrakisV2Resolver,
   IERC20,
   IUniswapV3Factory,
@@ -41,7 +41,7 @@ describe("PALMTerms integration test!!!", async function () {
   let pool: IUniswapV3Pool;
   let uniswapV3Amount: Contract;
   let vault: string;
-  let vaultV2: IArrakisV2;
+  let vaultV2: IArrakisV2Extended;
   let lowerTick: number;
   let upperTick: number;
 
@@ -156,6 +156,7 @@ describe("PALMTerms integration test!!!", async function () {
       projectTknIsTknZero ? projectTokenAllocation : baseTokenAllocation,
       projectTknIsTknZero ? baseTokenAllocation : projectTokenAllocation
     );
+
     const setup = {
       feeTiers: [500],
       token0: projectTknIsTknZero ? projectToken.address : baseToken.address,
@@ -169,6 +170,7 @@ describe("PALMTerms integration test!!!", async function () {
       isBeacon: true,
       delegate: ethers.constants.AddressZero,
       routers: [],
+      burnBuffer: 4500,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
@@ -412,10 +414,10 @@ describe("PALMTerms integration test!!!", async function () {
     ).to.be.equal(afterTreasoryP);
 
     vaultV2 = (await ethers.getContractAt(
-      "IArrakisV2",
+      "IArrakisV2Extended",
       vault,
       user
-    )) as IArrakisV2;
+    )) as IArrakisV2Extended;
 
     expect(await vaultV2.owner()).to.be.eq(userAddr);
     expect(await vaultV2.manager()).to.be.eq(userAddr);
@@ -462,6 +464,7 @@ describe("PALMTerms integration test!!!", async function () {
       isBeacon: false,
       delegate: await user2.getAddress(),
       routers: [],
+      burnBuffer: 4500,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);

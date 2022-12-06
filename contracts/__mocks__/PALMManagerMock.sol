@@ -2,12 +2,19 @@
 pragma solidity 0.8.13;
 
 import {PALMManagerStorage} from "../abstracts/PALMManagerStorage.sol";
-import {Range, Rebalance} from "../interfaces/IArrakisV2.sol";
+import {
+    Range,
+    Rebalance
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
 contract PALMManagerMock is PALMManagerStorage {
-    constructor(address terms_, uint256 termDuration_)
-        PALMManagerStorage(terms_, termDuration_)
+    constructor(
+        address terms_,
+        uint256 termDuration_,
+        uint16 _managerFeeBPS_
+    )
+        PALMManagerStorage(terms_, termDuration_, _managerFeeBPS_)
     // solhint-disable-next-line no-empty-blocks
     {
 
