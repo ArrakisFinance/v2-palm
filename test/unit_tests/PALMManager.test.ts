@@ -9,7 +9,7 @@ import {
   BaseToken,
   PALMManagerMock,
   IArrakisV2Extended,
-  IArrakisV2FactoryExtended,
+  IArrakisV2Factory,
   IUniswapV3Factory,
   ProjectToken,
 } from "../../typechain";
@@ -25,7 +25,7 @@ describe("PALMManager unit test!!!", async function () {
   let user2: Signer;
   let addresses: Addresses;
   let managerMock: PALMManagerMock;
-  let arrakisV2Factory: IArrakisV2FactoryExtended;
+  let arrakisV2Factory: IArrakisV2Factory;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
   let v3Factory: IUniswapV3Factory;
@@ -55,7 +55,7 @@ describe("PALMManager unit test!!!", async function () {
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
 
     arrakisV2Factory = await ethers.getContractAt(
-      "IArrakisV2FactoryExtended",
+      "IArrakisV2Factory",
       addresses.ArrakisV2Factory,
       user
     );
