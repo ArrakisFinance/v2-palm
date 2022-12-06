@@ -8,7 +8,7 @@ import { Signer } from "ethers";
 import {
   BaseToken,
   PALMManagerMock,
-  IArrakisV2,
+  IArrakisV2Extended,
   IArrakisV2Factory,
   IUniswapV3Factory,
   ProjectToken,
@@ -32,7 +32,7 @@ describe("PALMManager unit test!!!", async function () {
   // eslint-disable-next-line
   let projectTknIsTknZero: boolean;
   // let pool: IUniswapV3Pool;
-  let vault: IArrakisV2;
+  let vault: IArrakisV2Extended;
 
   beforeEach("Setting up for PALMManager unit test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -100,6 +100,7 @@ describe("PALMManager unit test!!!", async function () {
       init1: init1,
       manager: managerMock.address,
       routers: [],
+      burnBuffer: 4750,
     };
 
     const receipt = await (
@@ -107,10 +108,10 @@ describe("PALMManager unit test!!!", async function () {
     ).wait();
 
     vault = (await ethers.getContractAt(
-      "IArrakisV2",
+      "IArrakisV2Extended",
       receipt.events![receipt.events!.length - 1].args!.vault,
       user
-    )) as IArrakisV2;
+    )) as IArrakisV2Extended;
   });
 
   // #region add vault unit test.
@@ -178,7 +179,7 @@ describe("PALMManager unit test!!!", async function () {
   it("#5: test remove vault with not owner", async () => {
     await expect(
       managerMock.connect(user2).removeVault(vault.address, userAddr)
-    ).to.be.revertedWith("PALMManager: only vault owner");
+    ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#6: test remove vault with vault not managed", async () => {
@@ -233,7 +234,7 @@ describe("PALMManager unit test!!!", async function () {
       managerMock
         .connect(user2)
         .setVaultData(vault.address, ethers.constants.HashZero)
-    ).to.be.revertedWith("PALMManager: only vault owner");
+    ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#11: test set vault data with no managed vault", async () => {
@@ -282,7 +283,7 @@ describe("PALMManager unit test!!!", async function () {
   it("#14: test set vault strat by name with no owner", async () => {
     await expect(
       managerMock.connect(user2).setVaultStratByName(vault.address, "Gaussian")
-    ).to.be.revertedWith("PALMManager: only vault owner");
+    ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#15: test set vault strat by name with no managed vault", async () => {
@@ -415,7 +416,7 @@ describe("PALMManager unit test!!!", async function () {
           ethers.utils.parseEther("1"),
           userAddr
         )
-    ).to.be.revertedWith("PALMManager: only vault owner");
+    ).to.be.revertedWith("PALMManager: only PALMTerms");
   });
 
   it("#30: test withdraw vault balance with no managed vault", async () => {

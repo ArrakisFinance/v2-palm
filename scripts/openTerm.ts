@@ -38,6 +38,7 @@ const delegate = addresses.DevMultisig;
 const isBeacon = true;
 const strat = "BOOTSTRAPPING";
 const version = 0.7;
+const burnBuffer = 1000; // 10%
 
 const gasTankAmount = ethers.utils.parseEther("1");
 const txGasPrice = ethers.utils.parseUnits("20", "gwei");
@@ -108,6 +109,7 @@ async function main() {
     isBeacon: isBeacon,
     delegate: delegate,
     routers: [swapRouter],
+    burnBuffer: burnBuffer,
   };
 
   const t0 = (await ethers.getContractAt("IERC20", token0, user)) as IERC20;
