@@ -8,7 +8,7 @@ import { Signer } from "ethers";
 import {
   BaseToken,
   IArrakisV2Extended,
-  IArrakisV2FactoryExtended,
+  IArrakisV2Factory,
   IUniswapV3Factory,
   IUniswapV3Pool,
   ProjectToken,
@@ -28,7 +28,7 @@ describe("PALMTerms unit test!!!", async function () {
   let addresses: Addresses;
   let terms: PALMTermsMock;
   let manager: PALMManagerMock;
-  let arrakisV2Factory: IArrakisV2FactoryExtended;
+  let arrakisV2Factory: IArrakisV2Factory;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
   let v3Factory: IUniswapV3Factory;
@@ -61,7 +61,7 @@ describe("PALMTerms unit test!!!", async function () {
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
 
     arrakisV2Factory = await ethers.getContractAt(
-      "IArrakisV2FactoryExtended",
+      "IArrakisV2Factory",
       addresses.ArrakisV2Factory,
       user
     );

@@ -2,8 +2,8 @@
 pragma solidity 0.8.13;
 
 import {
-    IArrakisV2FactoryExtended
-} from "../interfaces/IArrakisV2FactoryExtended.sol";
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
 import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
 import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
@@ -21,9 +21,7 @@ contract PALMTermsMock is PALMTermsStorage {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2FactoryExtended v2factory_)
-        PALMTermsStorage(v2factory_)
-    {}
+    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
 
     // #region mock functions.
 

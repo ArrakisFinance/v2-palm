@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2FactoryExtended} from "./IArrakisV2FactoryExtended.sol";
+import {
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
 import {
     IArrakisV2Resolver
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
@@ -151,7 +153,7 @@ interface IPALMTerms {
 
     // #endregion PALMManager configuration functions.
 
-    function v2factory() external view returns (IArrakisV2FactoryExtended);
+    function v2factory() external view returns (IArrakisV2Factory);
 
     function termTreasury() external view returns (address);
 

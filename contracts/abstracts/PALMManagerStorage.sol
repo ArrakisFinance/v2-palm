@@ -20,7 +20,6 @@ import {
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
-/// @dev owner should be the PALMTerms smart contract.
 // solhint-disable-next-line max-states-count
 abstract contract PALMManagerStorage is
     IPALMManager,
@@ -161,11 +160,9 @@ abstract contract PALMManagerStorage is
 
     /// @notice add vault to manage
     /// @param vault_ Arrakis V2 vault address
-    /// @param datas_ meta data that be used by PALM
-    /// to manage the vault
+    /// @param datas_ metadata that be used by PALM to manage vault
     /// @param strat_ strategy type chosen by client
-    /// @dev only be callable by Terms sm and only for Terms owned
-    /// vault.
+    /// @dev only callable by Terms and only for Terms owned vault.
     function addVault(
         address vault_,
         bytes calldata datas_,
@@ -186,8 +183,7 @@ abstract contract PALMManagerStorage is
     /// @notice remove vault from management
     /// @param vault_ Arrakis V2 vault address
     /// @param to_ address that will left over balance.
-    /// @dev only be callable by Terms sm and only for Terms owned
-    /// vault.
+    /// @dev only callable by Terms and only for Terms owned vault.
     function removeVault(address vault_, address payable to_)
         external
         override
@@ -201,10 +197,8 @@ abstract contract PALMManagerStorage is
 
     /// @notice for setting managed vault meta data
     /// @param vault_ Arrakis V2 vault address
-    /// @param data_ meta data that be used by PALM
-    /// to manage the vault
-    /// @dev only be callable by Terms sm and only for Terms owned
-    /// vault.
+    /// @param data_ metadata used by PALM to manage the vault
+    /// @dev only callable by Terms and only for Terms owned vault.
     function setVaultData(address vault_, bytes calldata data_)
         external
         override
@@ -218,9 +212,8 @@ abstract contract PALMManagerStorage is
 
     /// @notice for changing strategy type
     /// @param vault_ Arrakis V2 vault address
-    /// @param strat_  strategy type chosen by client
-    /// @dev only be callable by Terms sm and only for Terms owned
-    /// vault.
+    /// @param strat_ strategy type chosen by client
+    /// @dev only callable by Terms and only for Terms owned vault.
     function setVaultStratByName(address vault_, string calldata strat_)
         external
         override
@@ -234,7 +227,7 @@ abstract contract PALMManagerStorage is
 
     /// @notice for setting gelato fee collector
     /// @param gelatoFeeCollector_ new gelato fee collector address
-    /// @dev only be callable by owner
+    /// @dev only callable by owner
     function setGelatoFeeCollector(address payable gelatoFeeCollector_)
         external
         override
@@ -252,7 +245,7 @@ abstract contract PALMManagerStorage is
 
     /// @notice for setting manager fee
     /// @param vault_ Arrakis V2 vault address
-    /// @dev only be callable by owner
+    /// @dev only callable by owner
     function setManagerFeeBPS(address vault_)
         external
         override
@@ -265,7 +258,7 @@ abstract contract PALMManagerStorage is
 
     /// @notice for adding operators
     /// @param operators_ list of operators to add
-    /// @dev only be callable by owner
+    /// @dev only callable by owner
     function addOperators(address[] calldata operators_)
         external
         override
@@ -284,7 +277,7 @@ abstract contract PALMManagerStorage is
 
     /// @notice for removing operators
     /// @param operators_ list of operators to remove
-    /// @dev only be callable by owner
+    /// @dev only callable by owner
     function removeOperators(address[] calldata operators_)
         external
         override
@@ -297,7 +290,7 @@ abstract contract PALMManagerStorage is
     /// @notice for withdrawing fee earn as manager
     /// @param tokens_ list of tokens where withdrawing fees
     /// @param to_ receiver of fees
-    /// @dev only be callable by owner
+    /// @dev only callable by owner
     function withdrawFeesEarned(address[] calldata tokens_, address to_)
         external
         override
@@ -316,7 +309,7 @@ abstract contract PALMManagerStorage is
     /// @param vault_ Arrakis V2 vault address
     /// @param amount_ amount of balance to retrieve
     /// @param to_ receiver of balance
-    /// @dev only be callable by palm term and managed vault
+    /// @dev only callable by palm term and managed vault
     function withdrawVaultBalance(
         address vault_,
         uint256 amount_,

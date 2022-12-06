@@ -2,8 +2,8 @@
 pragma solidity 0.8.13;
 
 import {
-    IArrakisV2FactoryExtended
-} from "./interfaces/IArrakisV2FactoryExtended.sol";
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
 import {
     IERC20,
     SafeERC20
@@ -41,16 +41,16 @@ contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    constructor(IArrakisV2FactoryExtended v2factory_)
+    constructor(IArrakisV2Factory v2factory_)
         PALMTermsStorage(v2factory_)
     // solhint-disable-next-line no-empty-blocks
     {
 
     }
 
-    /// @notice do all neccesary step to initialize market making.
-    /// @param setup_ contain all data to create Arrakis V2 vault,
-    /// to create a term btw client and PALM and to manage it.
+    /// @notice does neccesary step to initialize PALM market making.
+    /// @param setup_ contains all data to create ArrakisV2 vault,
+    /// creates a term btw client and PALM automated management.
     /// @return vault created Arrakis V2 vault address
     // solhint-disable-next-line function-max-lines
     function openTerm(SetupPayload calldata setup_)
@@ -127,9 +127,8 @@ contract PALMTerms is PALMTermsStorage {
         emit SetupVault(setup_.owner, vault);
     }
 
-    /// @notice to increase tokens allocation on client Arrakis V2 vault.
-    /// @param increaseBalance_ contain all data to increase Arrakis V2 vault
-    /// allocations
+    /// @notice increases tokens allocation on client ArrakisV2 PALM vault.
+    /// @param increaseBalance_ contain all data to increase vault allocations.
     /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
@@ -156,7 +155,7 @@ contract PALMTerms is PALMTermsStorage {
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
 
-    /// @notice to renew term btw PALM and client on Arrakis V2 vault
+    /// @notice renews term btw PALMManager and client on ArrakisV2 PALM vault
     /// @param vault_ Arrakis V2 vault
     /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
@@ -186,11 +185,9 @@ contract PALMTerms is PALMTermsStorage {
         emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }
 
-    /// @notice to decrease tokens allocation on client Arrakis V2 vault.
-    /// automated management.
-    /// @param decreaseBalance_ contain all data to decrease Arrakis V2 vault
-    /// allocations
-    /// @dev only vault owner can call it. And client will pay emoluments.
+    /// @notice to decrease tokens allocation on client ArrakisV2 PALM vault.
+    /// @param decreaseBalance_ contain all data to decrease vault allocations
+    /// @dev only vault owner can call it. Client will pay emoluments.
     // solhint-disable-next-line function-max-lines
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
@@ -259,13 +256,12 @@ contract PALMTerms is PALMTermsStorage {
         );
     }
 
-    /// @notice to close term btw PALM and client.
-    /// automated management.
-    /// @param vault_  Arrakis V2 vault
-    /// @param to_  address that will receive fund.
-    /// @param newOwner_  new owner of the Arrakis V2 vault.
-    /// @param newManager_  new manager of the Arrakis V2 vault.
-    /// @dev only vault owner can call it. And client will pay emoluments.
+    /// @notice closes term btw PALM and client.
+    /// @param vault_ Arrakis V2 vault
+    /// @param to_ address that will receive fund.
+    /// @param newOwner_ new owner of the Arrakis V2 vault.
+    /// @param newManager_ new manager of the Arrakis V2 vault.
+    /// @dev only vault owner can call it. Client will pay emoluments.
     // solhint-disable-next-line function-max-lines, code-complexity
     function closeTerm(
         IArrakisV2Extended vault_,
