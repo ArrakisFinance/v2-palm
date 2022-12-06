@@ -1,20 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Beacon} from "./IArrakisV2Beacon.sol";
+import {
+    IArrakisV2Beacon
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Beacon.sol";
+import {
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
 import {
     InitializePayload
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 
-interface IArrakisV2Factory {
-    event VaultCreated(address indexed manager, address indexed vault);
-
-    event InitFactory(address owner);
-
-    function deployVault(InitializePayload calldata params_, bool isBeacon_)
-        external
-        returns (address vault);
-
+interface IArrakisV2FactoryExtended is IArrakisV2Factory {
     // #region view functions
 
     function version() external view returns (string memory);

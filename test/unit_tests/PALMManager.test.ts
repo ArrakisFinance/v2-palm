@@ -8,8 +8,8 @@ import { Signer } from "ethers";
 import {
   BaseToken,
   PALMManagerMock,
-  IArrakisV2,
-  IArrakisV2Factory,
+  IArrakisV2Extended,
+  IArrakisV2FactoryExtended,
   IUniswapV3Factory,
   ProjectToken,
 } from "../../typechain";
@@ -25,14 +25,14 @@ describe("PALMManager unit test!!!", async function () {
   let user2: Signer;
   let addresses: Addresses;
   let managerMock: PALMManagerMock;
-  let arrakisV2Factory: IArrakisV2Factory;
+  let arrakisV2Factory: IArrakisV2FactoryExtended;
   let baseToken: BaseToken;
   let projectToken: ProjectToken;
   let v3Factory: IUniswapV3Factory;
   // eslint-disable-next-line
   let projectTknIsTknZero: boolean;
   // let pool: IUniswapV3Pool;
-  let vault: IArrakisV2;
+  let vault: IArrakisV2Extended;
 
   beforeEach("Setting up for PALMManager unit test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -55,7 +55,7 @@ describe("PALMManager unit test!!!", async function () {
     projectToken = (await ethers.getContract("ProjectToken")) as ProjectToken;
 
     arrakisV2Factory = await ethers.getContractAt(
-      "IArrakisV2Factory",
+      "IArrakisV2FactoryExtended",
       addresses.ArrakisV2Factory,
       user
     );
@@ -100,6 +100,7 @@ describe("PALMManager unit test!!!", async function () {
       init1: init1,
       manager: managerMock.address,
       routers: [],
+      burnBuffer: 4750,
     };
 
     const receipt = await (
@@ -107,10 +108,10 @@ describe("PALMManager unit test!!!", async function () {
     ).wait();
 
     vault = (await ethers.getContractAt(
-      "IArrakisV2",
+      "IArrakisV2Extended",
       receipt.events![receipt.events!.length - 1].args!.vault,
       user
-    )) as IArrakisV2;
+    )) as IArrakisV2Extended;
   });
 
   // #region add vault unit test.

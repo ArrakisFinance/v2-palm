@@ -37,7 +37,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
         },
       },
     },
-    args: [(await ethers.getContract("PALMTerms")).address, oneQuarter],
+    args: [(await ethers.getContract("PALMTerms")).address, oneQuarter, 4750],
     log: hre.network.name !== "hardhat" ? true : false,
   });
 };

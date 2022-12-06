@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2, Rebalance, Range} from "./interfaces/IArrakisV2.sol";
+import {
+    IArrakisV2Extended,
+    Rebalance,
+    Range
+} from "./interfaces/IArrakisV2Extended.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {VaultInfo} from "./structs/SPALMManager.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
@@ -9,8 +13,12 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 contract PALMManager is PALMManagerStorage {
     using Address for address payable;
 
-    constructor(address terms_, uint256 termDuration_)
-        PALMManagerStorage(terms_, termDuration_)
+    constructor(
+        address terms_,
+        uint256 termDuration_,
+        uint16 managerFeeBPS_
+    )
+        PALMManagerStorage(terms_, termDuration_, managerFeeBPS_)
     // solhint-disable-next-line no-empty-blocks
     {
 
@@ -32,7 +40,7 @@ contract PALMManager is PALMManagerStorage {
         uint256 feeAmount_
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
         uint256 balance = _preExec(vault_, feeAmount_);
-        IArrakisV2(vault_).rebalance(
+        IArrakisV2Extended(vault_).rebalance(
             ranges_,
             rebalanceParams_,
             rangesToRemove_

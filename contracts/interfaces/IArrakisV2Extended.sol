@@ -11,8 +11,11 @@ import {
     Range,
     Rebalance
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 
-interface IArrakisV2 {
+interface IArrakisV2Extended is IArrakisV2 {
     function mint(uint256 mintAmount_, address receiver_)
         external
         returns (uint256 amount0, uint256 amount1);
@@ -57,6 +60,4 @@ interface IArrakisV2 {
         returns (bool ok, uint256 index);
 
     function owner() external view returns (address);
-
-    function manager() external view returns (IPALMManager);
 }

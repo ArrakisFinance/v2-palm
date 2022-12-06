@@ -2,7 +2,7 @@
 pragma solidity 0.8.13;
 
 import {IPALMManager} from "../interfaces/IPALMManager.sol";
-import {IArrakisV2} from "../interfaces/IArrakisV2.sol";
+import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
 import {
     IERC20,
     SafeERC20
@@ -10,6 +10,7 @@ import {
 import {
     OwnableUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {
     PausableUpgradeable
@@ -42,6 +43,12 @@ abstract contract PALMManagerStorage is
     uint256 public immutable termDuration;
 
     // #endregion PALMTerms Market Making Duration.
+
+    // #region manager Fee BPS.
+
+    uint16 public immutable managerFeeBPS;
+
+    // #endregion manager Fee BPS.
 
     // #region whitelisted strategies.
 
@@ -76,8 +83,16 @@ abstract contract PALMManagerStorage is
 
     modifier onlyPALMTermsVaults(address vault) {
         require(
-            IArrakisV2(vault).owner() == terms,
+            Ownable(vault).owner() == terms,
             "PALMManager: owner no PALMTerms"
+        );
+        _;
+    }
+
+    modifier onlyVaultOwner(address vault) {
+        require(
+            IArrakisV2Extended(vault).owner() == msg.sender,
+            "PALMManager: only vault owner"
         );
         _;
     }
@@ -101,9 +116,14 @@ abstract contract PALMManagerStorage is
 
     // #region constructor.
 
-    constructor(address terms_, uint256 termDuration_) {
+    constructor(
+        address terms_,
+        uint256 termDuration_,
+        uint16 _managerFeeBPS_
+    ) {
         terms = terms_;
         termDuration = termDuration_;
+        managerFeeBPS = _managerFeeBPS_;
     }
 
     // #endregion constructor.
@@ -232,16 +252,15 @@ abstract contract PALMManagerStorage is
 
     /// @notice for setting manager fee
     /// @param vault_ Arrakis V2 vault address
-    /// @param managerFeeBPS_ new manager fee
     /// @dev only be callable by owner
-    function setManagerFeeBPS(address vault_, uint16 managerFeeBPS_)
+    function setManagerFeeBPS(address vault_)
         external
         override
         whenNotPaused
-        onlyOwner
+        onlyPALMTerms
     {
-        IArrakisV2(vault_).setManagerFeeBPS(managerFeeBPS_);
-        emit SetManagerFeeBPS(vault_, managerFeeBPS_);
+        IArrakisV2Extended(vault_).setManagerFeeBPS(managerFeeBPS);
+        emit SetManagerFeeBPS(vault_, managerFeeBPS);
     }
 
     /// @notice for adding operators

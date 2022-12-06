@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Factory} from "./interfaces/IArrakisV2Factory.sol";
+import {
+    IArrakisV2FactoryExtended
+} from "./interfaces/IArrakisV2FactoryExtended.sol";
 import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {BurnLiquidity, IArrakisV2} from "./interfaces/IArrakisV2.sol";
+import {IArrakisV2Extended} from "./interfaces/IArrakisV2Extended.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
+import {
+    BurnLiquidity
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
@@ -36,8 +41,12 @@ contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    constructor(IArrakisV2FactoryExtended v2factory_)
+        PALMTermsStorage(v2factory_)
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
+    {
+
+    }
 
     /// @notice do all neccesary step to initialize market making.
     /// @param setup_ contain all data to create Arrakis V2 vault,
@@ -72,13 +81,14 @@ contract PALMTerms is PALMTermsStorage {
                     init0: inits.init0,
                     init1: inits.init1,
                     manager: manager,
-                    routers: setup_.routers
+                    routers: setup_.routers,
+                    burnBuffer: setup_.burnBuffer
                 }),
                 setup_.isBeacon
             );
         }
 
-        IArrakisV2 vaultV2 = IArrakisV2(vault);
+        IArrakisV2Extended vaultV2 = IArrakisV2Extended(vault);
 
         _addVault(setup_.owner, vault);
 
@@ -86,7 +96,10 @@ contract PALMTerms is PALMTermsStorage {
 
         vaultV2.setRestrictedMint(address(this));
 
-        IPALMManager(manager).addVault{value: msg.value}(
+        IPALMManager palmManager = IPALMManager(manager);
+
+        palmManager.setManagerFeeBPS(vault);
+        palmManager.addVault{value: msg.value}(
             vault,
             setup_.datas,
             setup_.strat
@@ -147,11 +160,7 @@ contract PALMTerms is PALMTermsStorage {
     /// @param vault_ Arrakis V2 vault
     /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2 vault_)
-        external
-        override
-        requireIsOwner(address(vault_))
-    {
+    function renewTerm(IArrakisV2Extended vault_) external override {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
@@ -259,7 +268,7 @@ contract PALMTerms is PALMTermsStorage {
     /// @dev only vault owner can call it. And client will pay emoluments.
     // solhint-disable-next-line function-max-lines, code-complexity
     function closeTerm(
-        IArrakisV2 vault_,
+        IArrakisV2Extended vault_,
         address to_,
         address newOwner_,
         address newManager_
