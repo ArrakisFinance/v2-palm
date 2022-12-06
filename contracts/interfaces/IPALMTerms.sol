@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Factory} from "./IArrakisV2Factory.sol";
-import {IArrakisV2Resolver} from "./IArrakisV2Resolver.sol";
-import {IArrakisV2} from "./IArrakisV2.sol";
+import {
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
+import {
+    IArrakisV2Resolver
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
+import {IArrakisV2Extended} from "./IArrakisV2Extended.sol";
 import {IPALMManager} from "./IPALMManager.sol";
 import {
     SetupPayload,
@@ -90,7 +94,7 @@ interface IPALMTerms {
 
     // #endregion events.
 
-    function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
+    function openTerm(SetupPayload calldata setup_)
         external
         payable
         returns (address vault);
@@ -98,13 +102,13 @@ interface IPALMTerms {
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external;
 
-    function renewTerm(IArrakisV2 vault_) external;
+    function renewTerm(IArrakisV2Extended vault_) external;
 
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external;
 
     function closeTerm(
-        IArrakisV2 vault_,
+        IArrakisV2Extended vault_,
         address to_,
         address newOwner_,
         address newManager_
@@ -112,15 +116,21 @@ interface IPALMTerms {
 
     // #region Vault configuration functions.
 
-    function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_) external;
-
-    function removePools(IArrakisV2 vault_, address[] calldata pools_) external;
-
-    function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
+    function addPools(IArrakisV2Extended vault_, uint24[] calldata feeTiers_)
         external;
 
-    function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
+    function removePools(IArrakisV2Extended vault_, address[] calldata pools_)
         external;
+
+    function whitelistRouters(
+        IArrakisV2Extended vault_,
+        address[] calldata routers_
+    ) external;
+
+    function blacklistRouters(
+        IArrakisV2Extended vault_,
+        address[] calldata routers_
+    ) external;
 
     // #endregion Vault configuration functions.
 

@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2, BurnLiquidity} from "../interfaces/IArrakisV2.sol";
-import {IArrakisV2Resolver} from "../interfaces/IArrakisV2Resolver.sol";
+import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2Resolver
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
+import {
+    BurnLiquidity
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
 
 function _burn(
-    IArrakisV2 vault_,
+    IArrakisV2Extended vault_,
     address me,
     IArrakisV2Resolver resolver
 )
@@ -37,7 +42,7 @@ function _getInits(
 }
 
 function _requireTokenMatch(
-    IArrakisV2 vault_,
+    IArrakisV2Extended vault_,
     IERC20 token0_,
     IERC20 token1_
 ) view {
@@ -62,10 +67,6 @@ function _requireTokensAllocationsGtZero(uint256 amount0_, uint256 amount1_)
     pure
 {
     require(amount0_ > 0 || amount1_ > 0, "PALMTerms: no tokens allocations.");
-}
-
-function _requireMintNotZero(uint256 mintAmount_) pure {
-    require(mintAmount_ > 0, "PALMTerms: mintAmount zero.");
 }
 
 function _requireTknOrder(address token0_, address token1_) pure {

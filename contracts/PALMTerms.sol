@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Factory} from "./interfaces/IArrakisV2Factory.sol";
+import {
+    IArrakisV2Factory
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
 import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {BurnLiquidity, IArrakisV2} from "./interfaces/IArrakisV2.sol";
+import {IArrakisV2Extended} from "./interfaces/IArrakisV2Extended.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
+import {
+    BurnLiquidity
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
@@ -22,7 +27,6 @@ import {
     InitializePayload
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {
-    _requireMintNotZero,
     _getInits,
     _getEmolument,
     _requireTokensAllocationsGtZero,
@@ -30,36 +34,44 @@ import {
     _burn
 } from "./functions/FPALMTerms.sol";
 
+/// @title Portfolio automated liquidity management
+/// @notice Smart contract creating market making terms btw client and Arrakis Finance
 // solhint-disable-next-line no-empty-blocks
 contract PALMTerms is PALMTermsStorage {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.AddressSet;
 
+    constructor(IArrakisV2Factory v2factory_)
+        PALMTermsStorage(v2factory_)
     // solhint-disable-next-line no-empty-blocks
-    constructor(IArrakisV2Factory v2factory_) PALMTermsStorage(v2factory_) {}
+    {
 
-    /// @notice do all neccesary step to initialize market making.
+    }
+
+    /// @notice does neccesary step to initialize PALM market making.
+    /// @param setup_ contains all data to create ArrakisV2 vault,
+    /// creates a term btw client and PALM automated management.
+    /// @return vault created Arrakis V2 vault address
     // solhint-disable-next-line function-max-lines
-    function openTerm(SetupPayload calldata setup_, uint256 mintAmount_)
+    function openTerm(SetupPayload calldata setup_)
         external
         payable
         override
         collectLeftOver(setup_.token0, setup_.token1)
         returns (address vault)
     {
-        _requireMintNotZero(mintAmount_);
         _requireTokensAllocationsGtZero(setup_.amount0, setup_.amount1);
         _requireTknOrder(address(setup_.token0), address(setup_.token1));
 
+        uint256 mintAmount = 1e18;
         {
             Inits memory inits;
             (inits.init0, inits.init1) = _getInits(
-                mintAmount_,
+                mintAmount,
                 setup_.amount0,
                 setup_.amount1
             );
 
-            // Create vaultV2.
             vault = v2factory.deployVault(
                 InitializePayload({
                     feeTiers: setup_.feeTiers,
@@ -69,27 +81,30 @@ contract PALMTerms is PALMTermsStorage {
                     init0: inits.init0,
                     init1: inits.init1,
                     manager: manager,
-                    routers: setup_.routers
+                    routers: setup_.routers,
+                    burnBuffer: setup_.burnBuffer
                 }),
                 setup_.isBeacon
             );
         }
 
-        IArrakisV2 vaultV2 = IArrakisV2(vault);
+        IArrakisV2Extended vaultV2 = IArrakisV2Extended(vault);
 
         _addVault(setup_.owner, vault);
 
         if (setup_.delegate != address(0)) _setDelegate(vault, setup_.delegate);
-        // Mint vaultV2 token.
 
-        // Call the manager to make it manage the new vault.
-        IPALMManager(manager).addVault{value: msg.value}(
+        vaultV2.setRestrictedMint(address(this));
+
+        IPALMManager palmManager = IPALMManager(manager);
+
+        palmManager.setManagerFeeBPS(vault);
+        palmManager.addVault{value: msg.value}(
             vault,
             setup_.datas,
             setup_.strat
         );
 
-        // Transfer to termTreasury the project token emolment.
         setup_.token0.safeTransferFrom(
             msg.sender,
             address(this),
@@ -107,13 +122,14 @@ contract PALMTerms is PALMTermsStorage {
         setup_.token0.safeApprove(vault, setup_.amount0);
         setup_.token1.safeApprove(vault, setup_.amount1);
 
-        vaultV2.setRestrictedMint(address(this));
-
-        vaultV2.mint(mintAmount_, address(this));
+        vaultV2.mint(mintAmount, address(this));
 
         emit SetupVault(setup_.owner, vault);
     }
 
+    /// @notice increases tokens allocation on client ArrakisV2 PALM vault.
+    /// @param increaseBalance_ contain all data to increase vault allocations.
+    /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external
@@ -139,14 +155,17 @@ contract PALMTerms is PALMTermsStorage {
         emit IncreaseLiquidity(msg.sender, address(increaseBalance_.vault));
     }
 
+    /// @notice renews term btw PALMManager and client on ArrakisV2 PALM vault
+    /// @param vault_ Arrakis V2 vault
+    /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2 vault_) external override {
+    function renewTerm(IArrakisV2Extended vault_) external override {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
             "PALMTerms: term not ended."
         );
-        IPALMManager(manager).renewTerm(address(vault_));
+        manager_.renewTerm(address(vault_));
 
         uint256 balance = IERC20(address(vault_)).balanceOf(address(this));
 
@@ -166,6 +185,9 @@ contract PALMTerms is PALMTermsStorage {
         emit RenewTerm(address(vault_), emolumentAmt0, emolumentAmt1);
     }
 
+    /// @notice to decrease tokens allocation on client ArrakisV2 PALM vault.
+    /// @param decreaseBalance_ contain all data to decrease vault allocations
+    /// @dev only vault owner can call it. Client will pay emoluments.
     // solhint-disable-next-line function-max-lines
     function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
         external
@@ -179,6 +201,12 @@ contract PALMTerms is PALMTermsStorage {
         BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
             decreaseBalance_.burnAmount,
             decreaseBalance_.vault
+        );
+
+        require(
+            IERC20(address(decreaseBalance_.vault)).balanceOf(address(this)) >
+                decreaseBalance_.burnAmount,
+            "PALMTerms: burn all vault tokens no allowed."
         );
 
         (uint256 amount0, uint256 amount1) = decreaseBalance_.vault.burn(
@@ -228,9 +256,15 @@ contract PALMTerms is PALMTermsStorage {
         );
     }
 
+    /// @notice closes term btw PALM and client.
+    /// @param vault_ Arrakis V2 vault
+    /// @param to_ address that will receive fund.
+    /// @param newOwner_ new owner of the Arrakis V2 vault.
+    /// @param newManager_ new manager of the Arrakis V2 vault.
+    /// @dev only vault owner can call it. Client will pay emoluments.
     // solhint-disable-next-line function-max-lines, code-complexity
     function closeTerm(
-        IArrakisV2 vault_,
+        IArrakisV2Extended vault_,
         address to_,
         address newOwner_,
         address newManager_

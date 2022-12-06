@@ -41,7 +41,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 34208409,
+        blockNumber: 36468447,
       },
     },
 
@@ -79,19 +79,19 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.13",
         settings: {
-          optimizer: { enabled: true, runs: 200 },
+          optimizer: { enabled: true, runs: 999999 },
         },
       },
       {
         version: "0.8.7",
         settings: {
-          optimizer: { enabled: true, runs: 200 },
+          optimizer: { enabled: true, runs: 999999 },
         },
       },
       {
         version: "0.6.11",
         settings: {
-          optimizer: { enabled: true, runs: 200 },
+          optimizer: { enabled: true, runs: 999999 },
         },
       },
     ],

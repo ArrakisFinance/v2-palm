@@ -38,6 +38,7 @@ const delegate = addresses.DevMultisig;
 const isBeacon = true;
 const strat = "BOOTSTRAPPING";
 const version = 0.7;
+const burnBuffer = 1000; // 10%
 
 const gasTankAmount = ethers.utils.parseEther("1");
 const txGasPrice = ethers.utils.parseUnits("20", "gwei");
@@ -108,9 +109,9 @@ async function main() {
     isBeacon: isBeacon,
     delegate: delegate,
     routers: [swapRouter],
+    burnBuffer: burnBuffer,
   };
 
-  const mintAmount = ethers.utils.parseEther("1");
   const t0 = (await ethers.getContractAt("IERC20", token0, user)) as IERC20;
   const t1 = (await ethers.getContractAt("IERC20", token1, user)) as IERC20;
   const terms = (await ethers.getContractAt(
@@ -125,7 +126,7 @@ async function main() {
     gasPrice: txGasPrice,
   });
   await tx1.wait();
-  const tx2 = await terms.openTerm(setupPayload, mintAmount, {
+  const tx2 = await terms.openTerm(setupPayload, {
     value: gasTankAmount,
     gasPrice: txGasPrice,
     gasLimit: 2000000,
