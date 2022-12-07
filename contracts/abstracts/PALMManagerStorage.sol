@@ -80,14 +80,6 @@ abstract contract PALMManagerStorage is
         _;
     }
 
-    modifier onlyPALMTermsVaults(address vault) {
-        require(
-            Ownable(vault).owner() == terms,
-            "PALMManager: owner no PALMTerms"
-        );
-        _;
-    }
-
     modifier onlyVaultOwner(address vault) {
         require(
             IArrakisV2Extended(vault).owner() == msg.sender,
@@ -174,7 +166,7 @@ abstract contract PALMManagerStorage is
         whenNotPaused
         requireAddressNotZero(vault_)
         onlyPALMTerms
-        onlyPALMTermsVaults(vault_)
+        onlyVaultOwner(vault_)
     {
         _addVault(vault_, datas_, strat_);
         if (msg.value > 0) _fundVaultBalance(vault_);

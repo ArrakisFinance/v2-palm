@@ -27,20 +27,11 @@ interface IPALMTerms {
     );
 
     event AddVault(address creator, address vault);
-    event RemoveVault(address creator, address vault);
     event DelegateVault(address creator, address vault, address delegate);
 
     event SetupVault(address creator, address vault);
     event IncreaseLiquidity(address creator, address vault);
     event RenewTerm(address vault, uint256 emolument0, uint256 emolument1);
-    event DecreaseLiquidity(
-        address creator,
-        address vault,
-        uint256 amount0,
-        uint256 amount1,
-        uint256 emolument0,
-        uint256 emolument1
-    );
     event CloseTerm(
         address creator,
         address vault,
@@ -103,9 +94,6 @@ interface IPALMTerms {
         external;
 
     function renewTerm(IArrakisV2Extended vault_) external;
-
-    function decreaseLiquidity(DecreaseBalance calldata decreaseBalance_)
-        external;
 
     function closeTerm(
         IArrakisV2Extended vault_,
