@@ -9,11 +9,7 @@ import {
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
 import {IArrakisV2Extended} from "./IArrakisV2Extended.sol";
 import {IPALMManager} from "./IPALMManager.sol";
-import {
-    SetupPayload,
-    IncreaseBalance,
-    DecreaseBalance
-} from "../structs/SPALMTerms.sol";
+import {SetupPayload, IncreaseBalance} from "../structs/SPALMTerms.sol";
 
 interface IPALMTerms {
     // #region events.

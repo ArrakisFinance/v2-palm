@@ -17,12 +17,7 @@ import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    SetupPayload,
-    IncreaseBalance,
-    DecreaseBalance,
-    Inits
-} from "./structs/SPALMTerms.sol";
+import {SetupPayload, IncreaseBalance, Inits} from "./structs/SPALMTerms.sol";
 import {
     InitializePayload
 } from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
