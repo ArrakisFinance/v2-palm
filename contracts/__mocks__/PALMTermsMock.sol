@@ -9,11 +9,7 @@ import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
 } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import {
-    SetupPayload,
-    IncreaseBalance,
-    DecreaseBalance
-} from "../structs/SPALMTerms.sol";
+import {SetupPayload, IncreaseBalance} from "../structs/SPALMTerms.sol";
 
 // solhint-disable
 
