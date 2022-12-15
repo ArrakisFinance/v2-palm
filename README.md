@@ -35,3 +35,7 @@ yarn test
 ## Audits
 
 Two security audits were recently performed- audit reports coming soon.
+
+## Licensing
+
+The license for Arrakis PALM is the MIT license, see LICENSE.
