@@ -22,7 +22,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy } = deployments;
   const { deployer, arrakisDaoOwner } = await getNamedAccounts();
 
-  const addresses = getAddressBookByNetwork("matic");
+  const addresses = getAddressBookByNetwork(hre.network.name);
 
   await deploy("PALMTermsMock", {
     from: deployer,
