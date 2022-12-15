@@ -12,7 +12,7 @@ PALM is the first application built on top of the flexible Arrakis V2 Core syste
 
 PALM enables users to:
 
-- Create a "private" vault that is managed by PALMManager who will run automated strategies on behalf of the vault owner. Only vault owners can add and remove liquidity from their private vault.
+- Create a "private" vault that is managed by `PALMManager` who will run automated strategies on behalf of the vault owner. Only vault owners can add and remove liquidity from their private vault.
   Vault owners have the ability to pick from a list of whitelisted strategy templates, and further configure the strategy with custom parameters.
 
 - Vault owners can increase or decrease liquidity deposited in the vault at any time, as well as change the strategy configuration (or delegate this strategy configuration ability to a third party)
