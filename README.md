@@ -6,12 +6,14 @@ Built on top of [Arrakis V2](https://github.com/ArrakisFinance/v2-core)
 
 ## Setup
 
-fill in `.env` file (see: `.env.example` for necessary environment vars)
+Create `.env` file and add `ALCHEMY_ID` (for all relevant environment variables, see `.env.example`)
 
-# Test
+## Test
 
+```
 yarn
 
 yarn compile
 
 yarn test
+```
