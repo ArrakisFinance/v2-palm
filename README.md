@@ -10,7 +10,7 @@ Built on top of [Arrakis V2](https://github.com/ArrakisFinance/v2-core)
 
 Create `.env` file and add `ALCHEMY_ID` (for all relevant environment variables, see `.env.example`)
 
-Repo uses yarn for package management. Don't have yarn? see [here](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
+Repo uses yarn for package management. Don't have yarn? [see here](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable)
 
 ## Test
 
