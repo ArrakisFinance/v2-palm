@@ -1,4 +1,4 @@
-import hre from "hardhat";
+import hre, { getNamedAccounts } from "hardhat";
 import { PALMTerms, IERC20 } from "../typechain";
 import { getAddressBookByNetwork } from "../src/config/addressBooks";
 import { sleep } from "../src/utils";
@@ -34,7 +34,6 @@ const maxSlippage = 100;
 const minTick = -700000;
 const maxTick = 700000;
 const swapRouter = addresses.UniswapV3SwapRouter;
-const delegate = addresses.DevMultisig;
 const isBeacon = true;
 const strat = "BOOTSTRAPPING";
 const version = 0.7;
@@ -53,6 +52,8 @@ function buf2hex(buffer: any) {
 }
 
 async function main() {
+  const { arrakisDaoOwner: delegate } = await getNamedAccounts();
+
   const stratData = {
     assetIsTokenZero: isAssetTokenZero,
     minTick: minTick,
@@ -80,7 +81,8 @@ async function main() {
   if (
     hre.network.name === "mainnet" ||
     hre.network.name === "matic" ||
-    hre.network.name === "optimism"
+    hre.network.name === "optimism" ||
+    hre.network.name === "arbitrum"
   ) {
     console.log(`OPEN TERM to ${hre.network.name}. Hit ctrl + c to abort\n\n`);
     console.log("VAULT DATA:");
