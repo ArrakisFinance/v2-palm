@@ -6,8 +6,6 @@ export interface Addresses {
   ArrakisV2Factory: string;
   UniswapV3Amount: string;
   PALMTerms: string;
-  DevMultisig: string;
-  ProxyMultisig: string;
   UniswapV3SwapRouter: string;
 }
 /* eslint-enable @typescript-eslint/naming-convention */
@@ -17,15 +15,13 @@ export const getAddressBookByNetwork = (network: string) => {
   switch (network) {
     case "optimism":
       return {
-        Gelato: "",
+        Gelato: "0x01051113D81D7d6DA508462F2ad6d7fD96cF42Ef",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "",
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
         PALMTerms: "",
-        DevMultisig: "",
-        ProxyMultisig: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
     case "mainnet":
@@ -36,8 +32,6 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Factory: "0xd9a23005bbe1562856346864BAeb6Ec4d37044Ec",
         UniswapV3Amount: "",
         PALMTerms: "",
-        DevMultisig: "0x5108EF86cF493905BcD35A3736e4B46DeCD7de58",
-        ProxyMultisig: "0xb9229ea965FC84f21b63791efC643b2c7ffB77Be",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -49,8 +43,6 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Factory: "0x32888bb636Cefe86B812adAfd33C05792d9A0e34",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
         PALMTerms: "0x48C58178121cBD28833149cb808ce045497A8c4d",
-        DevMultisig: "0xDEb4C33D5C3E7e32F55a9D6336FE06010E40E3AB",
-        ProxyMultisig: "0xd06a7cc1a162fDfB515595A2eC1c47B75743C381",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -62,9 +54,17 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Factory: "",
         UniswapV3Amount: "",
         PALMTerms: "",
-        DevMultisig: "",
-        ProxyMultisig: "",
-        UniswapV3SwapRouter: "",
+        UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
+      };
+    case "arbitrum":
+      return {
+        Gelato: "0x4775aF8FEf4809fE10bf05867d2b038a4b5B2146",
+        UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
+        UniswapV3Amount: "",
+        PALMTerms: "",
+        UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
     case "hardhat":
       return {
@@ -74,8 +74,6 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Factory: "0x32888bb636Cefe86B812adAfd33C05792d9A0e34",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
         PALMTerms: "",
-        DevMultisig: "0x5108EF86cF493905BcD35A3736e4B46DeCD7de58",
-        ProxyMultisig: "0xb9229ea965FC84f21b63791efC643b2c7ffB77Be",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
