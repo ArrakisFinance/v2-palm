@@ -1,6 +1,6 @@
 {
   "name": "v2-palm",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Arrakis V2 PALM contracts",
   "scripts": {
     "build": "yarn compile && npx tsc",
