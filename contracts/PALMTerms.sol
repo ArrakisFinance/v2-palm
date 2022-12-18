@@ -111,9 +111,6 @@ contract PALMTerms is PALMTermsStorage {
             setup_.amount1
         );
 
-        setup_.token0.safeApprove(vault, 0);
-        setup_.token1.safeApprove(vault, 0);
-
         setup_.token0.safeApprove(vault, setup_.amount0);
         setup_.token1.safeApprove(vault, setup_.amount1);
 
