@@ -7,7 +7,6 @@ import {
     Range
 } from "./interfaces/IArrakisV2Extended.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
-import {VaultInfo} from "./structs/SPALMManager.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract PALMManager is PALMManagerStorage {
