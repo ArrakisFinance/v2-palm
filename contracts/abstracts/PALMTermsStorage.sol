@@ -246,10 +246,10 @@ abstract contract PALMTermsStorage is
     {
         IPALMManager(manager).setVaultData(vault_, data_);
 
+        address delegate = delegateByVaults[vault_];
+
         emit LogSetVaultData(
-            delegateByVaults[vault_] != address(0)
-                ? delegateByVaults[vault_]
-                : msg.sender,
+            delegate != address(0) ? delegate : msg.sender,
             vault_,
             data_
         );
@@ -267,10 +267,10 @@ abstract contract PALMTermsStorage is
     {
         IPALMManager(manager).setVaultStratByName(vault_, strat_);
 
+        address delegate = delegateByVaults[vault_];
+
         emit LogSetVaultStratByName(
-            delegateByVaults[vault_] != address(0)
-                ? delegateByVaults[vault_]
-                : msg.sender,
+            delegate != address(0) ? delegate : msg.sender,
             vault_,
             strat_
         );

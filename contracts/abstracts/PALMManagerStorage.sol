@@ -10,7 +10,6 @@ import {
 import {
     OwnableUpgradeable
 } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {
     PausableUpgradeable
@@ -482,14 +481,16 @@ abstract contract PALMManagerStorage is
         uint256 amount_,
         address payable to_
     ) internal {
+        uint256 oldBalance = vaults[vault_].balance;
         require(
-            vaults[vault_].balance >= amount_,
+            oldBalance >= amount_,
             "PALMManager: amount exceeds available balance"
         );
-        vaults[vault_].balance -= amount_;
+        uint256 newBalance = oldBalance - amount_;
+        vaults[vault_].balance = newBalance;
         to_.sendValue(amount_);
 
-        emit WithdrawVaultBalance(vault_, amount_, to_, vaults[vault_].balance);
+        emit WithdrawVaultBalance(vault_, amount_, to_, newBalance);
     }
 
     function _isOperator(address operator_)
