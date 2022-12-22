@@ -39,8 +39,8 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x7598e84B2E114AB62CAB288CE5f7d5f6bad35BbA",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "",
-        ArrakisV2Factory: "",
+        ArrakisV2Resolver: "0x475BD9BF87d3B0580BE8BDD0CDBcF0c2B4865fF9",
+        ArrakisV2Factory: "0xAA8af27C661618825C58b93Ea40d55bAcd005D25",
         UniswapV3Amount: "",
         PALMTerms: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
