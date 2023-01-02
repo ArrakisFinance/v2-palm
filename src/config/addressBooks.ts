@@ -1,3 +1,5 @@
+import { ethers } from "hardhat";
+
 /* eslint-disable @typescript-eslint/naming-convention */
 export interface Addresses {
   Gelato: string;
@@ -6,6 +8,7 @@ export interface Addresses {
   ArrakisV2Factory: string;
   UniswapV3Amount: string;
   PALMTerms: string;
+  PALMManager: string;
   UniswapV3SwapRouter: string;
 }
 /* eslint-enable @typescript-eslint/naming-convention */
@@ -19,8 +22,9 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
         ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
-        UniswapV3Amount: "",
-        PALMTerms: "",
+        UniswapV3Amount: ethers.constants.AddressZero.toString(),
+        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
+        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -30,8 +34,9 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
         ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
-        UniswapV3Amount: "",
-        PALMTerms: "",
+        UniswapV3Amount: ethers.constants.AddressZero.toString(),
+        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
+        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -41,8 +46,9 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
         ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
-        UniswapV3Amount: "",
-        PALMTerms: "",
+        UniswapV3Amount: ethers.constants.AddressZero.toString(),
+        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
+        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -52,8 +58,9 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
         ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
-        UniswapV3Amount: "",
-        PALMTerms: "",
+        UniswapV3Amount: ethers.constants.AddressZero.toString(),
+        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
+        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
     case "arbitrum":
@@ -62,8 +69,9 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
         ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
         ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
-        UniswapV3Amount: "",
-        PALMTerms: "",
+        UniswapV3Amount: ethers.constants.AddressZero.toString(),
+        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
+        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
     case "hardhat":
@@ -73,7 +81,8 @@ export const getAddressBookByNetwork = (network: string) => {
         ArrakisV2Resolver: "0xE738063Ce9108c7794eC493cDAEF13b51A189984",
         ArrakisV2Factory: "0x32888bb636Cefe86B812adAfd33C05792d9A0e34",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
-        PALMTerms: "",
+        PALMTerms: ethers.constants.AddressZero.toString(),
+        PALMManager: ethers.constants.AddressZero.toString(),
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 

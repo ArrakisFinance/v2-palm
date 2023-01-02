@@ -1,6 +1,6 @@
 import { deployments, getNamedAccounts } from "hardhat";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { getAddressBookByNetwork } from "../../src/config";
+import { getAddressBookByNetwork } from "../../src";
 import { DeployFunction } from "hardhat-deploy/types";
 import { sleep } from "../../src/utils";
 
