@@ -7,7 +7,7 @@ import {
 import { Signer } from "ethers";
 import {
   BaseToken,
-  IArrakisV2Extended,
+  IArrakisV2,
   IArrakisV2Factory,
   IUniswapV3Factory,
   IUniswapV3Pool,
@@ -35,7 +35,7 @@ describe("PALMTerms unit test!!!", async function () {
   let pool: IUniswapV3Pool;
   // eslint-disable-next-line
   let projectTknIsTknZero: boolean;
-  let vault: IArrakisV2Extended;
+  let vault: IArrakisV2;
 
   beforeEach("Setting up for PALMTerms unit test", async function () {
     if (hre.network.name !== "hardhat") {
@@ -117,10 +117,10 @@ describe("PALMTerms unit test!!!", async function () {
     ).wait();
 
     vault = (await ethers.getContractAt(
-      "IArrakisV2Extended",
+      "IArrakisV2",
       receipt.events![receipt.events!.length - 1].args!.vault,
       user
-    )) as IArrakisV2Extended;
+    )) as IArrakisV2;
   });
 
   // #region set Emolument unit test.

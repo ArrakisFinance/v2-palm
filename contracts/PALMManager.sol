@@ -2,10 +2,12 @@
 pragma solidity 0.8.13;
 
 import {
-    IArrakisV2Extended,
-    Rebalance,
-    Range
-} from "./interfaces/IArrakisV2Extended.sol";
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
+import {
+    Range,
+    Rebalance
+} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
@@ -38,7 +40,7 @@ contract PALMManager is PALMManagerStorage {
         uint256 feeAmount_
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
         uint256 balance = _preExec(vault_, feeAmount_);
-        IArrakisV2Extended(vault_).rebalance(
+        IArrakisV2(vault_).rebalance(
             ranges_,
             rebalanceParams_,
             rangesToRemove_

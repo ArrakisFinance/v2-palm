@@ -7,7 +7,9 @@ import {
 import {
     IArrakisV2Resolver
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
-import {IArrakisV2Extended} from "./IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {IPALMManager} from "./IPALMManager.sol";
 import {SetupPayload, IncreaseBalance} from "../structs/SPALMTerms.sol";
 
@@ -89,10 +91,10 @@ interface IPALMTerms {
     function increaseLiquidity(IncreaseBalance calldata increaseBalance_)
         external;
 
-    function renewTerm(IArrakisV2Extended vault_) external;
+    function renewTerm(IArrakisV2 vault_) external;
 
     function closeTerm(
-        IArrakisV2Extended vault_,
+        IArrakisV2 vault_,
         address to_,
         address newOwner_,
         address newManager_
@@ -100,21 +102,15 @@ interface IPALMTerms {
 
     // #region Vault configuration functions.
 
-    function addPools(IArrakisV2Extended vault_, uint24[] calldata feeTiers_)
+    function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_) external;
+
+    function removePools(IArrakisV2 vault_, address[] calldata pools_) external;
+
+    function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external;
 
-    function removePools(IArrakisV2Extended vault_, address[] calldata pools_)
+    function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external;
-
-    function whitelistRouters(
-        IArrakisV2Extended vault_,
-        address[] calldata routers_
-    ) external;
-
-    function blacklistRouters(
-        IArrakisV2Extended vault_,
-        address[] calldata routers_
-    ) external;
 
     // #endregion Vault configuration functions.
 

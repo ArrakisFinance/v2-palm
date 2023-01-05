@@ -4,7 +4,9 @@ pragma solidity 0.8.13;
 import {
     IArrakisV2Factory
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Factory.sol";
-import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {PALMTermsStorage} from "../abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
@@ -41,10 +43,10 @@ contract PALMTermsMock is PALMTermsStorage {
         override
     {}
 
-    function renewTerm(IArrakisV2Extended vault_) external override {}
+    function renewTerm(IArrakisV2 vault_) external override {}
 
     function closeTerm(
-        IArrakisV2Extended vault_,
+        IArrakisV2 vault_,
         address to_,
         address newOwner_,
         address newManager_

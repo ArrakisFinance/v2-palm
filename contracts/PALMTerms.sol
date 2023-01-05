@@ -8,7 +8,9 @@ import {
     IERC20,
     SafeERC20
 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IArrakisV2Extended} from "./interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
 import {
     BurnLiquidity
@@ -83,7 +85,7 @@ contract PALMTerms is PALMTermsStorage {
             );
         }
 
-        IArrakisV2Extended vaultV2 = IArrakisV2Extended(vault);
+        IArrakisV2 vaultV2 = IArrakisV2(vault);
 
         _addVault(setup_.owner, vault);
 
@@ -151,7 +153,7 @@ contract PALMTerms is PALMTermsStorage {
     /// @param vault_ Arrakis V2 vault
     /// @dev only vault owner can call it.
     // solhint-disable-next-line function-max-lines
-    function renewTerm(IArrakisV2Extended vault_) external override {
+    function renewTerm(IArrakisV2 vault_) external override {
         IPALMManager manager_ = IPALMManager(manager);
         require( // solhint-disable-next-line not-rely-on-time
             manager_.getVaultInfo(address(vault_)).termEnd < block.timestamp,
@@ -185,7 +187,7 @@ contract PALMTerms is PALMTermsStorage {
     /// @dev only vault owner can call it. Client will pay emoluments.
     // solhint-disable-next-line function-max-lines, code-complexity
     function closeTerm(
-        IArrakisV2Extended vault_,
+        IArrakisV2 vault_,
         address to_,
         address newOwner_,
         address newManager_
@@ -218,7 +220,7 @@ contract PALMTerms is PALMTermsStorage {
             vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
 
         IPALMManager(manager).removeVault(address(vault_), payable(to_));
-        vault_.setManager(IPALMManager(newManager_));
+        vault_.setManager(newManager_);
         vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
 

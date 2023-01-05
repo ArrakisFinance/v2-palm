@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 struct SetupPayload {
@@ -21,7 +23,7 @@ struct SetupPayload {
 }
 
 struct IncreaseBalance {
-    IArrakisV2Extended vault;
+    IArrakisV2 vault;
     uint256 amount0;
     uint256 amount1;
 }
