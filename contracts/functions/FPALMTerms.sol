@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {
     IArrakisV2Resolver
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
@@ -12,7 +14,7 @@ import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {FullMath} from "@arrakisfi/v3-lib-0.8/contracts/FullMath.sol";
 
 function _burn(
-    IArrakisV2Extended vault_,
+    IArrakisV2 vault_,
     address me,
     IArrakisV2Resolver resolver
 )
@@ -42,7 +44,7 @@ function _getInits(
 }
 
 function _requireTokenMatch(
-    IArrakisV2Extended vault_,
+    IArrakisV2 vault_,
     IERC20 token0_,
     IERC20 token1_
 ) view {

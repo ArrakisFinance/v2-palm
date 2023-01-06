@@ -8,7 +8,9 @@ import {
 import {
     IArrakisV2Resolver
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2Resolver.sol";
-import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {IPALMManager} from "../interfaces/IPALMManager.sol";
 import {
     IERC20,
@@ -169,7 +171,7 @@ abstract contract PALMTermsStorage is
     /// @param vault_ Arrakis V2 vault
     /// @param feeTiers_ feeTiers to add
     /// @dev only callable by owner of the vault
-    function addPools(IArrakisV2Extended vault_, uint24[] calldata feeTiers_)
+    function addPools(IArrakisV2 vault_, uint24[] calldata feeTiers_)
         external
         override
         requireAddressNotZero(address(vault_))
@@ -184,7 +186,7 @@ abstract contract PALMTermsStorage is
     /// @param vault_ Arrakis V2 vault
     /// @param pools_ pools to remove
     /// @dev only callable by owner of the vault
-    function removePools(IArrakisV2Extended vault_, address[] calldata pools_)
+    function removePools(IArrakisV2 vault_, address[] calldata pools_)
         external
         override
         requireAddressNotZero(address(vault_))
@@ -199,10 +201,7 @@ abstract contract PALMTermsStorage is
     /// @param vault_ Arrakis V2 vault
     /// @param routers_ routers to whitelist
     /// @dev only callable by owner of the vault
-    function whitelistRouters(
-        IArrakisV2Extended vault_,
-        address[] calldata routers_
-    )
+    function whitelistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
         requireAddressNotZero(address(vault_))
@@ -217,10 +216,7 @@ abstract contract PALMTermsStorage is
     /// @param vault_ Arrakis V2 vault
     /// @param routers_ routers to blacklist
     /// @dev only callable by owner of the vault
-    function blacklistRouters(
-        IArrakisV2Extended vault_,
-        address[] calldata routers_
-    )
+    function blacklistRouters(IArrakisV2 vault_, address[] calldata routers_)
         external
         override
         requireAddressNotZero(address(vault_))

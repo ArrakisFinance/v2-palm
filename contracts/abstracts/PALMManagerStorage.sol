@@ -2,7 +2,9 @@
 pragma solidity 0.8.13;
 
 import {IPALMManager} from "../interfaces/IPALMManager.sol";
-import {IArrakisV2Extended} from "../interfaces/IArrakisV2Extended.sol";
+import {
+    IArrakisV2
+} from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {
     IERC20,
     SafeERC20
@@ -81,7 +83,7 @@ abstract contract PALMManagerStorage is
 
     modifier onlyVaultOwner(address vault) {
         require(
-            IArrakisV2Extended(vault).owner() == msg.sender,
+            IArrakisV2(vault).owner() == msg.sender,
             "PALMManager: only vault owner"
         );
         _;
@@ -243,7 +245,7 @@ abstract contract PALMManagerStorage is
         whenNotPaused
         onlyPALMTerms
     {
-        IArrakisV2Extended(vault_).setManagerFeeBPS(managerFeeBPS);
+        IArrakisV2(vault_).setManagerFeeBPS(managerFeeBPS);
         emit SetManagerFeeBPS(vault_, managerFeeBPS);
     }
 

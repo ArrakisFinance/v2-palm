@@ -1,7 +1,8 @@
 {
   "name": "v2-palm",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Arrakis V2 PALM contracts",
+  "license": "MIT",
   "scripts": {
     "build": "yarn compile && npx tsc",
     "clean": "npx hardhat clean",
@@ -24,9 +25,8 @@
     "type": "git",
     "url": "git+https://github.com/ArrakisFinance/v2-palm"
   },
-  "license": "ISC",
   "devDependencies": {
-    "@arrakisfi/v2-core": "0.2.1",
+    "@arrakisfi/v2-core": "1.0.0",
     "@arrakisfi/v3-lib-0.8": "0.1.3",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-etherscan": "3.1.0",

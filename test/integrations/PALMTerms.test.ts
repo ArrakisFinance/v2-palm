@@ -9,7 +9,7 @@ import { Contract } from "ethers";
 import {
   BaseToken,
   PALMManager,
-  IArrakisV2Extended,
+  IArrakisV2,
   IArrakisV2Resolver,
   IERC20,
   IUniswapV3Factory,
@@ -41,7 +41,7 @@ describe("PALMTerms integration test!!!", async function () {
   let pool: IUniswapV3Pool;
   let uniswapV3Amount: Contract;
   let vault: string;
-  let vaultV2: IArrakisV2Extended;
+  let vaultV2: IArrakisV2;
   let lowerTick: number;
   let upperTick: number;
 
@@ -348,10 +348,10 @@ describe("PALMTerms integration test!!!", async function () {
     ).to.be.equal(afterTreasoryP);
 
     vaultV2 = (await ethers.getContractAt(
-      "IArrakisV2Extended",
+      "IArrakisV2",
       vault,
       user
-    )) as IArrakisV2Extended;
+    )) as IArrakisV2;
 
     expect(await vaultV2.owner()).to.be.eq(userAddr);
     expect(await vaultV2.manager()).to.be.eq(userAddr);
