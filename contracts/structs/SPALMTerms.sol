@@ -19,7 +19,6 @@ struct SetupPayload {
     bool isBeacon;
     address delegate;
     address[] routers;
-    uint16 burnBuffer;
 }
 
 struct IncreaseBalance {

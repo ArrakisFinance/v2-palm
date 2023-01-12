@@ -41,6 +41,7 @@ abstract contract PALMTermsStorage is
     address public termTreasury;
     address public manager;
     uint16 public emolument;
+    /// @dev can be used in the future
     IArrakisV2Resolver public resolver;
     mapping(address => address) public delegateByVaults;
 

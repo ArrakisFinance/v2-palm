@@ -170,32 +170,6 @@ describe("PALMTerms unit test!!!", async function () {
 
   // #endregion set Term Treasury test.
 
-  // #region setResolver unit test.
-
-  it("#6: setResolver unit test with no owner", async () => {
-    await expect(
-      terms.setResolver(ethers.constants.AddressZero)
-    ).to.be.revertedWith("Ownable: caller is not the owner");
-  });
-
-  it("#7: setResolver unit test with zero address", async () => {
-    await expect(
-      terms.connect(owner).setResolver(ethers.constants.AddressZero)
-    ).to.be.revertedWith("PALMTerms: address Zero");
-  });
-
-  it("#8: setResolver unit test with same resolver", async () => {
-    await expect(
-      terms.connect(owner).setResolver(await terms.resolver())
-    ).to.be.revertedWith("PALMTerms: already resolver");
-  });
-
-  it("#9: setResolver unit test", async () => {
-    await expect(terms.connect(owner).setResolver(userAddr)).to.not.be.reverted;
-  });
-
-  // #endregion setResolver unit test.
-
   // #region setManager unit test.
 
   it("#10: setManager unit test with no owner", async () => {
