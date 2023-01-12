@@ -12,9 +12,6 @@ import {
     IArrakisV2
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
 import {IPALMManager} from "./interfaces/IPALMManager.sol";
-import {
-    BurnLiquidity
-} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {PALMTermsStorage} from "./abstracts/PALMTermsStorage.sol";
 import {
     EnumerableSet
@@ -78,8 +75,7 @@ contract PALMTerms is PALMTermsStorage {
                     init0: inits.init0,
                     init1: inits.init1,
                     manager: manager,
-                    routers: setup_.routers,
-                    burnBuffer: setup_.burnBuffer
+                    routers: setup_.routers
                 }),
                 setup_.isBeacon
             );
@@ -165,13 +161,7 @@ contract PALMTerms is PALMTermsStorage {
 
         uint256 emolumentShares = _getEmolument(balance, emolument);
 
-        BurnLiquidity[] memory burnPayload = resolver.standardBurnParams(
-            emolumentShares,
-            vault_
-        );
-
         (uint256 emolumentAmt0, uint256 emolumentAmt1) = vault_.burn(
-            burnPayload,
             emolumentShares,
             termTreasury
         );
@@ -200,11 +190,7 @@ contract PALMTerms is PALMTermsStorage {
     {
         _vaults[msg.sender].remove(address(vault_));
 
-        (uint256 amount0, uint256 amount1, ) = _burn(
-            vault_,
-            address(this),
-            resolver
-        );
+        (uint256 amount0, uint256 amount1, ) = _burn(vault_, address(this));
 
         uint256 emolumentAmt0 = _getEmolument(amount0, emolument);
         uint256 emolumentAmt1 = _getEmolument(amount1, emolument);
