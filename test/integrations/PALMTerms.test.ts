@@ -170,7 +170,6 @@ describe("PALMTerms integration test!!!", async function () {
       isBeacon: true,
       delegate: ethers.constants.AddressZero,
       routers: [],
-      burnBuffer: 4500,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);
