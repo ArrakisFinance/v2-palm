@@ -38,7 +38,7 @@ export const getAddressBookByNetwork = (network: string) => {
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
-    case "matic":
+    case "polygon":
       return {
         Gelato: "0x7598e84B2E114AB62CAB288CE5f7d5f6bad35BbA",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
@@ -76,7 +76,7 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x7598e84B2E114AB62CAB288CE5f7d5f6bad35BbA",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4B6FEE838b3dADd5f0846a9f2d74081de96e6f73",
+        ArrakisV2Resolver: "0x047aF3804618291339a34aB1e46B4b27037C2Ff4",
         ArrakisV2Factory: "0x32888bb636Cefe86B812adAfd33C05792d9A0e34",
         UniswapV3Amount: "0xcCd824d1Baaeb6d6E2B6De867409564F7B8859d2",
         PALMTerms: "",

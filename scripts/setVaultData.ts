@@ -81,7 +81,7 @@ async function main() {
 
   // if (
   //   hre.network.name === "mainnet" ||
-  //   hre.network.name === "matic" ||
+  //   hre.network.name === "polygon" ||
   //   hre.network.name === "optimism"
   // ) {
   //   console.log(`\n\nset vault data on ${hre.network.name}. Hit ctrl + c to abort`);

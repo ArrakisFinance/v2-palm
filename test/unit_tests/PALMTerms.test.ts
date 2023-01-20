@@ -109,7 +109,6 @@ describe("PALMTerms unit test!!!", async function () {
       init1: init1,
       manager: userAddr,
       routers: [],
-      burnBuffer: 1000,
     };
 
     const receipt = await (
