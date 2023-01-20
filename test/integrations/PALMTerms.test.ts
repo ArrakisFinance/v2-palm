@@ -279,13 +279,7 @@ describe("PALMTerms integration test!!!", async function () {
 
     await manager
       .connect(gelatoCaller)
-      .rebalance(
-        vault,
-        [{ lowerTick, upperTick, feeTier: 500 }],
-        rebalanceParams,
-        [],
-        ethers.utils.parseUnits("1", 18)
-      );
+      .rebalance(vault, rebalanceParams, ethers.utils.parseUnits("1", 18));
 
     // #endregion do a classical rebalance.
   });
@@ -397,7 +391,6 @@ describe("PALMTerms integration test!!!", async function () {
       isBeacon: false,
       delegate: await user2.getAddress(),
       routers: [],
-      burnBuffer: 4500,
     };
 
     await baseToken.approve(terms.address, baseTokenAllocation);

@@ -4,10 +4,7 @@ pragma solidity 0.8.13;
 import {
     IArrakisV2
 } from "@arrakisfi/v2-core/contracts/interfaces/IArrakisV2.sol";
-import {
-    Range,
-    Rebalance
-} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
+import {Rebalance} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {PALMManagerStorage} from "./abstracts/PALMManagerStorage.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
@@ -27,24 +24,16 @@ contract PALMManager is PALMManagerStorage {
 
     /// @notice rebalance Arrakis V2 tokens allocation on Uniswap V3.
     /// @param vault_ Arrakis V2 vault address
-    /// @param ranges_ ranges to tracks
     /// @param rebalanceParams_ contains all data for doing reblance
-    /// @param rangesToRemove_ ranges to remove
     /// @param feeAmount_ gas cost of rebalance
     /// @dev only operators can call it
     function rebalance(
         address vault_,
-        Range[] calldata ranges_,
         Rebalance calldata rebalanceParams_,
-        Range[] calldata rangesToRemove_,
         uint256 feeAmount_
     ) external override whenNotPaused onlyManagedVaults(vault_) onlyOperators {
         uint256 balance = _preExec(vault_, feeAmount_);
-        IArrakisV2(vault_).rebalance(
-            ranges_,
-            rebalanceParams_,
-            rangesToRemove_
-        );
+        IArrakisV2(vault_).rebalance(rebalanceParams_);
         emit RebalanceVault(vault_, balance);
     }
 

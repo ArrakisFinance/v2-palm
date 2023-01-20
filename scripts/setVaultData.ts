@@ -27,8 +27,11 @@ const maxTwapDeviation = 100;
 const maxSlippage = 100;
 const minTick = -700000;
 const maxTick = 700000;
+const maxFairPriceDeviation = 350;
+const cmcBase = "";
+const cmcAsset = "";
 const strat = "BOOTSTRAPPING";
-const version = 0.7;
+const version = 0.8;
 
 // #endregion input values
 
@@ -70,6 +73,13 @@ async function main() {
     baseMinRebalanceAmount: baseMinRebalanceAmount,
     assetMinRebalanceAmount: assetMinRebalanceAmount,
     maxGasPrice: maxRebalanceGasPrice,
+    apiData: {
+      maxFairPriceDeviation: maxFairPriceDeviation,
+      coinmarketcap: {
+        base: cmcBase,
+        asset: cmcAsset,
+      },
+    },
   };
 
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
@@ -81,7 +91,7 @@ async function main() {
 
   // if (
   //   hre.network.name === "mainnet" ||
-  //   hre.network.name === "matic" ||
+  //   hre.network.name === "polygon" ||
   //   hre.network.name === "optimism"
   // ) {
   //   console.log(`\n\nset vault data on ${hre.network.name}. Hit ctrl + c to abort`);

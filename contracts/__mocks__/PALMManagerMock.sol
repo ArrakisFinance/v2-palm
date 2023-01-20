@@ -2,10 +2,7 @@
 pragma solidity 0.8.13;
 
 import {PALMManagerStorage} from "../abstracts/PALMManagerStorage.sol";
-import {
-    Range,
-    Rebalance
-} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
+import {Rebalance} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 import {VaultInfo} from "../structs/SPALMManager.sol";
 
 contract PALMManagerMock is PALMManagerStorage {
@@ -32,9 +29,7 @@ contract PALMManagerMock is PALMManagerStorage {
 
     function rebalance(
         address vault_,
-        Range[] calldata ranges_,
         Rebalance calldata rebalanceParams_,
-        Range[] calldata rangesToRemove_,
         uint256 feeAmount_
     ) external {} // solhint-disable-line no-empty-blocks
 }

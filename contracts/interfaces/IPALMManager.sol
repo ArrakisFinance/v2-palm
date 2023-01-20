@@ -2,10 +2,7 @@
 pragma solidity 0.8.13;
 
 import {VaultInfo} from "../structs/SPALMManager.sol";
-import {
-    Range,
-    Rebalance
-} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
+import {Rebalance} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";
 
 interface IPALMManager {
     event AddVault(address indexed vault, bytes datas, string strat);
@@ -46,9 +43,7 @@ interface IPALMManager {
     // ======== GELATOFIED FUNCTIONS ========
     function rebalance(
         address vault_,
-        Range[] calldata ranges_,
         Rebalance calldata rebalanceParams_,
-        Range[] calldata rangesToRemove_,
         uint256 feeAmount_
     ) external;
 
