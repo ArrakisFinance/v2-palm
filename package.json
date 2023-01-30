@@ -1,6 +1,6 @@
 {
   "name": "v2-palm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Arrakis V2 PALM contracts",
   "license": "MIT",
   "scripts": {
