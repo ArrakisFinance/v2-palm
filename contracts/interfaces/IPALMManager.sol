@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.13;
+pragma solidity >=0.8.0;
 
 import {VaultInfo} from "../structs/SPALMManager.sol";
 import {Rebalance} from "@arrakisfi/v2-core/contracts/structs/SArrakisV2.sol";

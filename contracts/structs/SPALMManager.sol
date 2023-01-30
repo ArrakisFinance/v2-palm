@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.13;
+pragma solidity >=0.8.0;
 
 struct VaultInfo {
     uint256 balance; // prepaid credit for rebalance
