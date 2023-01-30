@@ -18,11 +18,11 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x01051113D81D7d6DA508462F2ad6d7fD96cF42Ef",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
-        ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
-        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
+        PALMTerms: "",
+        PALMManager: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -30,11 +30,11 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x3CACa7b48D0573D793d3b0279b5F0029180E83b6",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
-        ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
-        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
+        PALMTerms: "",
+        PALMManager: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -42,11 +42,11 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x7598e84B2E114AB62CAB288CE5f7d5f6bad35BbA",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
-        ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
-        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
+        PALMTerms: "",
+        PALMManager: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
 
@@ -54,22 +54,22 @@ export const getAddressBookByNetwork = (network: string) => {
       return {
         Gelato: "0x683913B3A32ada4F8100458A3E1675425BdAa7DF",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
-        ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
-        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
+        PALMTerms: "",
+        PALMManager: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
     case "arbitrum":
       return {
         Gelato: "0x4775aF8FEf4809fE10bf05867d2b038a4b5B2146",
         UniswapV3Factory: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-        ArrakisV2Resolver: "0x4bc385b1dDf0121CC40A0715CfD3beFE52f905f5",
-        ArrakisV2Factory: "0x055B6d3919042Be29C5F044A55529933e1273A88",
+        ArrakisV2Resolver: "",
+        ArrakisV2Factory: "",
         UniswapV3Amount: "",
-        PALMTerms: "0x50763a665Dc24692E25eC8e2c203A79e602D2890",
-        PALMManager: "0xF90ec87BA0BA9AC92f5374f112740Ce291B8877e",
+        PALMTerms: "",
+        PALMManager: "",
         UniswapV3SwapRouter: "0xE592427A0AEce92De3Edee1F18E0157C05861564",
       };
     case "hardhat":
