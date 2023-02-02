@@ -194,30 +194,46 @@ contract PALMTerms is PALMTermsStorage {
 
         uint256 emolumentAmt0 = _getEmolument(amount0, emolument);
         uint256 emolumentAmt1 = _getEmolument(amount1, emolument);
+        {
+            emolumentAmt0 = _getEmolument(amount0, emolument);
+            emolumentAmt1 = _getEmolument(amount1, emolument);
 
-        if (emolumentAmt0 > 0)
-            vault_.token0().safeTransfer(termTreasury, emolumentAmt0);
-        if (emolumentAmt1 > 0)
-            vault_.token1().safeTransfer(termTreasury, emolumentAmt1);
+            emit CloseTerm(
+                msg.sender,
+                address(vault_),
+                amount0,
+                amount1,
+                to_,
+                emolumentAmt0,
+                emolumentAmt1
+            );
+        }
+        {
+            IERC20 token0 = vault_.token0();
+            IERC20 token1 = vault_.token1();
 
-        if (amount0 > 0)
-            vault_.token0().safeTransfer(to_, amount0 - emolumentAmt0);
-        if (amount1 > 0)
-            vault_.token1().safeTransfer(to_, amount1 - emolumentAmt1);
+            if (emolumentAmt0 > 0)
+                token0.safeTransfer(termTreasury, emolumentAmt0);
+            if (emolumentAmt1 > 0)
+                token1.safeTransfer(termTreasury, emolumentAmt1);
 
-        IPALMManager(manager).removeVault(address(vault_), payable(to_));
+            if (amount0 > 0) token0.safeTransfer(to_, amount0 - emolumentAmt0);
+            if (amount1 > 0) token1.safeTransfer(to_, amount1 - emolumentAmt1);
+
+            IPALMManager(manager).removeVault(address(vault_), payable(to_));
+            vault_.setManager(address(this));
+            emolumentAmt0 = token0.balanceOf(address(this));
+            emolumentAmt1 = token1.balanceOf(address(this));
+            vault_.withdrawManagerBalance();
+            emolumentAmt0 = token0.balanceOf(address(this)) - emolumentAmt0;
+            emolumentAmt1 = token1.balanceOf(address(this)) - emolumentAmt1;
+
+            if (emolumentAmt0 > 0) token0.safeTransfer(manager, emolumentAmt0);
+            if (emolumentAmt1 > 0) token1.safeTransfer(manager, emolumentAmt1);
+        }
+
         vault_.setManager(newManager_);
         vault_.setRestrictedMint(address(0));
         vault_.transferOwnership(newOwner_);
-
-        emit CloseTerm(
-            msg.sender,
-            address(vault_),
-            amount0,
-            amount1,
-            to_,
-            emolumentAmt0,
-            emolumentAmt1
-        );
     }
 }
