@@ -6,32 +6,34 @@ import hre from "hardhat";
 const { ethers } = hre;
 
 // #region input values
-
 const feeTier = 10000; // uniswap v3 feeTier.
 const isAssetTokenZero = true;
-const midAllocationBps = 100;
-const baseAllocationBps = 200;
+const midAllocationBps = 200; // 2% in BPS
+const baseAllocationBps = 100;
 const assetAllocationBps = 300;
-const rangeSize = 2;
-const assetRebalanceThreshold = 1;
+const rangeSize = 2; // 2 * tickSpacing ticks
+const assetRebalanceThreshold = 1.5; // 1.5 * tickSpacing ticks (from outer edge)
 const baseRebalanceThreshold = 1;
-const maxRebalanceGasPrice = 5000000000000; // 500 gwei
+const maxRebalanceGasPrice = ethers.utils.parseUnits("50", "gwei").toString(); // 50 gwei
 const baseMinRebalanceAmount = "0";
-const assetMinRebalanceAmount = "2";
+const assetMinRebalanceAmount = "2"; // wont rebalance on openTerm since assetMinRebalanceAmount > amount0
 const baseMaxSwapAmount = "1";
 const assetMaxSwapAmount = "1";
 const baseMinVwapAmount = "1";
 const assetMinVwapAmount = "1";
-const twapDuration = 1000;
-const maxTwapDeviation = 100;
-const maxSlippage = 100;
+const twapDuration = 2000; // 33 min (in seconds)
+const maxTwapDeviation = 300; // 300 ticks
 const minTick = -700000;
 const maxTick = 700000;
-const maxFairPriceDeviation = 350;
-const cmcBase = "";
-const cmcAsset = "";
+const coolDownPeriod = 1000 * 60 * 60; // 60 min (in miliseconds)
 const strat = "BOOTSTRAPPING";
-const version = 0.8;
+const version = 1.0;
+const hasApiData = false;
+const apiData = {
+  maxFairPriceDeviation: 300,
+  coingecko: null, // {base: "<id>", asset: "<id>"}
+  coinmarketcap: null, // {base: "<id>", asset: "<id>"}
+};
 
 // #endregion input values
 
@@ -65,7 +67,6 @@ async function main() {
     version: version,
     twapDuration: twapDuration,
     maxTwapDeviation: maxTwapDeviation,
-    maxSlippage: maxSlippage,
     baseMaxSwapAmount: baseMaxSwapAmount,
     assetMaxSwapAmount: assetMaxSwapAmount,
     baseMinVwapAmount: baseMinVwapAmount,
@@ -73,13 +74,8 @@ async function main() {
     baseMinRebalanceAmount: baseMinRebalanceAmount,
     assetMinRebalanceAmount: assetMinRebalanceAmount,
     maxGasPrice: maxRebalanceGasPrice,
-    apiData: {
-      maxFairPriceDeviation: maxFairPriceDeviation,
-      coinmarketcap: {
-        base: cmcBase,
-        asset: cmcAsset,
-      },
-    },
+    coolDownPeriod: coolDownPeriod,
+    apiData: hasApiData ? apiData : null,
   };
 
   const dataFormatted = ethers.utils.toUtf8Bytes(JSON.stringify(stratData));
