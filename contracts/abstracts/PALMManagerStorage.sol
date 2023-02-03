@@ -436,6 +436,8 @@ abstract contract PALMManagerStorage is
     function _removeVault(address vault_, address payable to_) internal {
         uint256 balance = vaults[vault_].balance;
 
+        IArrakisV2(vault_).withdrawManagerBalance();
+
         delete vaults[vault_];
 
         if (balance > 0) to_.sendValue(balance);
