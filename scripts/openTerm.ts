@@ -1,10 +1,13 @@
 import hre, { getNamedAccounts } from "hardhat";
 import { PALMTerms, IERC20 } from "../typechain";
-import { getAddressBookByNetwork } from "../src/config/addressBooks";
+import {
+  getAddressBookByNetwork,
+  PalmAddresses,
+} from "../src/config/addressBooks";
 import { sleep } from "../src/utils";
 const { ethers } = hre;
 
-const addresses = getAddressBookByNetwork(hre.network.name);
+const addresses: PalmAddresses = getAddressBookByNetwork(hre.network.name);
 
 // #region critical input values VERIFY THESE!
 
@@ -33,7 +36,7 @@ const maxTwapDeviation = 100;
 const maxSlippage = 100;
 const minTick = -700000;
 const maxTick = 700000;
-const swapRouter = addresses.UniswapV3SwapRouter;
+const swapRouter = addresses.SwapRouter;
 const isBeacon = true;
 const strat = "BOOTSTRAPPING";
 const version = 0.7;
