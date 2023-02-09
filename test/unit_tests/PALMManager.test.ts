@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre = require("hardhat");
 import {
-  Addresses,
+  PALMAddresses,
   getAddressBookByNetwork,
 } from "../../src/config/addressBooks";
 import { Signer } from "ethers";
@@ -23,7 +23,7 @@ describe("PALMManager unit test!!!", async function () {
   let user: Signer;
   let userAddr: string;
   let user2: Signer;
-  let addresses: Addresses;
+  let addresses: PALMAddresses;
   let managerMock: PALMManagerMock;
   let arrakisV2Factory: IArrakisV2Factory;
   let baseToken: BaseToken;
