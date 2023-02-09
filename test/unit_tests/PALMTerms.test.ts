@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre = require("hardhat");
 import {
-  Addresses,
+  PALMAddresses,
   getAddressBookByNetwork,
 } from "../../src/config/addressBooks";
 import { Signer } from "ethers";
@@ -25,7 +25,7 @@ describe("PALMTerms unit test!!!", async function () {
   let user: Signer;
   let userAddr: string;
   let owner: Signer;
-  let addresses: Addresses;
+  let addresses: PALMAddresses;
   let terms: PALMTermsMock;
   let manager: PALMManagerMock;
   let arrakisV2Factory: IArrakisV2Factory;
@@ -285,7 +285,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     await user.sendTransaction({
       to: terms.address,
-      value: ethers.utils.parseEther("1"),
+      value: ethers.utils.parseEther("2"),
     });
 
     await manager.connect(s).addVaultMock(vault.address);
@@ -339,7 +339,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     await user.sendTransaction({
       to: terms.address,
-      value: ethers.utils.parseEther("1"),
+      value: ethers.utils.parseEther("2"),
     });
 
     await manager.connect(s).addVaultMock(vault.address);
@@ -398,7 +398,7 @@ describe("PALMTerms unit test!!!", async function () {
 
     await user.sendTransaction({
       to: terms.address,
-      value: ethers.utils.parseEther("2"),
+      value: ethers.utils.parseEther("3"),
     });
 
     await manager

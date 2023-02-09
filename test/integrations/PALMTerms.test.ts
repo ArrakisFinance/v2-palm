@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import hre = require("hardhat");
 import {
-  Addresses,
+  PALMAddresses,
   getAddressBookByNetwork,
 } from "../../src/config/addressBooks";
 import { Signer } from "ethers";
@@ -29,7 +29,7 @@ describe("PALMTerms integration test!!!", async function () {
   let arrakisDaoOwner: Signer;
   let gelatoCaller: Signer;
   let userAddr: string;
-  let addresses: Addresses;
+  let addresses: PALMAddresses;
   let terms: PALMTerms;
   let manager: PALMManager;
   let baseToken: BaseToken;
