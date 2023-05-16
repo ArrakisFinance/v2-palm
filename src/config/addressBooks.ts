@@ -87,6 +87,20 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
 
       return arbitrumPalm;
 
+    case "binance":
+      // eslint-disable-next-line no-case-declarations
+      const binanceAddresses: Addresses = getAddresses("binance");
+
+      // eslint-disable-next-line no-case-declarations
+      const binancePalm: PALMAddresses = {
+        ...binanceAddresses,
+        Gelato: "0x7C5c4Af1618220C090A6863175de47afb20fa9Df",
+        UniswapV3Amount: "",
+        PALMTerms: "",
+        PALMManager: "",
+      };
+
+      return binancePalm;
     case "hardhat":
       // eslint-disable-next-line no-case-declarations
       const hardhatAddresses: Addresses = getAddresses("hardhat");

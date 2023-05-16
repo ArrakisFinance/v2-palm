@@ -10,7 +10,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "goerli" ||
     hre.network.name === "polygon" ||
     hre.network.name === "optimism" ||
-    hre.network.name === "arbitrum"
+    hre.network.name === "arbitrum" ||
+    hre.network.name === "binance"
   ) {
     console.log(
       `Deploying BaseToken to ${hre.network.name}. Hit ctrl + c to abort`
@@ -36,7 +37,8 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "goerli" ||
     hre.network.name === "polygon" ||
     hre.network.name === "optimism" ||
-    hre.network.name === "arbitrum";
+    hre.network.name === "arbitrum" ||
+    hre.network.name === "binance";
 
   return shouldSkip ? true : false;
 };
