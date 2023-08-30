@@ -103,8 +103,6 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
       return binancePalm;
     case "sepolia": // TODO: use v2-core lib once updated
       // eslint-disable-next-line no-case-declarations
-
-      // eslint-disable-next-line no-case-declarations
       const sepoliaAddresses: PALMAddresses = {
         UniswapV3Factory: "0x0227628f3F023bb0B980b67D528571c95c6DaC1c",
         SwapRouter: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
@@ -124,8 +122,6 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
 
       return sepoliaAddresses;
     case "base": // TODO: use v2-core lib once updated
-      // eslint-disable-next-line no-case-declarations
-
       // eslint-disable-next-line no-case-declarations
       const baseAddresses: PALMAddresses = {
         UniswapV3Factory: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
