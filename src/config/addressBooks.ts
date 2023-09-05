@@ -101,46 +101,34 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
       };
 
       return binancePalm;
-    case "sepolia": // TODO: use v2-core lib once updated
+    case "sepolia":
       // eslint-disable-next-line no-case-declarations
-      const sepoliaAddresses: PALMAddresses = {
-        UniswapV3Factory: "0x0227628f3F023bb0B980b67D528571c95c6DaC1c",
-        SwapRouter: "0x3fC91A3afd70395Cd496C647d5a6CC9D4B2b7FAD",
-        WETH: "",
-        WMATIC: "",
-        USDC: "",
-        ArrakisV2Implementation: "",
-        ArrakisV2Beacon: "0x1D91F6D917ec51dE53A5789c34fFF777a58759B6",
-        ArrakisV2Factory: "0xECb8Ffcb2369EF188A082a662F496126f66c8288",
-        ArrakisV2Helper: "",
-        ArrakisV2Resolver: "0x535C5fDf31477f799366DF6E4899a12A801cC7b8",
+      const sepoliaAddresses: Addresses = getAddresses("sepolia");
+
+      // eslint-disable-next-line no-case-declarations
+      const sepoliaPalm: PALMAddresses = {
+        ...sepoliaAddresses,
         Gelato: "0x7C5c4Af1618220C090A6863175de47afb20fa9Df",
         UniswapV3Amount: "",
         PALMTerms: "",
         PALMManager: "",
       };
 
-      return sepoliaAddresses;
+      return sepoliaPalm;
     case "base": // TODO: use v2-core lib once updated
       // eslint-disable-next-line no-case-declarations
-      const baseAddresses: PALMAddresses = {
-        UniswapV3Factory: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD",
-        SwapRouter: "0x2626664c2603336E57B271c5C0b26F421741e481",
-        WETH: "",
-        WMATIC: "",
-        USDC: "",
-        ArrakisV2Implementation: "",
-        ArrakisV2Beacon: "0x1D91F6D917ec51dE53A5789c34fFF777a58759B6",
-        ArrakisV2Factory: "0xECb8Ffcb2369EF188A082a662F496126f66c8288",
-        ArrakisV2Helper: "",
-        ArrakisV2Resolver: "0x535C5fDf31477f799366DF6E4899a12A801cC7b8",
+      const baseAddresses: Addresses = getAddresses("base");
+
+      // eslint-disable-next-line no-case-declarations
+      const basePalm: PALMAddresses = {
+        ...baseAddresses,
         Gelato: "0x08EFb6D315c7e74C39620c9AAEA289730f43a429",
         UniswapV3Amount: "",
         PALMTerms: "",
         PALMManager: "",
       };
 
-      return baseAddresses;
+      return basePalm;
     case "hardhat":
       // eslint-disable-next-line no-case-declarations
       const hardhatAddresses: Addresses = getAddresses("hardhat");
@@ -155,7 +143,6 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
       };
 
       return hardhatPalm;
-
     default: {
       throw new Error(`addressBooks: network: ${network} not supported`);
     }
