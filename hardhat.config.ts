@@ -55,7 +55,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       forking: {
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_ID}`,
-        blockNumber: 39110790,
+        blockNumber: 46734880,
       },
     },
 
@@ -98,7 +98,7 @@ const config: HardhatUserConfig = {
       url: "https://mainnet.base.org",
     },
     sepolia: {
-      accounts: PK ? [PK] : [],
+      accounts: TEST_PK ? [TEST_PK] : [],
       chainId: 11155111,
       url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_ID}`,
     },
