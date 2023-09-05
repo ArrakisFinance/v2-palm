@@ -101,6 +101,34 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
       };
 
       return binancePalm;
+    case "sepolia":
+      // eslint-disable-next-line no-case-declarations
+      const sepoliaAddresses: Addresses = getAddresses("sepolia");
+
+      // eslint-disable-next-line no-case-declarations
+      const sepoliaPalm: PALMAddresses = {
+        ...sepoliaAddresses,
+        Gelato: "0x7C5c4Af1618220C090A6863175de47afb20fa9Df",
+        UniswapV3Amount: "",
+        PALMTerms: "",
+        PALMManager: "",
+      };
+
+      return sepoliaPalm;
+    case "base": // TODO: use v2-core lib once updated
+      // eslint-disable-next-line no-case-declarations
+      const baseAddresses: Addresses = getAddresses("base");
+
+      // eslint-disable-next-line no-case-declarations
+      const basePalm: PALMAddresses = {
+        ...baseAddresses,
+        Gelato: "0x08EFb6D315c7e74C39620c9AAEA289730f43a429",
+        UniswapV3Amount: "",
+        PALMTerms: "",
+        PALMManager: "",
+      };
+
+      return basePalm;
     case "hardhat":
       // eslint-disable-next-line no-case-declarations
       const hardhatAddresses: Addresses = getAddresses("hardhat");
@@ -115,7 +143,6 @@ export const getAddressBookByNetwork = (network: string): PALMAddresses => {
       };
 
       return hardhatPalm;
-
     default: {
       throw new Error(`addressBooks: network: ${network} not supported`);
     }
