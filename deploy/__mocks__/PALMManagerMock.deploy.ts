@@ -15,7 +15,8 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "binance" ||
     hre.network.name === "base" ||
     hre.network.name === "base_goerli" ||
-    hre.network.name === "sepolia"
+    hre.network.name === "sepolia" ||
+    hre.network.name === "gnosis"
   ) {
     console.log(
       `Deploying PALMManagerMock to ${hre.network.name}. Hit ctrl + c to abort`
@@ -59,7 +60,8 @@ func.skip = async (hre: HardhatRuntimeEnvironment) => {
     hre.network.name === "binance" ||
     hre.network.name === "base" ||
     hre.network.name === "base_goerli" ||
-    hre.network.name === "sepolia";
+    hre.network.name === "sepolia" ||
+    hre.network.name === "gnosis";
 
   return shouldSkip ? true : false;
 };
