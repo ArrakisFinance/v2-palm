@@ -36,6 +36,7 @@ const config: HardhatUserConfig = {
       sepolia: "0x81a1e7F34b9bABf172087cF5df8A4DF6500e9d4d",
       base: "0x463a4a038038DE81525f55c456f071241e0a3E66",
       base_goerli: "0x0F83FFe2d0779550E74D96B3871216132D527eF5", // eslint-disable-line @typescript-eslint/naming-convention
+      gnosis: "0x05b1811546e65Dec3Eb703a13aA2885B4f51a32f",
     },
     arrakisDaoOwner: {
       default: 2,
@@ -48,6 +49,7 @@ const config: HardhatUserConfig = {
       sepolia: "0x09E60942D910D3399961b845d4479627F0FE2C43",
       base: "0x25CF23B54e25daaE3fe9989a74050b953A343823",
       base_goerli: "0x4788290e1fb26c537cBfBb5a8b4E1432795BeEbD", // eslint-disable-line @typescript-eslint/naming-convention
+      gnosis: "0x969cA3961FCeaFd3Cb3C1CA9ecdd475babcD704D",
     },
   },
 
@@ -96,6 +98,11 @@ const config: HardhatUserConfig = {
       accounts: PK ? [PK] : [],
       chainId: 8453,
       url: "https://mainnet.base.org",
+    },
+    gnosis: {
+      accounts: PK ? [PK] : [],
+      chainId: 100,
+      url: `https://rpc.gnosischain.com`,
     },
     sepolia: {
       accounts: TEST_PK ? [TEST_PK] : [],
